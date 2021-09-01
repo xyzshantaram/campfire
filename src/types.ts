@@ -11,5 +11,6 @@ export interface ElementProperties {
     misc?: Record<string, unknown>,
     children?: Node[] | HTMLElement[] | HTMLCollection,
     style?: Record<string, unknown>,
-    on?: Record<string, EventHandler>
+    on?: Record<string, EventHandler>,
+    attrs?: Record<string, string>
 }

@@ -1,7 +1,7 @@
 import { ElementProperties, Subscriber } from './types';
 
 const create = (args: ElementProperties) => {
-    let { parent, type, className, id, innerHTML, misc, children, style, on: handlers } = args;
+    let { parent, type, className, id, innerHTML, misc, children, style, on: handlers, attrs } = args;
 
     if (!type) type = 'div';
     let elem = document.createElement(type);
@@ -24,6 +24,12 @@ const create = (args: ElementProperties) => {
     if (handlers) {
         for (const handler in handlers) {
             elem.addEventListener(handler, handlers[handler]);
+        }
+    }
+
+    if (attrs) {
+        for (const attr in attrs) {
+            elem.setAttribute(attr, attrs[attr]);
         }
     }
 
@@ -67,5 +73,5 @@ class Store {
 }
 
 export default {
-    create, Store
+    Store, create
 }
