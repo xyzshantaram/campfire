@@ -1,6 +1,6 @@
 import { ElementProperties, Subscriber } from './types';
 
-function createElement(args: ElementProperties) {
+const create = (args: ElementProperties) => {
     let { parent, type, className, id, innerHTML, misc, children, style, on: handlers } = args;
 
     if (!type) type = 'div';
@@ -34,6 +34,7 @@ class Store {
     value: unknown = null;
     subscribers: Record<string, Subscriber> = {};
     subscriberCount = 0;
+    dead = false;
 
     constructor(value: unknown) {
         this.value = value;
@@ -51,14 +52,20 @@ class Store {
         }
     }
 
-    set(value: unknown) {
+    update(value: unknown) {
+        if (this.dead) return;
+
         this.value = value;
         for (const subscriber of Object.keys(this.subscribers)) {
             this.subscribers[subscriber](this.value);
         }
     }
+
+    dispose() {
+        this.dead = true;
+    }
 }
 
 export default {
-    createElement, Store
+    create, Store
 }
