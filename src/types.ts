@@ -9,7 +9,7 @@ export interface ElementProperties {
     innerHTML?: string,
     innerText?: string,
     misc?: Record<string, unknown>,
-    children?: Node[] | HTMLElement[] | Element[],
+    children?: Node[] | HTMLElement[] | HTMLCollection,
     style?: Record<string, unknown>,
     on?: Record<string, EventHandler>
 }

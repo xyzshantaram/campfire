@@ -2,24 +2,25 @@ import { ElementProperties, Subscriber } from './types';
 
 function createElement(args: ElementProperties) {
     let { parent, type, className, id, innerHTML, misc, children, style, on: handlers } = args;
-    
+
     if (!type) type = 'div';
     let elem = document.createElement(type);
-    
+
     if (className) elem.className = className;
     if (id) elem.id = id;
     if (innerHTML) elem.innerHTML = innerHTML;
     if (misc) Object.assign(elem, misc);
-    
+
     if (children) {
-        for (const child of children) {
-            elem.appendChild(child);
+        if (children instanceof HTMLCollection) {
+            children = Array.from(children);
         }
+        children.forEach((child) => elem.appendChild(child));
     }
-    
+
     if (style) Object.assign(elem.style, style);
     if (parent) parent.appendChild(elem);
-    
+
     if (handlers) {
         for (const handler in handlers) {
             elem.addEventListener(handler, handlers[handler]);
