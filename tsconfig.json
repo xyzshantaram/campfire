@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "allowJs": true,
+        "target": "es6",
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "lib": ["ES2020", "DOM"],
+        "module":"ES2015"
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}

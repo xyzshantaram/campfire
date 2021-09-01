@@ -1,0 +1,30 @@
+{
+  "devDependencies": {
+    "esbuild": "^0.12.24",
+    "esbuild-node-externals": "^1.3.0",
+    "typescript": "^4.4.2"
+  },
+  "name": "campfire",
+  "description": "a toy web framework",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc && node esbuild.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xyzshantaram/campfire.git"
+  },
+  "keywords": [
+    "web",
+    "framework",
+    "dom"
+  ],
+  "author": "shantaram",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xyzshantaram/campfire/issues"
+  },
+  "homepage": "https://github.com/xyzshantaram/campfire#readme"
+}
