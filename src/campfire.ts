@@ -17,7 +17,7 @@ import { ElementProperties, Subscriber } from './types';
         * `misc`: Miscellaneous properties of the element.
 */
 const create = (args: ElementProperties) => {
-    let { parent, tag, className, id, innerHTML, misc, children, style, on: handlers, attrs } = args;
+    let { tag, className, id, innerHTML, misc, style, on: handlers, attrs } = args;
 
     if (!tag) tag = 'div';
     let elem = document.createElement(tag);
@@ -27,13 +27,7 @@ const create = (args: ElementProperties) => {
     if (innerHTML) elem.innerHTML = innerHTML;
     if (misc) Object.assign(elem, misc);
 
-    if (children) {
-        if (children instanceof HTMLCollection) children = Array.from(children);
-        children.forEach((child) => elem.appendChild(child));
-    }
-
     if (style) Object.assign(elem.style, style);
-    if (parent) parent.appendChild(elem);
 
     if (handlers) {
         for (const handler in handlers) {

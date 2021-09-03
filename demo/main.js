@@ -4,22 +4,21 @@ window.addEventListener("DOMContentLoaded", function() {
     const items = new cf.ListStore([]);
 
     const root = cf.create({
-        parent: document.body,
         id: 'app',
         innerHTML: '<h1>Todo App</h1>',
         style: { fontFamily: 'sans-serif' }
     })
 
+    document.body.appendChild(root);
+
     const field = cf.create({
         tag: 'input',
-        parent: root,
         style: { minWidth: '25%' },
         misc: { type: 'text' },
     });
 
     const button = cf.create({
         tag: 'button',
-        parent: root,
         style: { minWidth: '5%' },
         misc: { type: 'button' },
         on: {
@@ -32,7 +31,6 @@ window.addEventListener("DOMContentLoaded", function() {
     });
 
     const list = cf.create({
-        parent: root,
         tag: 'ul',
         id: 'items',
         style: {
@@ -42,8 +40,10 @@ window.addEventListener("DOMContentLoaded", function() {
         }
     })
 
+    root.append(field, button, list);
+
     function createTodo(val, idx) {
-        return cf.create({
+        const elt = cf.create({
             tag: 'li',
             innerHTML: val.name,
             className: 'todo-item',
@@ -58,16 +58,19 @@ window.addEventListener("DOMContentLoaded", function() {
             attrs: {
                 "data-todo-idx": idx
             },
-            children: [cf.create({
-                tag: 'button',
-                innerHTML: 'remove',
-                style: { marginLeft: '0.5rem' },
-                on: { 'click': function(e) {
-                    const idx = parseInt(this.parentNode.getAttribute('data-todo-idx'));
-                    items.remove(idx);
-                }}
-            })]
         })
+
+        elt.appendChild(cf.create({
+            tag: 'button',
+            innerHTML: 'remove',
+            style: { marginLeft: '0.5rem' },
+            on: { 'click': function(e) {
+                const idx = parseInt(this.parentNode.getAttribute('data-todo-idx'));
+                items.remove(idx);
+            }}
+        }));
+
+        return elt;
     }
 
     items.on("set", (val) => {
