@@ -80,9 +80,7 @@ window.addEventListener("DOMContentLoaded", function() {
     items.on("remove", (val) => {
         list.removeChild(list.querySelector(`.todo-item:nth-child(${val.idx + 1})`));
         const elems = list.getElementsByClassName('todo-item');
-        for (let i = val.idx; i < elems.length; i++) {
-            elems[i].setAttribute("data-todo-idx", i);
-        }
+        for (let i = val.idx; i < elems.length; i++) elems[i].setAttribute("data-todo-idx", i);
     })
 
     items.on("push", (val) => {

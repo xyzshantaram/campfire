@@ -6,7 +6,6 @@ export interface ElementProperties {
     className?: string,
     id?: string,
     innerHTML?: string,
-    innerText?: string,
     misc?: Record<string, unknown>,
     style?: Record<string, unknown>,
     on?: Record<string, EventHandler>,
