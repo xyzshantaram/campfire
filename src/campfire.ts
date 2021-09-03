@@ -106,6 +106,10 @@ class ListStore extends Store {
         super(ls);
     }
 
+    clear() {
+        this.update([]);
+    }
+
     push(val: unknown) {
         this._value.push(val);
         this._sendEvent("push", {
