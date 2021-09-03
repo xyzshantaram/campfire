@@ -6,7 +6,8 @@
         "noImplicitAny": true,
         "strictNullChecks": true,
         "lib": ["ES2020", "DOM"],
-        "module":"ES2015"
+        "module":"ES2015",
+        "declaration": true,
     },
     "include": [
         "./src/**/*"
