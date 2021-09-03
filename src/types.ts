@@ -3,7 +3,7 @@ export type EventHandler = (e: Event) => unknown;
 
 export interface ElementProperties {
     parent?: HTMLElement,
-    type?: string,
+    tag?: string,
     className?: string,
     id?: string,
     innerHTML?: string,

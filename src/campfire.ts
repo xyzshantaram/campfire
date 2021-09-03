@@ -4,7 +4,7 @@ import { ElementProperties, Subscriber } from './types';
     * Element creation helper.
     * Returns a new DOM element with the arguments specified in `args`.
     * PARAMS:
-        * `type`: The tag name of the newly created DOM element. Defaults to div.
+        * `tag`: The tag name of the newly created DOM element. Defaults to div.
         * `parent`: a DOM element to parent the newly created element to.
         * `id`: The ID of the newly created element.
         * `className`: A space-separated list of classes for the new element,
@@ -17,10 +17,10 @@ import { ElementProperties, Subscriber } from './types';
         * `misc`: Miscellaneous properties of the element.
 */
 const create = (args: ElementProperties) => {
-    let { parent, type, className, id, innerHTML, misc, children, style, on: handlers, attrs } = args;
+    let { parent, tag, className, id, innerHTML, misc, children, style, on: handlers, attrs } = args;
 
-    if (!type) type = 'div';
-    let elem = document.createElement(type);
+    if (!tag) tag = 'div';
+    let elem = document.createElement(tag);
 
     if (className) elem.className = className;
     if (id) elem.id = id;
@@ -28,9 +28,7 @@ const create = (args: ElementProperties) => {
     if (misc) Object.assign(elem, misc);
 
     if (children) {
-        if (children instanceof HTMLCollection) {
-            children = Array.from(children);
-        }
+        if (children instanceof HTMLCollection) children = Array.from(children);
         children.forEach((child) => elem.appendChild(child));
     }
 
@@ -54,46 +52,96 @@ const create = (args: ElementProperties) => {
 
 /*
     * The Store class is a simple reactive store. Create a store object with
-    * `const store = new Store(<initial value>)` then use the `subscribe()` method
+    * `const store = new Store(<initial value>)` then use the `on()` method
+    * with a event type ("set" is the only currently supported type) and a callback
     * to add functions that get called with the new value of the store when it
-    * is updated with `update(<new value>)`. The `subscribe()` method returns an
+    * is updated with `update(<new value>)`. The `on()` method returns an
     * integer that can be passed to the `unsubscribe()` method to prevent the callback
-    * passed into that `subscribe()` call from being called.
+    * passed into that `on()` call from being called.
     * Calling the `dispose()` method for a Store will prevent it from updating any further.
 */
 class Store {
-    value: unknown = null;
-    subscribers: Record<string, Subscriber> = {};
-    subscriberCount = 0;
+    _value: unknown = null;
+    subscribers: Record<string, Record<number, Subscriber>> = {};
+    subscriberCounts: Record<string, number> = {};
     dead = false;
 
     constructor(value: unknown) {
-        this.value = value;
+        this._value = value;
     }
 
-    subscribe(fn: Subscriber): number {
-        this.subscribers[this.subscriberCount] = fn;
-        return ++this.subscriberCount;
+    on(type: string, fn: Subscriber): number {
+        this.subscriberCounts[type] = this.subscriberCounts[type] || 0;
+        this.subscribers[type] = this.subscribers[type] || {};
+        this.subscribers[type][this.subscriberCounts[type]] = fn;
+        return this.subscriberCounts[type]++;
     }
 
-    unsubscribe(idx: number) {
-        const str = idx.toString();
-        if (Object.keys(this.subscribers).includes(str)) {
-            delete this.subscribers[str];
-        }
+    unsubscribe(type: string, idx: number) {
+        delete this.subscribers[type][idx];
     }
 
     update(value: unknown) {
         if (this.dead) return;
+        this._value = value;
+        this._sendEvent("set", value);
+    }
 
-        this.value = value;
-        for (const subscriber of Object.keys(this.subscribers)) {
-            this.subscribers[subscriber](this.value);
+    _sendEvent(type: string, value: unknown) {
+        for (const idx in Object.keys(this.subscribers[type])) {
+            this.subscribers[type][idx](value);
         }
     }
 
     dispose() {
         this.dead = true;
+    }
+}
+
+/* 
+    * A reactive list store. 
+    * Implements push(item). remove(idx), get(idx), and setAt(idx, item).
+    * push() sends a "push" event
+    * remove() sends a "remove" event
+    * setAt() sends a "mutation" event
+*/
+class ListStore extends Store {
+    _value: unknown[];
+
+    constructor(ls: unknown[]) {
+        super(ls);
+    }
+
+    push(val: unknown) {
+        this._value.push(val);
+        this._sendEvent("push", {
+            value: val,
+            idx: this._value.length - 1
+        });
+    }
+
+    remove(idx: number) {
+        if (idx < 0 || idx > this._value.length) throw new RangeError("Invalid index.");
+
+        this._sendEvent("remove", {
+            value: this._value[idx],
+            idx: idx
+        });
+        this._value.splice(idx, 1);
+    }
+
+    get(idx: number) {
+        if (idx < 0 || idx > this._value.length) throw new RangeError("Invalid index.");
+        return this._value instanceof Array && this._value[idx];
+    }
+
+    setAt(idx: number, val: unknown) {
+        if (idx < 0 || idx > this._value.length) throw new RangeError("Invalid index.");
+        this._value[idx] = val;
+        this._sendEvent("mutation", {
+            value: val,
+            idx: idx,
+        });
     }
 }
 
@@ -121,9 +169,9 @@ const mustache = (string: string, data: Record<string, string> = {}): string => 
     * Does not sanitize html, use with caution.
 */
 const template = (str: string) => {
-    return (data: Record <string, string>) => mustache(str, data);
+    return (data: Record<string, string>) => mustache(str, data);
 }
 
 export default {
-    Store, create, mustache, template
+    Store, ListStore, create, mustache, template
 }
