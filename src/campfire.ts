@@ -1,45 +1,64 @@
 import { ElementProperties, Subscriber } from './types';
 
+interface ElementInfo {
+    tag?: string | undefined;
+    id?: string | undefined;
+    classes?: string[] | undefined
+}
+
+const _parse = (str: string | undefined): ElementInfo => {
+    const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/): undefined;
+    const results = matches ? matches.slice(1, 4)?.map((elem) => elem ? elem.trim() : undefined) : Array(3).fill(undefined);
+
+    return matches ? {
+        tag: results[0] || undefined,
+        id: results[1] || undefined, 
+        classes: results[2] ? results[2].split('.').filter((elem: string) => elem.trim()) : undefined
+    } : {};
+};
+
 /*
     * Element creation helper.
     * Returns a new DOM element with the arguments specified in `args`.
     * PARAMS:
-        * `tag`: The tag name of the newly created DOM element. Defaults to div.
-        * `parent`: a DOM element to parent the newly created element to.
-        * `id`: The ID of the newly created element.
-        * `className`: A space-separated list of classes for the new element,
-        *              similar to the `class` attribute in HTML.
-        * `innerHTML`: The inner HTML of the element.
-        * `children`: Children for this element. Can either be an Array of
-        *             Nodes, an Array of HTMLElements or an HTMLCollection
-        * `style`: An object containing styles to be set on the new element.
-        * `on`: An object containing event handlers. See examples.
-        * `misc`: Miscellaneous properties of the element.
+        * `eltInfo`: The basic info of the element.
+            * A string in the format
+            * <tagName>#<id>.<class1>.<class2>
+            * An infinite number of classes is allowed, but only one id and tagName
+            * should be supplied. All portions of eltInfo are optional. When passed
+            * an empty string, a div is created.
+        * `args`: An optional object containing the following properties:
+        * (all properties are optional)
+            * `innerHTML`, `i`: The inner HTML of the element.
+            * `style`, `s`: An object containing styles to be set on the new element.
+                * Understands styles as defined in CSSStyleDeclaration objects.
+            * `on`: An object containing event handlers. See examples.
+            * `misc`, `m`: Miscellaneous properties of the element.
 */
-const create = (args: ElementProperties) => {
-    let { tag, className, id, innerHTML, misc, style, on: handlers, attrs } = args;
+const nu = (eltInfo: string, args: ElementProperties = {}) => {
+    let { innerHTML, i, misc, m, style, s, on: handlers, attrs, a } = args;
+
+    let { tag, id, classes } = _parse(eltInfo);
 
     if (!tag) tag = 'div';
     let elem = document.createElement(tag);
-
-    if (className) elem.className = className;
+    
     if (id) elem.id = id;
+
+    if (classes) {
+        classes.forEach((cls) => elem.classList.add(cls));
+    }
+
+    innerHTML = innerHTML || i;
+    misc = misc || m;
+    style = style || s;
+    attrs = attrs || a;
+
     if (innerHTML) elem.innerHTML = innerHTML;
     if (misc) Object.assign(elem, misc);
-
     if (style) Object.assign(elem.style, style);
-
-    if (handlers) {
-        for (const handler in handlers) {
-            elem.addEventListener(handler, handlers[handler]);
-        }
-    }
-
-    if (attrs) {
-        for (const attr in attrs) {
-            elem.setAttribute(attr, attrs[attr]);
-        }
-    }
+    if (handlers) for (const handler in handlers) elem.addEventListener(handler, handlers[handler]);
+    if (attrs) for (const attr in attrs) elem.setAttribute(attr, attrs[attr]);
 
     return elem;
 }
@@ -171,5 +190,5 @@ const template = (str: string) => {
 }
 
 export default {
-    Store, ListStore, create, mustache, template
+    Store, ListStore, nu, mustache, template
 }

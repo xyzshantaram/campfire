@@ -1,24 +1,22 @@
 import cf from '../dist/campfire.min.js';
+window.cf = cf; // for playing around with it in the console
 
 window.addEventListener("DOMContentLoaded", function() {
     const items = new cf.ListStore([]);
 
-    const root = cf.create({
-        id: 'app',
+    const root = cf.nu("#app", {
         innerHTML: '<h1>Todo App</h1>',
         style: { fontFamily: 'sans-serif' }
     })
 
     document.body.appendChild(root);
 
-    const field = cf.create({
-        tag: 'input',
+    const field = cf.nu("input", {
         style: { minWidth: '25%' },
         misc: { type: 'text' },
     });
 
-    const button = cf.create({
-        tag: 'button',
+    const button = cf.nu("button", {
         style: { minWidth: '5%' },
         misc: { type: 'button' },
         on: {
@@ -30,9 +28,7 @@ window.addEventListener("DOMContentLoaded", function() {
         innerHTML: 'Add'
     });
 
-    const list = cf.create({
-        tag: 'ul',
-        id: 'items',
+    const list = cf.nu("ul#items", {
         style: {
             display: 'flex',
             flexDirection: 'column',
@@ -43,10 +39,8 @@ window.addEventListener("DOMContentLoaded", function() {
     root.append(field, button, list);
 
     function createTodo(val, idx) {
-        const elt = cf.create({
-            tag: 'li',
+        const elt = cf.nu("li.todo-item", {
             innerHTML: val.name,
-            className: 'todo-item',
             style: { cursor: 'pointer' },
             on: { 'click': function(e) {
                 if (e.target !== this) return;
@@ -60,8 +54,7 @@ window.addEventListener("DOMContentLoaded", function() {
             },
         })
 
-        elt.appendChild(cf.create({
-            tag: 'button',
+        elt.appendChild(cf.nu("button", {
             innerHTML: 'remove',
             style: { marginLeft: '0.5rem' },
             on: { 'click': function(e) {

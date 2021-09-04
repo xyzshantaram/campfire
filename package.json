@@ -6,7 +6,7 @@
   },
   "name": "campfire",
   "description": "a toy web framework",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "main": "dist/campfire.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
