@@ -15,7 +15,7 @@ Turn your dumpster fire into a Campfire today!
 
 ### Features
 
-- Small size (<1kb gzipped!)
+- Small size (~1kb gzipped!)
 - No unnecessary boilerplate, Campfire is just one import away
 - Work directly with DOM elements
 - Reactive data using a publish-subscribe model

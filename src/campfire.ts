@@ -206,3 +206,7 @@ const template = (str: string) => {
 export default {
     Store, ListStore, nu, mustache, template
 }
+
+export {
+    Store, ListStore, nu, mustache, template
+}
