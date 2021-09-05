@@ -10,6 +10,8 @@ const _parse = (str: string | undefined): ElementInfo => {
     const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/): undefined;
     const results = matches ? matches.slice(1, 4)?.map((elem) => elem ? elem.trim() : undefined) : Array(3).fill(undefined);
 
+    if (results && results[1]) results[1] = results[1].replace(/#*/g, "");
+
     return matches ? {
         tag: results[0] || undefined,
         id: results[1] || undefined, 
@@ -75,39 +77,40 @@ const nu = (eltInfo: string, args: ElementProperties = {}) => {
 */
 class Store {
     _value: unknown = null;
-    subscribers: Record<string, Record<number, Subscriber>> = {};
-    subscriberCounts: Record<string, number> = {};
-    dead = false;
+    _subscribers: Record<string, Record<number, Subscriber>> = {};
+    _subscriberCounts: Record<string, number> = {};
+    _dead = false;
 
     constructor(value: unknown) {
         this._value = value;
     }
-
+    // TODO: Add flag for if the subscriber gets called on subscription
     on(type: string, fn: Subscriber): number {
-        this.subscriberCounts[type] = this.subscriberCounts[type] || 0;
-        this.subscribers[type] = this.subscribers[type] || {};
-        this.subscribers[type][this.subscriberCounts[type]] = fn;
-        return this.subscriberCounts[type]++;
+        this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
+        this._subscribers[type] = this._subscribers[type] || {};
+
+        this._subscribers[type][this._subscriberCounts[type]] = fn;
+        return this._subscriberCounts[type]++;
     }
 
     unsubscribe(type: string, idx: number) {
-        delete this.subscribers[type][idx];
+        delete this._subscribers[type][idx];
     }
 
     update(value: unknown) {
-        if (this.dead) return;
+        if (this._dead) return;
         this._value = value;
         this._sendEvent("set", value);
     }
 
     _sendEvent(type: string, value: unknown) {
-        for (const idx in Object.keys(this.subscribers[type])) {
-            this.subscribers[type][idx](value);
+        for (const idx in Object.keys(this._subscribers[type])) {
+            this._subscribers[type][idx](value);
         }
     }
 
     dispose() {
-        this.dead = true;
+        this._dead = true;
     }
 }
 
