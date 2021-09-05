@@ -26,6 +26,7 @@ Turn your dumpster fire into a Campfire today!
 ```sh
 $ npm run build
 ```
+
 Then you can use `dist/campfire.min.js` and `dist/campfire.d.ts`.
 
 ### Usage
@@ -223,6 +224,15 @@ The ListStore is similar to a regular Store, but adds the following methods:
 - `setAt(idx: number, value)`: The `setAt()` method is a method to set the value
   at the supplied `idx` to `value`. ListStore also has getter called `length`
   which returns the current length of the list.
+
+### Contributing
+
+Fork the repo and make a pull request, or open an issue on the issues page.
+
+### Donate
+
+If you like using Campfire, you can donate using one of the means listed
+[here](https://shantaram.xyz/contact/donate.html).
 
 ### Acknowledgements
 
