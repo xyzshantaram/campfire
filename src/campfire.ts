@@ -76,20 +76,23 @@ const nu = (eltInfo: string, args: ElementProperties = {}) => {
     * Calling the `dispose()` method for a Store will prevent it from updating any further.
 */
 class Store {
-    _value: unknown = null;
+    value: unknown = null;
     _subscribers: Record<string, Record<number, Subscriber>> = {};
     _subscriberCounts: Record<string, number> = {};
     _dead = false;
 
     constructor(value: unknown) {
-        this._value = value;
+        this.value = value;
     }
-    // TODO: Add flag for if the subscriber gets called on subscription
-    on(type: string, fn: Subscriber): number {
+
+    on(type: string, fn: Subscriber, callNow: boolean = false): number {
         this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
         this._subscribers[type] = this._subscribers[type] || {};
 
         this._subscribers[type][this._subscriberCounts[type]] = fn;
+        if (callNow) {
+            fn(this.value);
+        }
         return this._subscriberCounts[type]++;
     }
 
@@ -99,11 +102,17 @@ class Store {
 
     update(value: unknown) {
         if (this._dead) return;
-        this._value = value;
-        this._sendEvent("set", value);
+        this.value = value;
+        this._sendEvent("update", value);
+    }
+
+    refresh() {
+        this._sendEvent("refresh", this.value);
     }
 
     _sendEvent(type: string, value: unknown) {
+        if (this._dead) return;
+        this._subscribers[type] = this._subscribers[type] || {};
         for (const idx in Object.keys(this._subscribers[type])) {
             this._subscribers[type][idx](value);
         }
@@ -113,7 +122,6 @@ class Store {
         this._dead = true;
     }
 }
-
 /* 
     * A reactive list store. 
     * Implements push(item). remove(idx), get(idx), and setAt(idx, item).
@@ -122,7 +130,7 @@ class Store {
     * setAt() sends a "mutation" event
 */
 class ListStore extends Store {
-    _value: unknown[];
+    value: unknown[];
 
     constructor(ls: unknown[]) {
         super(ls);
@@ -133,35 +141,38 @@ class ListStore extends Store {
     }
 
     push(val: unknown) {
-        this._value.push(val);
+        this.value.push(val);
         this._sendEvent("push", {
             value: val,
-            idx: this._value.length - 1
+            idx: this.value.length - 1
         });
     }
 
     remove(idx: number) {
-        if (idx < 0 || idx > this._value.length) throw new RangeError("Invalid index.");
-
+        if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
+        this.value.splice(idx, 1);
         this._sendEvent("remove", {
-            value: this._value[idx],
+            value: this.value[idx],
             idx: idx
         });
-        this._value.splice(idx, 1);
     }
 
     get(idx: number) {
-        if (idx < 0 || idx > this._value.length) throw new RangeError("Invalid index.");
-        return this._value instanceof Array && this._value[idx];
+        if (idx < 0 || idx > this.value.length) throw new RangeError("Invalid index.");
+        return this.value instanceof Array && this.value[idx];
     }
 
     setAt(idx: number, val: unknown) {
-        if (idx < 0 || idx > this._value.length) throw new RangeError("Invalid index.");
-        this._value[idx] = val;
+        if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
+        this.value[idx] = val;
         this._sendEvent("mutation", {
             value: val,
             idx: idx,
         });
+    }
+    
+    get length() {
+        return this.value.length;
     }
 }
 
