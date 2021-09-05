@@ -11,13 +11,22 @@ impose on you a way to build your application or create unnecessary
 abstractions - you only get the bare minimum to make developing with the DOM
 easy.
 
+Turn your dumpster fire into a Campfire today!
+
 ### Features
 
 - Small size (<1kb gzipped!)
-- No unnecessary boilerplate, just one import away
+- No unnecessary boilerplate, Campfire is just one import away
 - Work directly with DOM elements
 - Reactive data using a publish-subscribe model
 - String templating functionality using mustaches
+
+### Building
+
+```sh
+$ npm run build
+```
+Then you can use `dist/campfire.min.js` and `dist/campfire.d.ts`.
 
 ### Usage
 
