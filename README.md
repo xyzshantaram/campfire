@@ -31,8 +31,6 @@ Then you can use `dist/campfire.min.js` and `dist/campfire.d.ts`.
 
 ### Usage
 
-ES6 imports only, on purpose.
-
 ```js
 import cf from "campfire.min.js";
 ```
