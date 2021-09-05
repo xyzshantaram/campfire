@@ -12,7 +12,7 @@ esbuild.build({
     platform: 'browser',
     sourcemap: false,
     target: ['es6'],
-    format: 'cjs',
+    format: 'esm',
     plugins: [nodeExternalsPlugin()]
 }).catch((err) => {
     console.error(err)
