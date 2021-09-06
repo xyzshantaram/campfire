@@ -31,8 +31,24 @@ Then you can use `dist/campfire.min.js` and `dist/campfire.d.ts`.
 
 ### Usage
 
+You can use it directly in a JS file intended for the browser, either from [esm.sh](https://esm.sh) or unpkg, or self-host it:
 ```js
-import cf from "campfire.min.js";
+import cf from "https://esm.sh/campfire.js";
+```
+
+or install it with npm (`npm i campfire.js`) and use it in your existing workflow:
+
+```js
+const cf = require('campfire.js');
+```
+
+All the methods and classes are also exported, so you can do named imports as usual:
+```js
+const { nu, ListStore } = require('campfire.js');
+```
+or
+```js
+import { nu, ListStore } from "https://esm.sh/campfire.js";
 ```
 
 ### API (subject to change)

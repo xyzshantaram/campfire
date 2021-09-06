@@ -1,4 +1,4 @@
-import cf from '../dist/campfire.esm.min.js';
+import cf from 'http://esm.sh/campfire.js';
 window.cf = cf; // for playing around with it in the console
 
 window.addEventListener("DOMContentLoaded", function() {
