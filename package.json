@@ -6,7 +6,7 @@
   },
   "name": "campfire.js",
   "description": "a cozy web framework",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "main": "dist/campfire.cjs.js",
   "module": "dist/campfire.esm.js",
   "types": "dist/campfire.d.ts",
