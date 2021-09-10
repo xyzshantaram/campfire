@@ -6,20 +6,20 @@ interface ElementInfo {
     classes?: string[] | undefined
 }
 
-const _parse = (str: string | undefined): ElementInfo => {
-    const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/): undefined;
+const _parseEltString = (str: string | undefined): ElementInfo => {
+    const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/) : undefined;
     const results = matches ? matches.slice(1, 4)?.map((elem) => elem ? elem.trim() : undefined) : Array(3).fill(undefined);
 
     if (results && results[1]) results[1] = results[1].replace(/#*/g, "");
 
     return matches ? {
         tag: results[0] || undefined,
-        id: results[1] || undefined, 
+        id: results[1] || undefined,
         classes: results[2] ? results[2].split('.').filter((elem: string) => elem.trim()) : undefined
     } : {};
 };
 
-/*
+/**
     * Element creation helper.
     * Returns a new DOM element with the arguments specified in `args`.
     * PARAMS:
@@ -40,11 +40,11 @@ const _parse = (str: string | undefined): ElementInfo => {
 const nu = (eltInfo: string, args: ElementProperties = {}) => {
     let { innerHTML, i, misc, m, style, s, on: handlers, attrs, a } = args;
 
-    let { tag, id, classes } = _parse(eltInfo);
+    let { tag, id, classes } = _parseEltString(eltInfo);
 
     if (!tag) tag = 'div';
     let elem = document.createElement(tag);
-    
+
     if (id) elem.id = id;
 
     if (classes) {
@@ -65,7 +65,7 @@ const nu = (eltInfo: string, args: ElementProperties = {}) => {
     return elem;
 }
 
-/*
+/**
     * The Store class is a simple reactive store. Create a store object with
     * `const store = new Store(<initial value>)` then use the `on()` method
     * with a event type ("set" is the only currently supported type) and a callback
@@ -122,7 +122,7 @@ class Store {
         this._dead = true;
     }
 }
-/* 
+/**
     * A reactive list store. 
     * Implements push(item). remove(idx), get(idx), and setAt(idx, item).
     * push() sends a "push" event
@@ -170,13 +170,13 @@ class ListStore extends Store {
             idx: idx,
         });
     }
-    
+
     get length() {
         return this.value.length;
     }
 }
 
-/*
+/**
     * Applies mustache templating to a string. Any names surrounded by {{ }} will be
     * considered for templating: if the name is present as a property in `data`,
     * the mustache'd expression will be replaced with the value of the property in `data`.
@@ -193,7 +193,7 @@ const mustache = (string: string, data: Record<string, string> = {}): string => 
     }, string);
 }
 
-/*
+/**
     * Returns a partial application that can be used to generate templated HTML strings. 
     * Pass in an HTML string with mustache standins in it, and pass in a Record<string, string>
     * to the resulting function to get back a templated string.
@@ -203,10 +203,39 @@ const template = (str: string) => {
     return (data: Record<string, string>) => mustache(str, data);
 }
 
+/**
+    * Simple HTML sanitizer.
+*/
+const escape = (str: string) => {
+    if (!str) return '';
+
+    return str.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#37;')
+        .replace(/`/g, '&#96;');
+}
+
+/**
+    * Unescapes the output of escape().
+    * Allows escaping 
+*/
+const unescape = (str: string) => {
+    if (!str) return '';
+
+    return str.replace(/(?<!\\)&lt;/g, '<')
+        .replace(/(?<!\\)&gt;/g, '>')
+        .replace(/(?<!\\)&quot;/g, '"')
+        .replace(/(?<!\\)&#39;/g, '\'')
+        .replace(/(?<!\\)&#96/g, '`')
+        .replace(/(?<!\\)&amp;/g, '&');
+}
+
 export default {
-    Store, ListStore, nu, mustache, template
+    Store, ListStore, nu, mustache, template, escape, unescape
 }
 
 export {
-    Store, ListStore, nu, mustache, template
+    Store, ListStore, nu, mustache, template, escape, unescape
 }
