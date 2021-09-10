@@ -70,13 +70,13 @@ var Store = class {
     this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
     this._subscribers[type] = this._subscribers[type] || {};
     this._subscribers[type][this._subscriberCounts[type]] = fn;
-    if (callNow) {
+    if (callNow && !["push", "remove", "mutation", "setAt"].includes(type)) {
       fn(this.value);
     }
     return this._subscriberCounts[type]++;
   }
-  unsubscribe(type, idx) {
-    delete this._subscribers[type][idx];
+  unsubscribe(type, id) {
+    delete this._subscribers[type][id];
   }
   update(value) {
     if (this._dead)
@@ -97,6 +97,8 @@ var Store = class {
   }
   dispose() {
     this._dead = true;
+    this._subscribers = {};
+    this._subscriberCounts = {};
   }
 };
 var ListStore = class extends Store {
@@ -116,9 +118,8 @@ var ListStore = class extends Store {
   remove(idx) {
     if (idx < 0 || idx >= this.value.length)
       throw new RangeError("Invalid index.");
-    this.value.splice(idx, 1);
     this._sendEvent("remove", {
-      value: this.value[idx],
+      value: this.value.splice(idx, 1)[0],
       idx
     });
   }
