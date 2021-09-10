@@ -115,7 +115,7 @@ properties:
   will be set on the created object.
 
 Both arguments are optional. If `nu()` is called without any arguments, a blank
-<div> is created.
+`<div>` is created.
 
 #### `cf.mustache` - string templating with mustaches
 
@@ -261,3 +261,12 @@ If you like using Campfire, you can donate using one of the means listed
 
 Icon made by [Those Icons](https://www.flaticon.com/authors/those-icons) from
 [Flaticon](https://www.flaticon.com/)
+
+The [unescape](https://github.com/lodash/lodash/blob/master/unescape.js)
+function and
+[unit tests for it](https://github.com/lodash/lodash/blob/master/test/unescape.js)
+and [escape](https://github.com/lodash/lodash/blob/master/test/escape.test.js)
+are derived from lodash under the terms of the MIT License. Code in lodash is a
+copyright of JS Foundation and other contributors <https://js.foundation/>.
+Lodash itself is based on Underscore.js, copyright Jeremy Ashkenas,
+DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
