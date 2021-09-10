@@ -78,7 +78,6 @@ declare const template: (str: string) => (data: Record<string, string>) => strin
 declare const escape: (str: string) => string;
 /**
     * Unescapes the output of escape().
-    * Allows escaping escapes by prefixing them with a backslash.
 */
 declare const unescape: (str: string) => string;
 declare const _default: {

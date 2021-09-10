@@ -159,7 +159,6 @@ var unescape = (str) => {
   if (!str)
     return "";
   const expr = /(?<!\\)&(?:amp|lt|gt|quot|#(0+)?(?:39|96));/g;
-  const escapeExpr = /\\(&(?:amp|lt|gt|quot|#(0+)?(?:39|96));)/g;
   const entities = {
     "&amp;": "&",
     "&lt;": "<",
@@ -167,7 +166,7 @@ var unescape = (str) => {
     "&quot;": '"',
     "&#39;": "'"
   };
-  return str.replace(expr, (entity) => entities[entity] || "'").replace(escapeExpr, "$1");
+  return str.replace(expr, (entity) => entities[entity] || "'");
 };
 var campfire_default = {
   Store,
