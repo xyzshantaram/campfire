@@ -111,8 +111,14 @@ result of the templating operation.
 
 #### `escape` - HTML entity escaper
 
-A function to perform basic escaping of HTML entities. Escape will replace `&`,
-`<`, `>`, `'`, and `"` with their corresponding HTML escapes.
+A function to perform basic escaping of HTML entities. `escape` will replace
+`&`, `<`, `>`, `'`, and `"` with their corresponding HTML escapes (`&amp;`,
+`&gt;`, `&lt;`, `&#39;`, and `&quot`).
+
+#### `unescape` - character reference unescaper
+
+A function to perform the reverse operation of `escape`. It will convert
+character references into their corresponding characters.
 
 #### Classes
 
