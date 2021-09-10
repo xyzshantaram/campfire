@@ -6,10 +6,10 @@ a cozy web framework
     <img src='campfire.png' alt='campfire logo' width=256 height=256>
 </p>
 
-Campfire provides small utilities to make developing your app easy. It does not
-impose on you a way to build your application or create unnecessary
-abstractions - you only get the bare minimum to make developing with the DOM
-easy.
+Campfire provides small utilities to simplify building web applications with
+vanilla JavaScript. It does not impose on you a way to build your application or
+create unnecessary abstractions - you only get the bare minimum to make
+developing with the DOM easy.
 
 Turn your dumpster fire into a Campfire today!
 
@@ -60,41 +60,13 @@ or
 import { ListStore, nu } from "https://esm.sh/campfire.js";
 ```
 
-### API
+### Reference
 
 #### Methods
 
-#### `cf.nu` - element creation helper
+#### `nu` - element creation helper
 
-```js
-let count = 0;
-const btn = cf.nu("button#id.class1.class2", {
-  innerHTML: "I have not been clicked.",
-  attrs: {
-    // DOM attributes
-    "data-an-attribute": 42,
-  },
-  on: {
-    // event handlers, assigned using addEventListener
-    "click": function (e) {
-      this.innerHTML = `I have been clicked ${++count} times.`;
-    },
-  },
-  style: {
-    // Uses property names as specified in CSSStyleDeclaration.
-    background: "#007cdf",
-    borderRadius: "0.25em",
-    margin: "0.5rem",
-    color: "#f5f4f0",
-    transitionDuration: "0.2s",
-    border: "2px solid black",
-  }, // styles
-  misc: {
-    // miscellaneous properties
-    type: "button",
-  },
-});
-```
+[Code example](examples/nu.js)
 
 The first argument is a string describing the element. It contains the tag name,
 id, and a number of classes. All of these are optional, you can omit this
@@ -117,47 +89,36 @@ properties:
 Both arguments are optional. If `nu()` is called without any arguments, a blank
 `<div>` is created.
 
-#### `cf.mustache` - string templating with mustaches
+#### `mustache` - string templating with mustaches
 
 ```js
-const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // result is now "Welcome to Mars, user."
+const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."
 ```
 
 One-off string templating. The first argument should be a string containing
 mustaches and the second argument is data to substitute for the templates.
 
-#### `cf.template` - templating helper
+#### `template` - templating helper
 
 ```js
 const marsTemplate = cf.template("Welcome to Mars, {{ name }}."); // returns a function
-const result = marsTemplate({ name: "user" }); // result is now "Welcome to Mars, user."
+const result = marsTemplate({ name: "user" }); // "Welcome to Mars, user."
 ```
 
 A function that wraps `mustache()` to return a partial application. Pass in an
 object with templating data to the result of `template()` and it returns the
 result of the templating operation.
 
-#### `cf.Store` - reactive data store
+#### `escape` - HTML entity escaper
 
-```js
-const store = new cf.Store(0); // initial value
-const question = store.on("set", (val) => { // this function is called every time the value is changed
-  if (val == 42) {
-    console.log("That's the right answer!");
-  } else {
-    console.log("Hmmm. Try again.");
-  }
-}, false);
-/* The last argument specifies whether or not the callback should be called right now with the current value of the store. */
+A function to perform basic escaping of HTML entities. Escape will replace `&`,
+`<`, `>`, `'`, and `"` with their corresponding HTML escapes.
 
-store.update(3);
-store.update(42);
-store.update(69);
+#### Classes
 
-store.unsubscribe("set", question);
-store.dispose();
-store.update(42); // does nothing since the store is disposed of
-```
+[Code example](examples/Store.js)
+
+#### `Store` - reactive data store
 
 The Store class is a simple reactive data store. It has the following methods
 defined:
@@ -183,52 +144,9 @@ defined:
 - `dispose()`: The `dispose()` method prevents any further events from being
   sent by the store.
 
-#### `cf.ListStore` - Reactive list store
+#### `ListStore` - Reactive list store
 
-```js
-const homework = new cf.ListStore([]); // create a new store
-
-const list = document.body.appendChild(cf.nu("div"));
-const getIdx = (elem) => parseInt(elem.getAttribute("data-idx")); // helper function
-
-homework.on("refresh", function () {
-  if (homework.length == 0) list.innerHTML = "yay! no items!";
-}, false);
-
-homework.on("push", function (val) {
-  if (homework.length === 1) list.innerHTML = "";
-  list.appendChild(cf.nu("div", {
-    innerHTML: val.value,
-    attrs: { "data-idx": homework.length - 1 },
-    on: { click: (e) => homework.remove(getIdx(e.target)) },
-    style: { cursor: "pointer" },
-  }));
-});
-
-homework.on("remove", function (val) {
-  Array.from(list.querySelectorAll(`div:nth-child(n+${val.idx + 1})`)).forEach(
-    (elem, i) => {
-      elem.setAttribute("data-idx", getIdx(elem) - 1);
-    },
-  );
-  list.removeChild(list.querySelector(`div:nth-child(${val.idx + 1})`));
-  homework.refresh();
-});
-
-homework.push("English assignment");
-homework.push("Math assignment");
-homework.push("French assignment");
-
-homework.setAt(1, "Math test");
-
-console.log(
-  "Homework:",
-  [homework.get(0), homework.get(1), homework.get(2)].join(", "),
-);
-
-homework.setAt(3, "test"); // errors out
-homework.setAt(-1, "test 2"); // errors out
-```
+[Code example](examples/ListStore.js)
 
 The ListStore is similar to a regular Store, but adds the following methods:
 
@@ -254,8 +172,8 @@ Fork the repo and make a pull request, or open an issue on the issues page.
 
 ### Donate
 
-If you like using Campfire, you can donate using one of the means listed
-[here](https://shantaram.xyz/contact/donate.html).
+If you like using Campfire, you can donate to Campfire development using one of
+the means listed [here](https://shantaram.xyz/contact/donate.html).
 
 ### Acknowledgements
 
