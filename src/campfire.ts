@@ -213,23 +213,25 @@ const escape = (str: string) => {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/`/g, '&#96;');
+        .replace(/'/g, '&#39;');
 }
 
 /**
     * Unescapes the output of escape().
-    * Allows escaping 
 */
 const unescape = (str: string) => {
     if (!str) return '';
+    const expr = /(?<!\\)&(?:amp|lt|gt|quot|#(0+)?(?:39|96));/g;
 
-    return str.replace(/(?<!\\)&lt;/g, '<')
-        .replace(/(?<!\\)&gt;/g, '>')
-        .replace(/(?<!\\)&quot;/g, '"')
-        .replace(/(?<!\\)&#39;/g, '\'')
-        .replace(/(?<!\\)&#96/g, '`')
-        .replace(/(?<!\\)&amp;/g, '&');
+    const entities: Record<string, string> = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#39;': "'"
+    };
+
+    return str.replace(expr, (entity) => entities[entity] || '\'');
 }
 
 export default {
