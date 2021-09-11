@@ -74,3 +74,15 @@ a, a:visited, a:active {
     scrollbar-width: thin;
     scrollbar-color: transparent #ff9a00;
 }
+
+pre>code {
+    background-color: inherit;
+}
+
+pre {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.8);
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 0.4rem;
+}
