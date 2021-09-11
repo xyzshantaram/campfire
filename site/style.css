@@ -28,8 +28,8 @@
     border-top-right-radius: 6px;
 }
 
-a, a:visited, a:active {
-    color: inherit;
+a, a:link, a:visited, a:active {
+    color: #ff9a00;
 }
 
 @media not all and (hover: none) {
@@ -72,7 +72,7 @@ a, a:visited, a:active {
 
 * {
     scrollbar-width: thin;
-    scrollbar-color: transparent #ff9a00;
+    scrollbar-color: #ff9a00 transparent;
 }
 
 pre>code {

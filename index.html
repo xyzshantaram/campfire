@@ -56,11 +56,11 @@
         }
 
         a,
+        a:link,
         a:visited {
             text-decoration: none;
             border-bottom: 2px dashed;
             padding-bottom: 0.1rem;
-            color: #ff9a00;
         }
 
         .cf-site-div {
@@ -150,19 +150,19 @@
             <ul>
                 <li><code>nu</code> - an element creation helper. </li>
                 <li><code>mustache</code> - a templating helper.
-                    <pre><code>const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."</code></pre>
+                    <pre class='microlight'><code>const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."</code></pre>
                 </li>
                 <li><code>template</code> - wraps mustache() to return a partially applied function, for strings that
                     need to be updated frequently:
-                    <pre><code>const marsTemplate = cf.template("Welcome to Mars, {{ name }}."); // returns a function
+                    <pre class='microlight'><code>const marsTemplate = cf.template("Welcome to Mars, {{ name }}."); // returns a function
 const result = marsTemplate({ name: "user" }); // "Welcome to Mars, user."
 const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code></pre>
                 </li>
                 <li><code>escape</code> - Simple HTML escaper.
-                    <pre><code>escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;"</code></pre>
+                    <pre class='microlight'><code>escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;"</code></pre>
                 </li>
                 <li><code>unescape</code> - Unescapes the output of escape().
-                    <pre><code>unescape("&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;") // "&lt;script&gt;alert('XSS')&lt;/script&gt;"</code></pre>
+                    <pre class='microlight'><code>unescape("&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;") // "&lt;script&gt;alert('XSS')&lt;/script&gt;"</code></pre>
                 </li>
                 <li><code>Store</code> - Simple reactive data store.
                 </li>
@@ -176,9 +176,9 @@ const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code
             <p>
                 You can include campfire into your site with an import statement, either from a location where you are
                 hosting it, or from esm.sh / unkpg.
-            <pre><code>import cf from 'https://unpkg.com/campfire.js/';</code></pre>
+            <pre class='microlight'><code>import cf from 'https://unpkg.com/campfire.js/';</code></pre>
             or
-            <pre><code>import { nu, ListStore } from 'https://unpkg.com/campfire.js/';</code></pre>
+            <pre class='microlight'><code>import { nu, ListStore } from 'https://unpkg.com/campfire.js/';</code></pre>
             </p>
             <p>
                 If you use npm and a module bundler, campfire provides CommonJS and ESM versions that you can import()
@@ -187,12 +187,12 @@ const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code
             </p>
 
             To install:
-            <pre><code>$ npm i --save campfire.js</code></pre>
+            <pre class='microlight'><code>$ npm i --save campfire.js</code></pre>
 
             Then in your project:
-            <pre><code>import cf from 'campfire.js';</code></pre>
+            <pre class='microlight'><code>import cf from 'campfire.js';</code></pre>
             or (with CommonJS)
-            <pre><code>const cf = require('campfire.js');</code></pre>
+            <pre class='microlight'><code>const cf = require('campfire.js');</code></pre>
 
             Good luck, and thank you for choosing Campfire!
         </div>
@@ -206,8 +206,8 @@ const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code
         </div>
     </div>
 
-    <script type='module' src='site/main.js'>
-    </script>
+    <script src='site/vendor/microlight.min.js'></script>
+    <script type='module' src='site/main.js'></script>
 </body>
 
 </html>

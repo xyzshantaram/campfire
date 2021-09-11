@@ -6,10 +6,11 @@ a cozy web framework
     <img src='campfire.png' alt='campfire logo' width=256 height=256>
 </p>
 
-Campfire is a collection of small utilities to make developing with vanilla JS easy.
+Campfire is a collection of small utilities to make developing with vanilla JS
+easy.
 
-It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development
-easier.
+It is kept lightweight on purpose, aiming to provide the bare minimum necessary
+to make development easier.
 
 ### Features
 
@@ -59,7 +60,8 @@ import { ListStore, nu } from "https://esm.sh/campfire.js";
 
 ### Quick reference
 
-The API reference can be found [here](https://xyzshantaram.github.io/campfire/?tab=docs).
+The API reference can be found
+[here](https://xyzshantaram.github.io/campfire/?tab=docs).
 
 #### Methods
 
@@ -69,30 +71,30 @@ The API reference can be found [here](https://xyzshantaram.github.io/campfire/?t
 // A button that keeps track of how many times it's been clicked
 let count = 0;
 const btn = cf.nu("button#id.class1.class2", {
-    innerHTML: "I have not been clicked.",
-    attrs: {
-        // DOM attributes
-        "data-an-attribute": 42,
+  innerHTML: "I have not been clicked.",
+  attrs: {
+    // DOM attributes
+    "data-an-attribute": 42,
+  },
+  on: {
+    // event handlers, assigned using addEventListener
+    "click": function (e) {
+      this.innerHTML = `I have been clicked ${++count} times.`;
     },
-    on: {
-        // event handlers, assigned using addEventListener
-        "click": function (e) {
-            this.innerHTML = `I have been clicked ${++count} times.`;
-        },
-    },
-    style: {
-        // Uses property names as specified in CSSStyleDeclaration.
-        background: "#007cdf",
-        borderRadius: "0.25em",
-        margin: "0.5rem",
-        color: "#f5f4f0",
-        transitionDuration: "0.2s",
-        border: "2px solid black",
-    }, // styles
-    misc: {
-        // miscellaneous properties
-        type: "button",
-    },
+  },
+  style: {
+    // Uses property names as specified in CSSStyleDeclaration.
+    background: "#007cdf",
+    borderRadius: "0.25em",
+    margin: "0.5rem",
+    color: "#f5f4f0",
+    transitionDuration: "0.2s",
+    border: "2px solid black",
+  }, // styles
+  misc: {
+    // miscellaneous properties
+    type: "button",
+  },
 });
 ```
 
@@ -129,11 +131,11 @@ character references into their corresponding characters.
 
 const store = new cf.Store(0); // initial value
 const question = store.on("set", (val) => { // this function is called every time the value is changed
-    if (val == 42) {
-        console.log("That's the right answer!");
-    } else {
-        console.log("Hmmm. Try again.");
-    }
+  if (val == 42) {
+    console.log("That's the right answer!");
+  } else {
+    console.log("Hmmm. Try again.");
+  }
 }, false);
 /* The last argument specifies whether or not the callback should be called right now with the current value of the store. */
 
@@ -156,27 +158,27 @@ const list = document.body.appendChild(cf.nu("div"));
 const getIdx = (elem) => parseInt(elem.getAttribute("data-idx")); // helper function
 
 homework.on("refresh", function () {
-    if (homework.length == 0) list.innerHTML = "yay! no items!";
+  if (homework.length == 0) list.innerHTML = "yay! no items!";
 }, false);
 
 homework.on("push", function (val) {
-    if (homework.length === 1) list.innerHTML = "";
-    list.appendChild(cf.nu("div", {
-        innerHTML: val.value,
-        attrs: { "data-idx": homework.length - 1 },
-        on: { click: (e) => homework.remove(getIdx(e.target)) },
-        style: { cursor: "pointer" },
-    }));
+  if (homework.length === 1) list.innerHTML = "";
+  list.appendChild(cf.nu("div", {
+    innerHTML: val.value,
+    attrs: { "data-idx": homework.length - 1 },
+    on: { click: (e) => homework.remove(getIdx(e.target)) },
+    style: { cursor: "pointer" },
+  }));
 });
 
 homework.on("remove", function (val) {
-    Array.from(list.querySelectorAll(`div:nth-child(n+${val.idx + 1})`)).forEach(
-        (elem, i) => {
-            elem.setAttribute("data-idx", getIdx(elem) - 1);
-        },
-    );
-    list.removeChild(list.querySelector(`div:nth-child(${val.idx + 1})`));
-    homework.refresh();
+  Array.from(list.querySelectorAll(`div:nth-child(n+${val.idx + 1})`)).forEach(
+    (elem, i) => {
+      elem.setAttribute("data-idx", getIdx(elem) - 1);
+    },
+  );
+  list.removeChild(list.querySelector(`div:nth-child(${val.idx + 1})`));
+  homework.refresh();
 });
 
 homework.push("English assignment");
@@ -185,7 +187,10 @@ homework.push("French assignment");
 
 homework.setAt(1, "Math test");
 
-console.log("Homework:", [homework.get(0), homework.get(1), homework.get(2)].join(", "));
+console.log(
+  "Homework:",
+  [homework.get(0), homework.get(1), homework.get(2)].join(", "),
+);
 
 homework.setAt(3, "test"); // errors out
 ```
@@ -214,3 +219,8 @@ Lodash itself is based on Underscore.js, copyright Jeremy Ashkenas,
 DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
 
 Docs for Campfire are built with TSDoc.
+
+Syntax highlighting on the Campfire website is achieved with
+[Microlight](https://asvd.github.io/microlight/). Microlight is a copyright of
+[asvd](https://github.com/asvd) and is used under the
+[MIT License](https://github.com/asvd/microlight/blob/master/LICENSE).
