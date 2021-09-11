@@ -59,8 +59,7 @@ import { ListStore, nu } from "https://esm.sh/campfire.js";
 
 ### Quick reference
 
-A full API reference can be found [here](#).
-<!-- TODO: Change this to TSDoc path -->
+The API reference can be found [here](https://xyzshantaram.github.io/campfire/?tab=docs).
 
 #### Methods
 
@@ -213,3 +212,5 @@ are derived from lodash under the terms of the MIT License. Code in lodash is a
 copyright of JS Foundation and other contributors <https://js.foundation/>.
 Lodash itself is based on Underscore.js, copyright Jeremy Ashkenas,
 DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
+
+Docs for Campfire are built with TSDoc.

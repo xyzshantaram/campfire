@@ -1,0 +1,76 @@
+#app > nav > button {
+    padding: 0.4rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    background-color: transparent;
+    color: #f5f4f0;
+    border: none;
+    border-bottom: 3px dotted #f5f4f0;
+    font-size: 1.2rem;
+    transition-duration: 0.2s;
+    cursor: pointer;
+    font-family: inherit;
+    margin: 0.1rem;
+    flex-grow: 1;
+}
+
+#app > nav > button.active-tab {
+    background-color: #f5f4f0;
+    border-bottom-style: solid;
+    color: #001d3a;
+}
+
+#app > nav > button:first-child {
+    border-top-left-radius: 6px;
+}
+
+#app > nav > button:last-child {
+    border-top-right-radius: 6px;
+}
+
+a, a:visited, a:active {
+    color: inherit;
+}
+
+@media not all and (hover: none) {
+    #app > nav > button:hover:not(.active-tab) {
+        border-bottom-style: solid;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    a:hover {
+        border-bottom-style: solid;
+    }
+
+    a.icon-link:hover {
+        border: none;
+    }
+}
+
+@media screen and (max-aspect-ratio: 9/14) {
+    #app > nav > button {
+        text-overflow: ellipsis;
+    }
+
+    body {
+        font-size: 1rem;
+    }
+}
+
+::-webkit-scrollbar-track {
+    color: transparent;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ff9a00;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: transparent #ff9a00;
+}

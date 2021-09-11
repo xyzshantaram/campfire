@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>campfire: a cozy web framework</title>
+    <link rel="stylesheet" href="site/style.css">
+    <link rel="shortcut icon" type="image/jpg" href="campfire.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body>#app {
+            width: 60%;
+            max-width: 80ch;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Inconsolata', 'SF Mono', monospace;
+            background: #001d3a;
+            color: #f5f4f0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            width: 100%;
+            color: #ff9a00;
+        }
+
+        @media screen and (max-aspect-ratio: 1/1) {
+            body>#app {
+                width: 80%;
+            }
+        }
+
+        @media screen and (max-aspect-ratio: 9/14) {
+            body>#app {
+                width: 100%;
+            }
+        }
+
+        noscript {
+            text-align: center;
+            font-size: 1.4rem;
+        }
+
+        a,
+        a:visited {
+            text-decoration: none;
+            border-bottom: 2px dashed;
+            padding-bottom: 0.1rem;
+            color: #ff9a00;
+        }
+
+        .cf-site-div {
+            display: none;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        code {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 0.2rem;
+            font-family: 'Inconsolata', monospace;
+            border-radius: 4px;
+        }
+
+        pre>code {
+            background-color: inherit;
+        }
+
+        pre {
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.8);
+            width: 100%;
+            overflow-x: auto;
+            padding: 0.4rem;
+        }
+
+        #app>h1>code {
+            background-color: inherit;
+        }
+
+        .footer {
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 2rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+            padding-top: 1rem;
+        }
+
+        .footer a {
+            margin: 0.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='app'>
+        <h1>campfire</h1>
+        <noscript>
+            I'd love to make this site work without JS enabled, but seeing as how this is meant to be a demonstration
+            for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
+        </noscript>
+
+        <div class='cf-site-div' data-heading='home'>
+            <h3>a cozy web framework</h3>
+            <p>
+                <strong>Campfire</strong> is a collection of small utilities to make developing with vanilla JS easy.
+            </p>
+            <p>
+                It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development
+                easier.
+            </p>
+            Features:
+            <ul>
+                <li>Small size</li>
+                <li>Easy to get started with - just <code>import</code> it into your project from <a
+                        href='https://unpkg.com/browse/campfire.js@1.2.2/'>unpkg</a> or <a
+                        href='https://esm.sh/campfire.js/'>esm.sh</a>. Campfire is on npm as well, so you can also add
+                    it into your existing application with <code>npm i campfire.js</code>!</li>
+                <li>Uses vanilla JS wherever possible - no unnecessary DSLs or abstractions!</li>
+                <li>Provides an easy-to-understand API for implementing reactive data</li>
+                <li>Provides simple helpers for mustache templating</li>
+            </ul>
+            <p>
+                <a href='?tab=get'>Get campfire today!</a>
+            </p>
+        </div>
+        <div class='cf-site-div' data-heading='examples'>
+            <h3>runnable examples coming soon.</h3>
+            Meanwhile, <a href='https://github.com/xyzshantaram/campfire/blob/main/site/main.js'>this site uses
+                Campfire</a>, too!
+        </div>
+        <div class='cf-site-div' data-heading='docs'>
+
+            <h3>using campfire</h3>
+            <p>
+                View the <a target='_blank' href='site/docs/modules/campfire.html'>full API reference</a> for detailed
+                descriptions of the
+                methods and
+                classes provided by Campfire.
+            </p>
+
+            <h4>quick reference</h4>
+            <p>
+                Campfire provides the following methods and classes:
+            <ul>
+                <li><code>nu</code> - an element creation helper. </li>
+                <li><code>mustache</code> - a templating helper.
+                    <pre><code>const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."</code></pre>
+                </li>
+                <li><code>template</code> - wraps mustache() to return a partially applied function, for strings that
+                    need to be updated frequently:
+                    <pre><code>const marsTemplate = cf.template("Welcome to Mars, {{ name }}."); // returns a function
+const result = marsTemplate({ name: "user" }); // "Welcome to Mars, user."
+const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code></pre>
+                </li>
+                <li><code>escape</code> - Simple HTML escaper.
+                    <pre><code>escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;"</code></pre>
+                </li>
+                <li><code>unescape</code> - Unescapes the output of escape().
+                    <pre><code>unescape("&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;") // "&lt;script&gt;alert('XSS')&lt;/script&gt;"</code></pre>
+                </li>
+                <li><code>Store</code> - Simple reactive data store.
+                </li>
+                <li><code>ListStore</code> - Reactive list store.
+                </li>
+            </ul>
+            </p>
+        </div>
+        <div class='cf-site-div' data-heading='get'>
+            <h3>turn your dumpster fire into a campfire today!</h3>
+            <p>
+                You can include campfire into your site with an import statement, either from a location where you are
+                hosting it, or from esm.sh / unkpg.
+            <pre><code>import cf from 'https://unpkg.com/campfire.js/';</code></pre>
+            or
+            <pre><code>import { nu, ListStore } from 'https://unpkg.com/campfire.js/';</code></pre>
+            </p>
+            <p>
+                If you use npm and a module bundler, campfire provides CommonJS and ESM versions that you can import()
+                or require() to incorporate it into your existing workflow, complete with TSDoc hints for your editor
+                and TypeScript declarations.
+            </p>
+
+            To install:
+            <pre><code>$ npm i --save campfire.js</code></pre>
+
+            Then in your project:
+            <pre><code>import cf from 'campfire.js';</code></pre>
+            or (with CommonJS)
+            <pre><code>const cf = require('campfire.js');</code></pre>
+
+            Good luck, and thank you for choosing Campfire!
+        </div>
+        <div class='footer'>
+            <a href='https://github.com/xyzshantaram/campfire'>Campfire on GitHub</a>
+            <a href='https://github.com/xyzshantaram/campfire/blob/main/index.html'>This site on GitHub</a>
+            <p>
+                Campfire is free, open-source software available under <a
+                    href='https://github.com/xyzshantaram/campfire/blob/main/LICENSE'>the MIT License</a>.
+            </p>
+        </div>
+    </div>
+
+    <script type='module' src='site/main.js'>
+    </script>
+</body>
+
+</html>
