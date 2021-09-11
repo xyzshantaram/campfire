@@ -6,18 +6,15 @@ a cozy web framework
     <img src='campfire.png' alt='campfire logo' width=256 height=256>
 </p>
 
-Campfire provides small utilities to simplify building web applications with
-vanilla JavaScript. It does not impose on you a way to build your application or
-create unnecessary abstractions - you only get the bare minimum to make
-developing with the DOM easy.
+Campfire is a collection of small utilities to make developing with vanilla JS easy.
 
-Turn your dumpster fire into a Campfire today!
+It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development
+easier.
 
 ### Features
 
-- Small size (~1kb gzipped!)
-- No unnecessary boilerplate, Campfire is just one import away
-- Work directly with DOM elements
+- Small size (~2kb gzipped!)
+- Easy to get started with (just one import statement away!)
 - Reactive data using a publish-subscribe model
 - String templating functionality using mustaches
 
