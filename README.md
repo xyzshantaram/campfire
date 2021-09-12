@@ -128,9 +128,8 @@ character references into their corresponding characters.
 
 ```js
 // What is six by nine?
-
 const store = new cf.Store(0); // initial value
-const question = store.on("set", (val) => { // this function is called every time the value is changed
+const question = store.on("update", (val) => { // this function is called every time the value is changed
   if (val == 42) {
     console.log("That's the right answer!");
   } else {
@@ -142,7 +141,7 @@ const question = store.on("set", (val) => { // this function is called every tim
 store.update(3);
 store.update(42);
 
-store.unsubscribe("set", question);
+store.unsubscribe("update", question);
 store.dispose();
 store.update(42); // does nothing since the store is disposed of
 ```
@@ -224,3 +223,8 @@ Syntax highlighting on the Campfire website is achieved with
 [Microlight](https://asvd.github.io/microlight/). Microlight is a copyright of
 [asvd](https://github.com/asvd) and is used under the
 [MIT License](https://github.com/asvd/microlight/blob/master/LICENSE).
+
+The Campfire playground uses the [Ace editor](https://github.com/ajaxorg/ace/)
+as an embedded editor. The Ace editor is a copyright of Ajax.org B.V. and is
+used under the
+[3-clause BSD license](https://github.com/ajaxorg/ace/blob/master/LICENSE).

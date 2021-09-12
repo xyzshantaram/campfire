@@ -129,10 +129,19 @@
                 <a href='?tab=get'>Get campfire today!</a>
             </p>
         </div>
-        <div class='cf-site-div' data-heading='examples'>
-            <h3>runnable examples coming soon.</h3>
-            Meanwhile, <a href='https://github.com/xyzshantaram/campfire/blob/main/site/main.js'>this site uses
-                Campfire</a>, too!
+        <div class='cf-site-div' data-heading='playground'>
+            <p>
+                Try one of these demos, or do your own thing!
+                <ul id='playground-demo-list'>
+
+                </ul>
+            </p>
+            <div class='editor-wrapper'>
+                <div class='cf-editor-html'></div>
+                <div class='cf-editor-css'></div>
+                <div class='cf-editor-js'></div>
+                <div class='cf-editor-output'></div>
+            </div>
         </div>
         <div class='cf-site-div' data-heading='docs'>
 
@@ -150,7 +159,8 @@
             <ul>
                 <li><code>nu</code> - an element creation helper. </li>
                 <li><code>mustache</code> - a templating helper.
-                    <pre class='microlight'><code>const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."</code></pre>
+                    <pre
+                        class='microlight'><code>const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."</code></pre>
                 </li>
                 <li><code>template</code> - wraps mustache() to return a partially applied function, for strings that
                     need to be updated frequently:
@@ -159,10 +169,12 @@ const result = marsTemplate({ name: "user" }); // "Welcome to Mars, user."
 const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code></pre>
                 </li>
                 <li><code>escape</code> - Simple HTML escaper.
-                    <pre class='microlight'><code>escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;"</code></pre>
+                    <pre
+                        class='microlight'><code>escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;"</code></pre>
                 </li>
                 <li><code>unescape</code> - Unescapes the output of escape().
-                    <pre class='microlight'><code>unescape("&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;") // "&lt;script&gt;alert('XSS')&lt;/script&gt;"</code></pre>
+                    <pre
+                        class='microlight'><code>unescape("&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;") // "&lt;script&gt;alert('XSS')&lt;/script&gt;"</code></pre>
                 </li>
                 <li><code>Store</code> - Simple reactive data store.
                 </li>
@@ -208,6 +220,9 @@ const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code
 
     <script src='site/vendor/microlight.min.js'></script>
     <script type='module' src='site/main.js'></script>
+    <script src='site/vendor/ace/ace.js'></script>
+    <script src='site/vendor/ace/theme-tomorrow_night_blue.js'></script>
+    <script src='site/editor.js'></script>
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-#app > nav > button {
+#app>nav>button {
     padding: 0.4rem;
     padding-top: 0.6rem;
     padding-bottom: 0.6rem;
@@ -14,17 +14,17 @@
     flex-grow: 1;
 }
 
-#app > nav > button.active-tab {
+#app>nav>button.active-tab {
     background-color: #f5f4f0;
     border-bottom-style: solid;
     color: #001d3a;
 }
 
-#app > nav > button:first-child {
+#app>nav>button:first-child {
     border-top-left-radius: 6px;
 }
 
-#app > nav > button:last-child {
+#app>nav>button:last-child {
     border-top-right-radius: 6px;
 }
 
@@ -33,25 +33,25 @@ a, a:link, a:visited, a:active {
 }
 
 @media not all and (hover: none) {
-    #app > nav > button:hover:not(.active-tab) {
+    #app>nav>button:hover:not(.active-tab) {
         border-bottom-style: solid;
         background: rgba(255, 255, 255, 0.2);
     }
-
     a:hover {
         border-bottom-style: solid;
     }
-
     a.icon-link:hover {
         border: none;
+    }
+    .editor-wrapper>.switcher>button:hover {
+        background: #ff9a00;
     }
 }
 
 @media screen and (max-aspect-ratio: 9/14) {
-    #app > nav > button {
+    #app>nav>button {
         text-overflow: ellipsis;
     }
-
     body {
         font-size: 1rem;
     }
@@ -85,4 +85,62 @@ pre {
     max-width: 100%;
     overflow-x: auto;
     padding: 0.4rem;
+}
+
+div[class^='cf-editor'] {
+    width: 100%;
+    height: 50vh;
+    display: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.editor-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-wrapper>.switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.editor-wrapper>.switcher>button {
+    width: 100%;
+    font-family: inherit;
+    color: #f5f4f0;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition-duration: 0.2s;
+    padding: 0.4rem;
+    background: #080e51;
+    border-left: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.editor-wrapper>.switcher>button:first-child {
+    border-left: none;
+}
+
+.editor-wrapper>.switcher>button.active {
+    background: #ff9a00;
+    color: #001d3a;
+}
+
+.editor-wrapper>.switcher>button:first-child {
+    border-bottom-left-radius: 6px;
+}
+
+.editor-wrapper>.switcher>button:last-child {
+    border-bottom-right-radius: 6px;
+}
+
+.cf-editor-output-iframe {
+    border: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
 }
