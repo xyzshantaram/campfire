@@ -19,17 +19,15 @@ window.addEventListener("DOMContentLoaded", (e) => {
         return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     }
 
-    const setActiveTab = (name) => {
+    const focusTab = (name) => {
         Array.from(document.querySelectorAll('.cf-site-div')).forEach((elt) => {
-            if (elt.getAttribute('data-heading') !== name) elt.style.display = 'none';
-            else elt.style.display = 'block';
-        })
+            elt.style.display = elt.getAttribute('data-heading') === name ? 'block' : 'none';
+        });
 
         window.history.pushState({}, '', getTabURL(name));
 
         Array.from(nav.querySelectorAll('button')).forEach(elem => {
-            if (elem.innerHTML === name) elem.classList.add('active-tab');
-            else elem.classList.remove('active-tab');
+            elem.classList[elem.innerHTML === name ? 'add' : 'remove']('active-tab');
         });
     }
 
@@ -43,7 +41,7 @@ window.addEventListener("DOMContentLoaded", (e) => {
                 on: { 'click': function() {
                     document.querySelector('.active-tab')?.classList.remove('active-tab');
                     this.classList.add('active-tab');
-                    setActiveTab(item.heading);
+                    focusTab(item.heading);
                 }}
             }
         ));
@@ -57,5 +55,5 @@ window.addEventListener("DOMContentLoaded", (e) => {
 
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
-    setActiveTab(tab || 'home');
+    focusTab(tab || 'home');
 })
