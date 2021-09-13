@@ -81,20 +81,23 @@ window.addEventListener('DOMContentLoaded', () => {
         },
         on: {
             'click': () => {
-                const iframeContents = getIframeContents();
-                editorConfigs.out.elt.innerHTML = ''
-                const frame = cf.nu('iframe.cf-editor-output-iframe', {
-                    style: { width: '100%', height: '100%', background: 'white' },
-                    m: {
-                        srcdoc: iframeContents,
-                        sandbox: 'allow-modals allow-scripts'
-                    }
-                })
-                editorConfigs.out.elt.appendChild(frame);
                 currentEditorStore.update('out');
             }
         }
     }))
+
+    function generateOutput() {
+        const iframeContents = getIframeContents();
+        editorConfigs.out.elt.innerHTML = ''
+        const frame = cf.nu('iframe.cf-editor-output-iframe', {
+            style: { width: '100%', height: '100%', background: 'white' },
+            m: {
+                srcdoc: iframeContents,
+                sandbox: 'allow-modals allow-scripts'
+            }
+        })
+        editorConfigs.out.elt.appendChild(frame);
+    }
 
     currentEditorStore.on('update', (val) => {
         Array.from(document.querySelectorAll('.editor-wrapper > :not(.switcher)')).forEach(elem => elem.style.display = 'none');
@@ -102,6 +105,9 @@ window.addEventListener('DOMContentLoaded', () => {
         editorConfigs[val].editor?.resize();
         document.querySelector(`.switcher>button.active`)?.classList.remove('active');
         document.querySelector(`button[data-editor-view="${val}"]`)?.classList.add('active');
+        if (val === 'out') {
+            generateOutput();
+        }
     }, true);
 
     const setActivePlaygroundDemo = (obj) => {
@@ -123,7 +129,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 on: {
                     'click': function(e) {
                         setActivePlaygroundDemo(itm);
-                        currentEditorStore.update('html');
+                        currentEditorStore.update('out');
                     }
                 }
             }));
