@@ -123,7 +123,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 on: {
                     'click': function(e) {
                         setActivePlaygroundDemo(itm);
-                        currentEditorStore.update('js');
+                        currentEditorStore.update('html');
                     }
                 }
             }));
