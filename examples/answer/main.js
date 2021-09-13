@@ -1,6 +1,6 @@
 const result = document.querySelector("#result");
 const store = new cf.Store(0); // initial value
-const question = store.on("set", (val) => { // this function is called every time the value is changed
+const question = store.on("update", (val) => { // this function is called every time the value is changed
     if (val == 54) {
         result.textContent = "The correct answer.";
     }

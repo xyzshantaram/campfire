@@ -66,7 +66,7 @@ window.addEventListener("DOMContentLoaded", function() {
         return elt;
     }
 
-    items.on("set", (val) => {
+    items.on("update", (val) => {
         val.forEach(createTodo);
     })
 
