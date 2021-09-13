@@ -5,8 +5,8 @@ const { nodeExternalsPlugin } = require('esbuild-node-externals')
 
 // Full-size ESM version
 esbuild.build({
-    entryPoints: ['./dist/campfire.js'],
-    outfile: './dist/campfire.esm.js',
+    entryPoints: ['./dist/testing/campfire.js'],
+    outfile: './dist/testing/campfire.esm.js',
     bundle: true,
     minify: false,
     platform: 'browser',
@@ -21,8 +21,8 @@ esbuild.build({
 
 // Full-size CJS version
 esbuild.build({
-    entryPoints: ['./dist/campfire.js'],
-    outfile: './dist/campfire.cjs.js',
+    entryPoints: ['./dist/testing/campfire.js'],
+    outfile: './dist/testing/campfire.cjs.js',
     bundle: true,
     minify: false,
     platform: 'browser',
@@ -37,8 +37,8 @@ esbuild.build({
 
 // minified ESM version
 esbuild.build({
-    entryPoints: ['./dist/campfire.js'],
-    outfile: './dist/campfire.esm.min.js',
+    entryPoints: ['./dist/testing/campfire.js'],
+    outfile: './dist/testing/campfire.esm.min.js',
     bundle: true,
     minify: true,
     platform: 'browser',
@@ -53,8 +53,8 @@ esbuild.build({
 
 // minified CJS version
 esbuild.build({
-    entryPoints: ['./dist/campfire.js'],
-    outfile: './dist/campfire.cjs.min.js',
+    entryPoints: ['./dist/testing/campfire.js'],
+    outfile: './dist/testing/campfire.cjs.min.js',
     bundle: true,
     minify: true,
     platform: 'browser',

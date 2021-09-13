@@ -1,6 +1,6 @@
 const { describe, test, expect } = require("@jest/globals");
 // @ts-ignore
-const { escape, unescape, mustache, template } = require('../dist/campfire.cjs');
+const { escape, unescape, mustache, template } = require('../dist/testing/campfire.cjs');
 
 describe('tests for escape() and unescape()', () => {
     let escaped = '&amp;&lt;&gt;&quot;&#39;/';

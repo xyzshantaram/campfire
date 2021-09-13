@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "./dist",
+        "outDir": "./dist/testing",
         "allowJs": true,
         "target": "es6",
         "noImplicitAny": true,

@@ -7,9 +7,12 @@
     "typedoc": "^0.22.1",
     "typescript": "^4.4.2"
   },
+  "jest": {
+    "extensionsToTreatAsEsm": [".ts"]
+  },
   "name": "campfire.js",
   "description": "a cozy web framework",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "main": "dist/campfire.cjs.js",
   "module": "dist/campfire.esm.js",
   "types": "dist/campfire.d.ts",
@@ -19,7 +22,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "mkdocs": "npx typedoc src/campfire.ts src/types.ts --cleanOutputDir --out site/docs/ --darkHighlightTheme material-palenight --customCss site/tsdoc_style.css && cp campfire.png site/docs/campfire.png",
-    "build": "npx tsc && npx jest && node esbuild.config.js && npm run mkdocs"
+    "build": "npx tsc && node esbuild.config.js && npx jest && cp dist/testing/* dist/ && rm -rf dist/testing/"
   },
   "repository": {
     "type": "git",

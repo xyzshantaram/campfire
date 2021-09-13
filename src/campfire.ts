@@ -246,12 +246,11 @@ class ListStore extends Store {
 */
 const mustache = (string: string, data: Record<string, string> = {}): string => {
     return Object.entries(data).reduce((res, [key, value]) => {
-        const mainRe = new RegExp(`(?<!\\\\){{\\s*${key}\\s*}}`, 'g')
-        // lookbehind expression, only replaces if mustache was not preceded by a backslash
-        // this regex is actually (?<!\\){{\s*<key>\s*}} but because of escaping it looks like that...
+        const mainRe = new RegExp(`(^|[^\\\\]){{\\s*${key}\\s*}}`, 'g');
+        // only replaces if mustache was not preceded by a backslash. doing it this way because Safari doesn't support lookbehind yet
         const escapeRe = new RegExp(`\\\\({{\\s*${key}\\s*}})`, 'g')
         // the second regex now handles the cases that were skipped in the first case.
-        return res.replace(mainRe, value || "").replace(escapeRe, '$1');
+        return res.replace(mainRe, `$1${value || ""}`).replace(escapeRe, '$1');
     }, string);
 }
 

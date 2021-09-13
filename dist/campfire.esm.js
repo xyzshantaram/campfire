@@ -1,4 +1,4 @@
-// dist/campfire.js
+// dist/testing/campfire.js
 var _parseEltString = (str) => {
   var _a;
   const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/) : void 0;
@@ -125,9 +125,9 @@ var ListStore = class extends Store {
 };
 var mustache = (string, data = {}) => {
   return Object.entries(data).reduce((res, [key, value]) => {
-    const mainRe = new RegExp(`(?<!\\\\){{\\s*${key}\\s*}}`, "g");
+    const mainRe = new RegExp(`(^|[^\\\\]){{\\s*${key}\\s*}}`, "g");
     const escapeRe = new RegExp(`\\\\({{\\s*${key}\\s*}})`, "g");
-    return res.replace(mainRe, value || "").replace(escapeRe, "$1");
+    return res.replace(mainRe, `$1${value || ""}`).replace(escapeRe, "$1");
   }, string);
 };
 var template = (str) => {

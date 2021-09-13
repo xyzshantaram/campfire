@@ -6,7 +6,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// dist/campfire.js
+// dist/testing/campfire.js
 __export(exports, {
   ListStore: () => ListStore,
   Store: () => Store,
@@ -143,9 +143,9 @@ var ListStore = class extends Store {
 };
 var mustache = (string, data = {}) => {
   return Object.entries(data).reduce((res, [key, value]) => {
-    const mainRe = new RegExp(`(?<!\\\\){{\\s*${key}\\s*}}`, "g");
+    const mainRe = new RegExp(`(^|[^\\\\]){{\\s*${key}\\s*}}`, "g");
     const escapeRe = new RegExp(`\\\\({{\\s*${key}\\s*}})`, "g");
-    return res.replace(mainRe, value || "").replace(escapeRe, "$1");
+    return res.replace(mainRe, `$1${value || ""}`).replace(escapeRe, "$1");
   }, string);
 };
 var template = (str) => {
