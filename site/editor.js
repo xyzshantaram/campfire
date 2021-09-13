@@ -1,4 +1,4 @@
-import cf from 'https://unpkg.com/campfire.js@1.3.0/dist/campfire.esm.min.js';
+import cf from 'https://unpkg.com/campfire.js@1.4.0/dist/campfire.esm.min.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const examples = document.querySelector('.cf-site-div[data-heading="playground"]');
@@ -66,7 +66,7 @@ window.addEventListener('DOMContentLoaded', () => {
             <head><style> {{ css }} </style></head>
                 <body> {{ html }}
                     <script type='module'>
-                        import cf from 'https://unpkg.com/campfire.js@1.3.0/dist/campfire.esm.min.js';
+                        import cf from 'https://unpkg.com/campfire.js@1.4.0/dist/campfire.esm.min.js';
                         window.onload = function() { {{ js }} }
                     </script>
                 </body>
