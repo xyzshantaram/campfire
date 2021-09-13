@@ -1,3 +1,5 @@
+import cf from 'https://unpkg.com/campfire.js@1.2.4/dist/campfire.esm.min.js';
+
 window.addEventListener('DOMContentLoaded', () => {
     const examples = document.querySelector('.cf-site-div[data-heading="playground"]');
     if (!examples) return;
