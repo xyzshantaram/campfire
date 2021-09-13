@@ -60,4 +60,8 @@ describe('Tests for mustache', () => {
     test('Should ignore absent mustaches', () => {
         expect(mustache("{{ nonexistent }}", { name: "John" })).toBe("{{ nonexistent }}");
     })
+
+    test('Should perform replacements at once', () => {
+        expect(mustache("Welcome to {{ location }}, {{ name }}.", {  location: "{{ name }}", name: "John", })).toBe("Welcome to {{ name }}, John.");
+    })
 })

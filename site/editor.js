@@ -56,6 +56,10 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function cleanTemplates(str) {
+        
+    }
+
     function getIframeContents() {
         return cf.mustache(
             `<html>

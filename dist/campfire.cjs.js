@@ -142,11 +142,11 @@ var ListStore = class extends Store {
   }
 };
 var mustache = (string, data = {}) => {
-  return Object.entries(data).reduce((res, [key, value]) => {
-    const mainRe = new RegExp(`(^|[^\\\\]){{\\s*${key}\\s*}}`, "g");
-    const escapeRe = new RegExp(`\\\\({{\\s*${key}\\s*}})`, "g");
-    return res.replace(mainRe, `$1${value || ""}`).replace(escapeRe, "$1");
-  }, string);
+  const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
+  new RegExp(Object.keys(data).join("|"), "gi");
+  return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function(matched, p1, p2) {
+    return `${p1 || ""}${data[p2]}`;
+  }).replace(escapeExpr, "$1");
 };
 var template = (str) => {
   return (data) => mustache(str, data);

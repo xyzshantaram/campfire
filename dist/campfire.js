@@ -233,13 +233,11 @@ class ListStore extends Store {
  * @returns the templated string.
 */
 const mustache = (string, data = {}) => {
-    return Object.entries(data).reduce((res, [key, value]) => {
-        const mainRe = new RegExp(`(^|[^\\\\]){{\\s*${key}\\s*}}`, 'g');
-        // only replaces if mustache was not preceded by a backslash. doing it this way because Safari doesn't support lookbehind yet
-        const escapeRe = new RegExp(`\\\\({{\\s*${key}\\s*}})`, 'g');
-        // the second regex now handles the cases that were skipped in the first case.
-        return res.replace(mainRe, `$1${value || ""}`).replace(escapeRe, '$1');
-    }, string);
+    const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
+    new RegExp(Object.keys(data).join("|"), "gi");
+    return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function (matched, p1, p2) {
+        return `${p1 || ""}${data[p2]}`;
+    }).replace(escapeExpr, '$1');
 };
 /**
  * Returns a partial application that can be used to generate templated HTML strings.
