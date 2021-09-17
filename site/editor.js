@@ -64,7 +64,8 @@ window.addEventListener('DOMContentLoaded', () => {
         return cf.mustache(
             `<html>
             <head><style> {{ css }} </style></head>
-                <body> {{ html }}
+                <body>
+                    {{ html }}
                     <script type='module'>
                         import cf from 'https://unpkg.com/campfire.js@1.4.0/dist/campfire.esm.min.js';
                         window.onload = function() { {{ js }} }
@@ -143,4 +144,22 @@ window.addEventListener('DOMContentLoaded', () => {
     }).catch(err => {
         list.insertBefore(Document.createTextNode(`Error loading demos: ${err}. The playground should still work, sorry for the inconvenience!`));
     })
+
+    const clearBtn = document.querySelector("#cf-editor-clear");
+    const dlBtn = document.querySelector("#cf-editor-dl");
+
+    dlBtn.onclick = (e) => {
+        cf.nu('a', {
+            attrs: {
+                download: 'playground.html',
+                href: 'data:text/html;charset=utf-8,' + encodeURIComponent(getIframeContents())
+            }
+        }).click();
+    }
+
+    clearBtn.onclick = (e) => {
+        for (const str of ['html', 'js', 'css']) {
+            editorConfigs[str].editor.setValue("");
+        }
+    }
 })

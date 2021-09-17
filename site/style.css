@@ -37,7 +37,7 @@ a, a:link, a:visited, a:active {
         border-bottom-style: solid;
         background: rgba(255, 255, 255, 0.2);
     }
-    a:hover {
+    a:hover, a:link:hover, a:visited:hover {
         border-bottom-style: solid;
     }
     a.icon-link:hover {
@@ -143,4 +143,12 @@ div[class^='cf-editor'] {
     border: none;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
+}
+
+#cf-editor-controls {
+    width: 100%;
+    height: auto;
+    text-align: right;
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
 }
