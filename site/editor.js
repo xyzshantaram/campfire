@@ -169,5 +169,6 @@ window.addEventListener('DOMContentLoaded', () => {
         for (const str of ['html', 'js', 'css']) {
             editorConfigs[str].editor.setValue("");
         }
+        generateOutput();
     }
 })
