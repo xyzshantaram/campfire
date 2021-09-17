@@ -1,5 +1,25 @@
 import cf from 'https://unpkg.com/campfire.js@1.4.0/dist/campfire.esm.min.js';
 
+const iframeContentTemplate = cf.template(`\
+<html>
+<head>
+    <title>Campfire Playground</title>
+    <style>
+        {{ css }}
+    </style>
+</head>
+<body>
+    {{ html }}
+    <script type='module'>
+        import cf from 'https://unpkg.com/campfire.js@1.4.0/dist/campfire.esm.min.js';
+        window.onload = function() {
+            {{ js }}
+        }
+    </script>
+</body>
+</html>\
+`);
+
 window.addEventListener('DOMContentLoaded', () => {
     const examples = document.querySelector('.cf-site-div[data-heading="playground"]');
     if (!examples) return;
@@ -61,23 +81,11 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     function getIframeContents() {
-        return cf.mustache(
-            `<html>
-            <head><style> {{ css }} </style></head>
-                <body>
-                    {{ html }}
-                    <script type='module'>
-                        import cf from 'https://unpkg.com/campfire.js@1.4.0/dist/campfire.esm.min.js';
-                        window.onload = function() { {{ js }} }
-                    </script>
-                </body>
-            </html>`,
-            {
-                html: editorConfigs.html.editor.getValue().trim(),
-                css: editorConfigs.css.editor.getValue().trim(),
-                js: editorConfigs.js.editor.getValue().trim()
-            }
-        )
+        return iframeContentTemplate({
+            html: editorConfigs.html.editor.getValue().trim(),
+            css: editorConfigs.css.editor.getValue().trim(),
+            js: editorConfigs.js.editor.getValue().trim()
+        });
     }
 
     switcher.appendChild(cf.nu('button', {
