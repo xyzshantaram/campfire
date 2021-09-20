@@ -276,7 +276,7 @@ const escape = (str) => {
 const unescape = (str) => {
     if (!str)
         return '';
-    const expr = /&(?:amp|lt|gt|quot|#(0+)?(?:39|96));/g;
+    const expr = /&(?:amp|lt|gt|quot|#(0+)?39);/g;
     const entities = {
         '&amp;': '&',
         '&lt;': '<',

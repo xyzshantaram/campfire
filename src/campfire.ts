@@ -290,7 +290,7 @@ const escape = (str: string) => {
  */
 const unescape = (str: string) => {
     if (!str) return '';
-    const expr = /&(?:amp|lt|gt|quot|#(0+)?(?:39|96));/g;
+    const expr = /&(?:amp|lt|gt|quot|#(0+)?39);/g;
 
     const entities: Record<string, string> = {
         '&amp;': '&',
