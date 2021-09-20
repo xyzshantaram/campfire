@@ -159,6 +159,12 @@ class ListStore extends Store {
     constructor(ls) {
         super(ls);
     }
+    /**
+     * Empties out the list store.
+     *
+     * A helper function that sends an `update` event
+     * and sets the value of the store to [].
+     */
     clear() {
         this.update([]);
     }
@@ -257,6 +263,10 @@ const template = (str) => {
  * (`&amp;`,`&gt;`, `&lt;`, `&#39;`, and `&quot`).
  * @param str A string to escape.
  * @returns The escaped string.
+ * No characters other than the ones mentioned above are escaped.
+ * `escape` is only provided for basic protection against XSS and if you need more
+ * robust functionality consider using another HTML escaper (such as
+ * [he](https://github.com/mathiasbynens/he)).
  */
 const escape = (str) => {
     if (!str)
@@ -272,6 +282,9 @@ const escape = (str) => {
  * `&#39;`, and `&quot` with `&`, `<`, `>`, `'`, and `"` respectively.
  * @param str A string to unescape.
  * @returns The string, with its character references replaced by the characters it references.
+ * No characters other than the ones mentioned above are unescaped.
+ * If you need more robust functionality consider using another HTML
+ * escaper (such as [he](https://github.com/mathiasbynens/he)).
  */
 const unescape = (str) => {
     if (!str)

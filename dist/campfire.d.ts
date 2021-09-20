@@ -83,6 +83,12 @@ declare class Store {
 declare class ListStore extends Store {
     value: unknown[];
     constructor(ls: unknown[]);
+    /**
+     * Empties out the list store.
+     *
+     * A helper function that sends an `update` event
+     * and sets the value of the store to [].
+     */
     clear(): void;
     /**
      * Append the value `val` to the end of the list. This method sends a "push" event,
@@ -144,6 +150,10 @@ declare const template: (str: string) => Template;
  * (`&amp;`,`&gt;`, `&lt;`, `&#39;`, and `&quot`).
  * @param str A string to escape.
  * @returns The escaped string.
+ * No characters other than the ones mentioned above are escaped.
+ * `escape` is only provided for basic protection against XSS and if you need more
+ * robust functionality consider using another HTML escaper (such as
+ * [he](https://github.com/mathiasbynens/he)).
  */
 declare const escape: (str: string) => string;
 /**
@@ -151,6 +161,9 @@ declare const escape: (str: string) => string;
  * `&#39;`, and `&quot` with `&`, `<`, `>`, `'`, and `"` respectively.
  * @param str A string to unescape.
  * @returns The string, with its character references replaced by the characters it references.
+ * No characters other than the ones mentioned above are unescaped.
+ * If you need more robust functionality consider using another HTML
+ * escaper (such as [he](https://github.com/mathiasbynens/he)).
  */
 declare const unescape: (str: string) => string;
 declare const _default: {
