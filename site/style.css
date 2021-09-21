@@ -20,12 +20,9 @@
     color: #001d3a;
 }
 
-#app>nav>button:first-child {
-    border-top-left-radius: 6px;
-}
-
-#app>nav>button:last-child {
+#app>nav>button {
     border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
 }
 
 a, a:link, a:visited, a:active {
