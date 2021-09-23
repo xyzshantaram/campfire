@@ -5,16 +5,21 @@ const question = store.on("update", (val) => { // this function is called every 
         result.textContent = "The correct answer.";
     }
     else if (val == 42) {
-        result.textContent = 'Ah, I see you\'re a man of culture as well.';
+        result.textContent = "Ah, I see you're a man of culture as well.";
     } else {
         result.textContent = "Hmm. Try again.";
     }
 }, false);
+
+store.on("update", (val) => {
+    document.querySelector("#last").innerHTML = `Your response: ${val}`;
+})
 /* The last argument specifies whether or not the callback should be called right now with the current value of the store. */
 
 const input = cf.nu("input", {
     m: { type: 'text', placeholder: 'What is six by nine?' },
 })
+
 document.body.prepend(input,
     cf.nu("button", {
         m: { type: 'button' },
@@ -26,4 +31,5 @@ document.body.prepend(input,
                 else result.innerHTML = 'Type something first, ya numpty!';
             }
         }
-    }))
+    })
+)

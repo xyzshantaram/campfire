@@ -132,9 +132,9 @@
         <div class='cf-site-div' data-heading='playground'>
             <p>
                 Try one of these demos, or do your own thing!
-                <ul id='playground-demo-list'>
+            <ul id='playground-demo-list'>
 
-                </ul>
+            </ul>
             </p>
 
 
@@ -142,7 +142,7 @@
                 <a href='javascript:void(0)' id='cf-editor-clear'>Clear All</a>
                 <a href='javascript:void(0)' id='cf-editor-dl'>Download</a>
             </div>
-            
+
             <div class='editor-wrapper'>
                 <div class='cf-editor-html'></div>
                 <div class='cf-editor-css'></div>
@@ -164,7 +164,23 @@
             <p>
                 Campfire provides the following methods and classes:
             <ul>
-                <li><code>nu</code> - an element creation helper. </li>
+                <li><code>nu</code> - an element creation helper.
+                    <h4>A heading:</h4>
+                    <pre class='microlight'><code>cf.nu("h4", { innerHTML: "A heading" })</code></pre>
+                    <h4>A button:</h4>
+                    <pre class='microlight'><code>cf.nu("button#alert-btn", {
+    i: 'Click Me!', // same as innerHTML
+    s: { border: "2px solid red" },
+    on: {
+        click: (e) => {
+            alert('Click!')
+        }
+    }
+});
+</code></pre>
+<h4>A div with some classes</h4>
+                <pre class='microlight'><code>cf.nu('.class1.class2')</code></pre>
+                </li>
                 <li><code>mustache</code> - a templating helper.
                     <pre
                         class='microlight'><code>const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."</code></pre>
@@ -200,8 +216,10 @@ const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code
             <pre class='microlight'><code>import { nu, ListStore } from 'https://unpkg.com/campfire.js/';</code></pre>
             </p>
             <p>
-                If you use npm and a module bundler, campfire provides CommonJS and ESM versions that you can <code>import</code>
-                or <code>require()</code> to incorporate it into your existing workflow, complete with TSDoc hints for your editor
+                If you use npm and a module bundler, campfire provides CommonJS and ESM versions that you can
+                <code>import</code>
+                or <code>require()</code> to incorporate it into your existing workflow, complete with TSDoc hints for
+                your editor
                 and TypeScript declarations.
             </p>
 
@@ -227,7 +245,7 @@ const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code
 
     <script src='site/vendor/microlight.min.js'></script>
     <script type='module' src='site/main.js'></script>
-    
+
     <script src='site/vendor/ace/ace.js'></script>
     <script src='site/vendor/ace/theme-tomorrow_night_blue.js'></script>
     <script type='module' src='site/editor.js'></script>
