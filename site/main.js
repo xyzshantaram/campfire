@@ -1,8 +1,27 @@
-import cf from 'https://unpkg.com/campfire.js@1.4.0/dist/campfire.esm.min.js'
+import cf from 'https://esm.sh/campfire.js/';
+import marked from 'https://esm.sh/marked/';
+import toml from 'https://esm.sh/toml';
+
 window.cf = cf;
 
-window.addEventListener("DOMContentLoaded", (e) => {
+const PageRenderer = {
+    code: (code, infostring, escaped) => {
+        code = code.replace(/\n$/, '') + '\n';
+
+        return '<pre class="microlight"><code>'
+            + (escaped ? code : cf.escape(code, true))
+            + '</code></pre>\n';
+
+    }
+}
+
+window.addEventListener("DOMContentLoaded", async (e) => {
     const app = document.querySelector("#app");
+    const mask = document.querySelector("#mask");
+    const footer = app.querySelector('.footer');
+
+    marked.use({ renderer: PageRenderer });
+
     const nav = cf.nu('nav', {
         style: {
             display: 'flex',
@@ -10,7 +29,8 @@ window.addEventListener("DOMContentLoaded", (e) => {
             justifyContent: 'center'
         }
     });
-    app.insertBefore(nav, app.querySelector('.cf-site-div'));
+
+    app.insertBefore(nav, footer);
     const siteData = new cf.ListStore([]);
 
     const getTabURL = (name) => {
@@ -32,28 +52,52 @@ window.addEventListener("DOMContentLoaded", (e) => {
     }
 
     siteData.on('push', (_item) => {
-        const item = _item.value;
-        console.log(item);
+        const { idx, value: item } = _item;
+
+        app.insertBefore(cf.nu(
+            'div.cf-site-div',
+            {
+                attrs: {
+                    'data-heading': item.heading
+                },
+                innerHTML: item.innerHTML
+            }
+        ), footer);
+
         nav.appendChild(cf.nu(
             "button", {
-                m: { type: 'button' },
-                innerHTML: item.heading,
-                on: { 'click': function() {
+            m: { type: 'button' },
+            innerHTML: item.heading,
+            on: {
+                'click': function () {
                     document.querySelector('.active-tab')?.classList.remove('active-tab');
                     this.classList.add('active-tab');
                     focusTab(item.heading);
-                }}
+                }
             }
-        ));
+        }));
     })
 
-    for (let x of document.querySelectorAll(".cf-site-div")) {
-        siteData.push({
-            heading: x.getAttribute("data-heading"),
-        });
-    }
+    fetch('site/data/main.toml').then(res => res.text()).then(text => {
+        const data = toml.parse(text);
 
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
-    focusTab(tab || 'home');
+        for (let key of Object.keys(data)) {
+            siteData.push({
+                innerHTML: marked.parse(data[key].md),
+                heading: key,
+            })
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        focusTab(tab || 'home');
+
+        if (window.editorReady) window.editorReady();
+        if (window.microlight) window.microlight.reset();
+
+        mask.style.display = 'none';
+    }).catch(err => {
+        mask.innerHTML = `Error loading site data: ${err}`;
+    })
+
 })

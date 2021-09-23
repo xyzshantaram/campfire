@@ -94,6 +94,21 @@
         .footer a {
             margin: 0.2rem;
         }
+
+        #mask {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: rgba(0, 29, 58, 0.8);
+            backdrop-filter: blur(4px);
+            color: white;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -105,134 +120,6 @@
             for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
         </noscript>
 
-        <div class='cf-site-div' data-heading='home'>
-            <h3>a cozy web framework</h3>
-            <p>
-                <strong>Campfire</strong> is a collection of small utilities to make developing with vanilla JS easy.
-            </p>
-            <p>
-                It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development
-                easier.
-            </p>
-            Features:
-            <ul>
-                <li>Small size</li>
-                <li>Easy to get started with - just <code>import</code> it into your project from <a
-                        href='https://unpkg.com/browse/campfire.js@1.2.2/'>unpkg</a> or <a
-                        href='https://esm.sh/campfire.js/'>esm.sh</a>. Campfire is on npm as well, so you can also add
-                    it into your existing application with <code>npm i campfire.js</code>!</li>
-                <li>Uses vanilla JS wherever possible - no unnecessary DSLs or abstractions!</li>
-                <li>Provides an easy-to-understand API for implementing reactive data</li>
-                <li>Provides simple helpers for mustache templating</li>
-            </ul>
-            <p>
-                <a href='?tab=get'>Get campfire today!</a>
-            </p>
-        </div>
-        <div class='cf-site-div' data-heading='playground'>
-            <p>
-                Try one of these demos, or do your own thing!
-            <ul id='playground-demo-list'>
-
-            </ul>
-            </p>
-
-
-            <div id='cf-editor-controls'>
-                <a href='javascript:void(0)' id='cf-editor-clear'>Clear All</a>
-                <a href='javascript:void(0)' id='cf-editor-dl'>Download</a>
-            </div>
-
-            <div class='editor-wrapper'>
-                <div class='cf-editor-html'></div>
-                <div class='cf-editor-css'></div>
-                <div class='cf-editor-js'></div>
-                <div class='cf-editor-output'></div>
-            </div>
-        </div>
-        <div class='cf-site-div' data-heading='docs'>
-
-            <h3>using campfire</h3>
-            <p>
-                View the <a target='_blank' href='site/docs/modules/campfire.html'>full API reference</a> for detailed
-                descriptions of the
-                methods and
-                classes provided by Campfire.
-            </p>
-
-            <h4>quick reference</h4>
-            <p>
-                Campfire provides the following methods and classes:
-            <ul>
-                <li><code>nu</code> - an element creation helper.
-                    <h4>A heading:</h4>
-                    <pre class='microlight'><code>cf.nu("h4", { innerHTML: "A heading" })</code></pre>
-                    <h4>A button:</h4>
-                    <pre class='microlight'><code>cf.nu("button#alert-btn", {
-    i: 'Click Me!', // same as innerHTML
-    s: { border: "2px solid red" },
-    on: {
-        click: (e) => {
-            alert('Click!')
-        }
-    }
-});
-</code></pre>
-<h4>A div with some classes</h4>
-                <pre class='microlight'><code>cf.nu('.class1.class2')</code></pre>
-                </li>
-                <li><code>mustache</code> - a templating helper.
-                    <pre
-                        class='microlight'><code>const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."</code></pre>
-                </li>
-                <li><code>template</code> - wraps mustache() to return a partially applied function, for strings that
-                    need to be updated frequently:
-                    <pre class='microlight'><code>const marsTemplate = cf.template("Welcome to Mars, {{ name }}."); // returns a function
-const result = marsTemplate({ name: "user" }); // "Welcome to Mars, user."
-const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code></pre>
-                </li>
-                <li><code>escape</code> - Simple HTML escaper.
-                    <pre
-                        class='microlight'><code>escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;"</code></pre>
-                </li>
-                <li><code>unescape</code> - Unescapes the output of escape().
-                    <pre
-                        class='microlight'><code>unescape("&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;") // "&lt;script&gt;alert('XSS')&lt;/script&gt;"</code></pre>
-                </li>
-                <li><code>Store</code> - Simple reactive data store.
-                </li>
-                <li><code>ListStore</code> - Reactive list store.
-                </li>
-            </ul>
-            </p>
-        </div>
-        <div class='cf-site-div' data-heading='get'>
-            <h3>turn your dumpster fire into a campfire today!</h3>
-            <p>
-                You can include campfire into your site with an import statement, either from a location where you are
-                hosting it, or from esm.sh / unkpg.
-            <pre class='microlight'><code>import cf from 'https://unpkg.com/campfire.js/';</code></pre>
-            or
-            <pre class='microlight'><code>import { nu, ListStore } from 'https://unpkg.com/campfire.js/';</code></pre>
-            </p>
-            <p>
-                If you use npm and a module bundler, campfire provides CommonJS and ESM versions that you can
-                <code>import</code>
-                or <code>require()</code> to incorporate it into your existing workflow, complete with TSDoc hints for
-                your editor
-                and TypeScript declarations.
-            </p>
-
-            To install:
-            <pre class='microlight'><code>$ npm i --save campfire.js</code></pre>
-
-            Then in your project:
-            <pre class='microlight'><code>import cf from 'campfire.js';</code></pre>
-            or (with CommonJS)
-            <pre class='microlight'><code>const cf = require('campfire.js');</code></pre>
-
-            Good luck, and thank you for choosing Campfire!
-        </div>
         <div class='footer'>
             <a href='https://github.com/xyzshantaram/campfire'>Campfire on GitHub</a>
             <a href='https://github.com/xyzshantaram/campfire/blob/main/index.html'>This site on GitHub</a>
@@ -241,6 +128,10 @@ const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code
                     href='https://github.com/xyzshantaram/campfire/blob/main/LICENSE'>the MIT License</a>.
             </p>
         </div>
+    </div>
+
+    <div id='mask'>
+        <span >loading...</span>
     </div>
 
     <script src='site/vendor/microlight.min.js'></script>

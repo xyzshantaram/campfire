@@ -1,7 +1,88 @@
-import cf from 'http://esm.sh/campfire.js';
-window.cf = cf; // for playing around with it in the console
+[answer]
+title = "What do you get when you multiply six by nine?"
 
-window.addEventListener("DOMContentLoaded", function() {
+html = """\
+<div id='last'></div>
+<div id='result'></div>
+"""
+
+js = """\
+const result = document.querySelector("#result");
+const store = new cf.Store(0); // initial value
+const question = store.on("update", (val) => { // this function is called every time the value is changed
+    if (val == 54) {
+        result.textContent = "The correct answer.";
+    }
+    else if (val == 42) {
+        result.textContent = "Ah, I see you're a man of culture as well.";
+    } else {
+        result.textContent = "Hmm. Try again.";
+    }
+}, false);
+
+store.on("update", (val) => {
+    document.querySelector("#last").innerHTML = `Your response: ${val}`;
+})
+/* The last argument specifies whether or not the callback should be called right now with the current value of the store. */
+
+const input = cf.nu("input", {
+    m: { type: 'text', placeholder: 'What is six by nine?' },
+})
+
+document.body.prepend(input,
+    cf.nu("button", {
+        m: { type: 'button' },
+        i: 'Answer',
+        on: {
+            'click': function (e) {
+                const val = input.value.trim();
+                if (val) store.update(val);
+                else result.innerHTML = 'Type something first, ya numpty!';
+            }
+        }
+    })
+)
+"""
+
+[button]
+title = "Reactive button"
+
+js = """\
+// A button that keeps track of how many times it's been clicked
+let count = 0;
+const btn = cf.nu("button#id.class1.class2", {
+    innerHTML: "I have not been clicked.",
+    attrs: {
+        // DOM attributes
+        "data-an-attribute": 42,
+    },
+    on: {
+        // event handlers, assigned using addEventListener
+        "click": function (e) {
+            this.innerHTML = `I have been clicked ${++count} times.`;
+        },
+    },
+    style: {
+        // Uses property names as specified in CSSStyleDeclaration.
+        background: "#007cdf",
+        borderRadius: "0.25em",
+        margin: "0.5rem",
+        color: "#f5f4f0",
+        transitionDuration: "0.2s",
+        border: "2px solid black",
+    }, // styles
+    misc: {
+        // miscellaneous properties
+        type: "button",
+    },
+});
+document.body.appendChild(btn);
+"""
+
+[todo]
+title = "To-do list app"
+
+js = """\
     const items = new cf.ListStore([]);
 
     const root = cf.nu("#app", {
@@ -83,4 +164,4 @@ window.addEventListener("DOMContentLoaded", function() {
     items.on("mutation", (val) => {
         list.querySelector(`.todo-item:nth-child(${val.idx + 1})`).style.textDecoration = val.value.done ? 'line-through' : 'initial';
     })
-})
+"""

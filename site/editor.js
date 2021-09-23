@@ -1,4 +1,5 @@
-import cf from 'https://unpkg.com/campfire.js@1.4.0/dist/campfire.esm.min.js';
+import cf from 'https://esm.sh/campfire.js/';
+import toml from 'https://esm.sh/toml';
 
 const iframeContentTemplate = cf.template(`\
 <html>
@@ -20,7 +21,7 @@ const iframeContentTemplate = cf.template(`\
 </html>\
 `);
 
-window.addEventListener('DOMContentLoaded', () => {
+const editorReady = () => {
     const examples = document.querySelector('.cf-site-div[data-heading="playground"]');
     if (!examples) return;
 
@@ -74,10 +75,6 @@ window.addEventListener('DOMContentLoaded', () => {
             fontSize: '1rem',
             copyWithEmptySelection: 'true',
         });
-    }
-
-    function cleanTemplates(str) {
-        
     }
 
     function getIframeContents() {
@@ -137,10 +134,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const list = document.querySelector("#playground-demo-list");
 
-    fetch("site/examples.json").then(res => res.json()).then(data => {
-        data.forEach(itm => {
+    fetch("site/data/examples.toml").then(res => res.text()).then(text => {
+        const data = toml.parse(text);
+        for (let key of Object.keys(data)) {
+            const itm = data[key];
             list.appendChild(cf.nu('li', {
-                i: `<a href='javascript:void(0)'>${itm.name}</a>`,
+                i: `<a href='javascript:void(0)'>${itm.title}</a>`,
                 on: {
                     'click': function(e) {
                         setActivePlaygroundDemo(itm);
@@ -148,9 +147,9 @@ window.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }));
-        })
+        }
     }).catch(err => {
-        list.insertBefore(Document.createTextNode(`Error loading demos: ${err}. The playground should still work, sorry for the inconvenience!`));
+        list.appendChild(document.createTextNode(`Error loading demos: ${err}. The playground should still work, sorry for the inconvenience!`));
     })
 
     const clearBtn = document.querySelector("#cf-editor-clear");
@@ -171,4 +170,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         generateOutput();
     }
-})
+}
+
+window.editorReady = editorReady;
