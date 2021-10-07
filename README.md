@@ -224,7 +224,7 @@ copyright of JS Foundation and other contributors <https://js.foundation/>.
 Lodash itself is based on Underscore.js, copyright Jeremy Ashkenas,
 DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
 
-Docs for Campfire are built with [Typedoc](https://typedoc.org).
+Docs for Campfire are built with [TypeDoc](https://typedoc.org).
 
 The Campfire website uses the [toml](https://www.npmjs.com/package/toml) and
 [Marked.js](https://marked.js.org/) libraries under the MIT License to display
