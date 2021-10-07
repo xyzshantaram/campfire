@@ -65,3 +65,9 @@ describe('Tests for mustache', () => {
         expect(mustache("Welcome to {{ location }}, {{ name }}.", {  location: "{{ name }}", name: "John", })).toBe("Welcome to {{ name }}, John.");
     })
 })
+
+describe('Tests for template', () => {
+    test('should substitute data that is present', () => {
+        expect(mustache("Welcome to {{ location }}, {{ name }}.", { name: "John", location: "Mars" })).toBe("Welcome to Mars, John.");
+    })
+})
