@@ -11,34 +11,26 @@ var _parseEltString = (str) => {
     classes: results[2] ? results[2].split(".").filter((elem) => elem.trim()) : void 0
   } : {};
 };
+var extend = (elem, args = {}) => {
+  let { contents, c, misc, m, style, s, on, attrs, a, raw } = args;
+  contents = contents || c || "";
+  contents = raw ? contents : escape(contents);
+  elem.innerHTML = contents;
+  Object.assign(elem, misc || m);
+  Object.assign(elem.style, style || s);
+  Object.entries(on || {}).forEach(([evt, listener]) => elem.addEventListener(evt, listener));
+  Object.entries(attrs || a || {}).forEach(([attr, value]) => elem.setAttribute(attr, value));
+  return elem;
+};
 var nu = (eltInfo, args = {}) => {
-  let { innerHTML, i, misc, m, style, s, on: handlers, attrs, a } = args;
   let { tag, id, classes } = _parseEltString(eltInfo);
   if (!tag)
     tag = "div";
   let elem = document.createElement(tag);
   if (id)
     elem.id = id;
-  if (classes) {
-    classes.forEach((cls) => elem.classList.add(cls));
-  }
-  innerHTML = innerHTML || i;
-  misc = misc || m;
-  style = style || s;
-  attrs = attrs || a;
-  if (innerHTML)
-    elem.innerHTML = innerHTML;
-  if (misc)
-    Object.assign(elem, misc);
-  if (style)
-    Object.assign(elem.style, style);
-  if (handlers)
-    for (const handler in handlers)
-      elem.addEventListener(handler, handlers[handler]);
-  if (attrs)
-    for (const attr in attrs)
-      elem.setAttribute(attr, attrs[attr]);
-  return elem;
+  (classes || []).forEach((cls) => elem.classList.add(cls));
+  return extend(elem, args);
 };
 var Store = class {
   constructor(value) {
@@ -123,12 +115,21 @@ var ListStore = class extends Store {
     return this.value.length;
   }
 };
-var mustache = (string, data = {}) => {
+var _mustache = (string, data = {}) => {
   const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
   new RegExp(Object.keys(data).join("|"), "gi");
   return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function(matched, p1, p2) {
     return `${p1 || ""}${data[p2]}`;
   }).replace(escapeExpr, "$1");
+};
+var mustache = (string, data = {}, shouldEscape = true) => {
+  let escaped = Object.assign({}, data);
+  if (shouldEscape) {
+    escaped = Object.fromEntries(Object.entries(escaped).map(([key, value]) => {
+      return [key, escape(value)];
+    }));
+  }
+  return _mustache(string, escaped);
 };
 var template = (str) => {
   return (data) => mustache(str, data);
@@ -158,13 +159,15 @@ var campfire_default = {
   mustache,
   template,
   escape,
-  unescape
+  unescape,
+  extend
 };
 export {
   ListStore,
   Store,
   campfire_default as default,
   escape,
+  extend,
   mustache,
   nu,
   template,

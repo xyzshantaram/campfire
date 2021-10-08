@@ -17,8 +17,26 @@ const _parseEltString = (str) => {
     } : {};
 };
 /**
+ * Takes an existing element and modifies its properties.
+ * Refer ElementProperties documentation for details on
+ * what can be changed.
+ * @param elem The element to modify.
+ * @param args Properties to set on the element.
+ */
+const extend = (elem, args = {}) => {
+    let { contents, c, misc, m, style, s, on, attrs, a, raw } = args;
+    contents = contents || c || '';
+    contents = raw ? contents : escape(contents);
+    elem.innerHTML = contents;
+    Object.assign(elem, misc || m);
+    Object.assign(elem.style, style || s);
+    Object.entries(on || {}).forEach(([evt, listener]) => elem.addEventListener(evt, listener));
+    Object.entries(attrs || a || {}).forEach(([attr, value]) => elem.setAttribute(attr, value));
+    return elem;
+};
+/**
  * An element creation helper.
- * @param {string} eltInfo Basic information about the element.
+ * @param eltInfo Basic information about the element.
  * `eltInfo` should be a string of the format `tagName#id.class1.class2`.
  * Each part (tag name, id, classes) is optional, and an infinite number of
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
@@ -27,33 +45,14 @@ const _parseEltString = (str) => {
  * @returns The newly created DOM element.
  */
 const nu = (eltInfo, args = {}) => {
-    let { innerHTML, i, misc, m, style, s, on: handlers, attrs, a } = args;
     let { tag, id, classes } = _parseEltString(eltInfo);
     if (!tag)
         tag = 'div';
     let elem = document.createElement(tag);
     if (id)
         elem.id = id;
-    if (classes) {
-        classes.forEach((cls) => elem.classList.add(cls));
-    }
-    innerHTML = innerHTML || i;
-    misc = misc || m;
-    style = style || s;
-    attrs = attrs || a;
-    if (innerHTML)
-        elem.innerHTML = innerHTML;
-    if (misc)
-        Object.assign(elem, misc);
-    if (style)
-        Object.assign(elem.style, style);
-    if (handlers)
-        for (const handler in handlers)
-            elem.addEventListener(handler, handlers[handler]);
-    if (attrs)
-        for (const attr in attrs)
-            elem.setAttribute(attr, attrs[attr]);
-    return elem;
+    (classes || []).forEach((cls) => elem.classList.add(cls));
+    return extend(elem, args);
 };
 /**
  * A simple reactive store.
@@ -230,20 +229,39 @@ class ListStore extends Store {
     }
 }
 /**
- * Applies mustache templating to a string. Any names surrounded by {{ }} will be
- * considered for templating: if the name is present as a property in `data`,
- * the mustache'd expression will be replaced with the value of the property in `data`.
- * Prefixing the opening {{ with double backslashes will escape the expression.
+ * The function that actually does the mustache templating.
  * @param string - the string to be templated.
- * @param data - The data which will be used to perform replacements.
+ * @param data - The replacement data.
+ * @internal
  * @returns the templated string.
 */
-const mustache = (string, data = {}) => {
+const _mustache = (string, data = {}) => {
     const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
     new RegExp(Object.keys(data).join("|"), "gi");
     return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function (matched, p1, p2) {
         return `${p1 || ""}${data[p2]}`;
     }).replace(escapeExpr, '$1');
+};
+/**
+ * Applies mustache templating to a string. Any names surrounded by {{ }} will be
+ * considered for templating: if the name is present as a property in `data`,
+ * the mustache'd expression will be replaced with the value of the property in `data`.
+ * Prefixing the opening {{ with double backslashes will escape the expression.
+ * By default, mustache data is escaped with campfire's escape() function - you can
+ * disable this by supplying the value of `esc` as false.
+ * @param string - the string to be templated.
+ * @param data - The data which will be used to perform replacements.
+ * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
+ * @returns the templated string.
+*/
+const mustache = (string, data = {}, shouldEscape = true) => {
+    let escaped = Object.assign({}, data);
+    if (shouldEscape) {
+        escaped = Object.fromEntries(Object.entries(escaped).map(([key, value]) => {
+            return [key, escape(value)];
+        }));
+    }
+    return _mustache(string, escaped);
 };
 /**
  * Returns a partial application that can be used to generate templated HTML strings.
@@ -300,6 +318,6 @@ const unescape = (str) => {
     return str.replace(expr, (entity) => entities[entity] || '\'');
 };
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape
+    Store, ListStore, nu, mustache, template, escape, unescape, extend
 };
-export { Store, ListStore, nu, mustache, template, escape, unescape };
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend };

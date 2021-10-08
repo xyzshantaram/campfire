@@ -1,7 +1,15 @@
 import { ElementProperties, Subscriber, Template } from './types';
 /**
+ * Takes an existing element and modifies its properties.
+ * Refer ElementProperties documentation for details on
+ * what can be changed.
+ * @param elem The element to modify.
+ * @param args Properties to set on the element.
+ */
+declare const extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;
+/**
  * An element creation helper.
- * @param {string} eltInfo Basic information about the element.
+ * @param eltInfo Basic information about the element.
  * `eltInfo` should be a string of the format `tagName#id.class1.class2`.
  * Each part (tag name, id, classes) is optional, and an infinite number of
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
@@ -129,11 +137,14 @@ declare class ListStore extends Store {
  * considered for templating: if the name is present as a property in `data`,
  * the mustache'd expression will be replaced with the value of the property in `data`.
  * Prefixing the opening {{ with double backslashes will escape the expression.
+ * By default, mustache data is escaped with campfire's escape() function - you can
+ * disable this by supplying the value of `esc` as false.
  * @param string - the string to be templated.
  * @param data - The data which will be used to perform replacements.
+ * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
  * @returns the templated string.
 */
-declare const mustache: (string: string, data?: Record<string, string>) => string;
+declare const mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
 /**
  * Returns a partial application that can be used to generate templated HTML strings.
  * Does not sanitize html, use with caution.
@@ -170,10 +181,11 @@ declare const _default: {
     Store: typeof Store;
     ListStore: typeof ListStore;
     nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
-    mustache: (string: string, data?: Record<string, string>) => string;
+    mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
     template: (str: string) => Template;
     escape: (str: string) => string;
     unescape: (str: string) => string;
+    extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;
 };
 export default _default;
-export { Store, ListStore, nu, mustache, template, escape, unescape };
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend };

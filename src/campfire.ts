@@ -20,8 +20,31 @@ const _parseEltString = (str: string | undefined): TagStringParseResult => {
 };
 
 /**
+ * Takes an existing element and modifies its properties.
+ * Refer ElementProperties documentation for details on
+ * what can be changed.
+ * @param elem The element to modify.
+ * @param args Properties to set on the element.
+ */
+const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
+    let { contents, c, misc, m, style, s, on, attrs, a, raw } = args;
+
+    contents = contents || c || '';
+    contents = raw ? contents: escape(contents);
+    elem.innerHTML = contents;
+    
+    Object.assign(elem, misc || m);
+    Object.assign(elem.style, style || s);
+
+    Object.entries(on || {}).forEach(([evt, listener]) => elem.addEventListener(evt, listener));
+    Object.entries(attrs || a || {}).forEach(([attr, value]) => elem.setAttribute(attr, value));
+
+    return elem;
+}
+
+/**
  * An element creation helper.
- * @param {string} eltInfo Basic information about the element.
+ * @param eltInfo Basic information about the element.
  * `eltInfo` should be a string of the format `tagName#id.class1.class2`.
  * Each part (tag name, id, classes) is optional, and an infinite number of
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
@@ -30,35 +53,15 @@ const _parseEltString = (str: string | undefined): TagStringParseResult => {
  * @returns The newly created DOM element.
  */
 const nu = (eltInfo: string, args: ElementProperties = {}) => {
-    let { contents, c, misc, m, style, s, on: handlers, attrs, a, raw } = args;
-
     let { tag, id, classes } = _parseEltString(eltInfo);
 
     if (!tag) tag = 'div';
     let elem = document.createElement(tag);
 
     if (id) elem.id = id;
+    (classes || []).forEach((cls) => elem.classList.add(cls));
 
-    if (classes) {
-        classes.forEach((cls) => elem.classList.add(cls));
-    }
-
-    contents = contents || c;
-
-    if (contents && (raw)) {
-        contents = escape(contents);
-    }
-    misc = misc || m;
-    style = style || s;
-    attrs = attrs || a;
-
-    if (contents) elem.innerHTML = contents;
-    if (misc) Object.assign(elem, misc);
-    if (style) Object.assign(elem.style, style);
-    if (handlers) for (const handler in handlers) elem.addEventListener(handler, handlers[handler]);
-    if (attrs) for (const attr in attrs) elem.setAttribute(attr, attrs[attr]);
-
-    return elem;
+    return extend(elem, args);
 }
 
 /**
@@ -343,9 +346,9 @@ const unescape = (str: string) => {
 }
 
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape
+    Store, ListStore, nu, mustache, template, escape, unescape, extend
 }
 
 export {
-    Store, ListStore, nu, mustache, template, escape, unescape
+    Store, ListStore, nu, mustache, template, escape, unescape, extend
 }
