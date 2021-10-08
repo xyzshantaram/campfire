@@ -41,7 +41,7 @@ const extend = (elem, args = {}) => {
  * Each part (tag name, id, classes) is optional, and an infinite number of
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
  * `div`.
- * @param args - Optional extra properties for the created element.
+ * @param args Optional extra properties for the created element.
  * @returns The newly created DOM element.
  */
 const nu = (eltInfo, args = {}) => {
@@ -53,6 +53,45 @@ const nu = (eltInfo, args = {}) => {
         elem.id = id;
     (classes || []).forEach((cls) => elem.classList.add(cls));
     return extend(elem, args);
+};
+/**
+ * Inserts an element into the DOM given a reference element and the relative position
+ * of the new element.
+ *
+ * * if `where` looks like `{ after: reference }`, the element is inserted into `reference`'s
+ * parent, after `reference`.
+ * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
+ * parent, before `reference`.
+ * * if `where` looks like `{ atStart: reference }`, the element is inserted into `reference`,
+ * before its first child.
+ * * if `where` looks like `{ atEnd: reference }`, the element is inserted into `reference`,
+ * after its last child.
+ * @param elem The element to insert.
+ * @param where An object specifying where to insert `elem` relative to another element.
+ * @throws an Error when there are either zero or more than one keys present in `where`.
+ * @returns void
+ */
+const insert = (elem, where) => {
+    const keys = Object.keys(where);
+    if (keys.length !== 1) {
+        throw new Error("Too many or too few positions specified.");
+    }
+    const ref = Object.values(where)[0];
+    let position = 'afterend';
+    if (where.after) {
+        position = 'afterend';
+    }
+    else if (where.before) {
+        position = 'beforebegin';
+    }
+    else if (where.atStartOf) {
+        position = 'afterbegin';
+    }
+    else if (where.atEndOf) {
+        position = 'beforeend';
+    }
+    ref.insertAdjacentElement(position, elem);
+    return elem;
 };
 /**
  * A simple reactive store.
@@ -284,7 +323,7 @@ const template = (str) => {
  * No characters other than the ones mentioned above are escaped.
  * `escape` is only provided for basic protection against XSS and if you need more
  * robust functionality consider using another HTML escaper (such as
- * [he](https://github.com/mathiasbynens/he) or 
+ * [he](https://github.com/mathiasbynens/he) or
  * [sanitize-html](https://github.com/apostrophecms/sanitize-html)).
  */
 const escape = (str) => {
@@ -302,8 +341,6 @@ const escape = (str) => {
  * @param str A string to unescape.
  * @returns The string, with its character references replaced by the characters it references.
  * No characters other than the ones mentioned above are unescaped.
- * If you need more robust functionality consider using another HTML
- * escaper (such as [he](https://github.com/mathiasbynens/he)).
  */
 const unescape = (str) => {
     if (!str)

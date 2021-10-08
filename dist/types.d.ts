@@ -52,3 +52,9 @@ export interface TagStringParseResult {
     /** An array of classes parsed from the info string. */
     classes?: string[] | undefined;
 }
+export interface ElementPosition {
+    before?: HTMLElement;
+    after?: HTMLElement;
+    atStartOf?: HTMLElement;
+    atEndOf?: HTMLElement;
+}

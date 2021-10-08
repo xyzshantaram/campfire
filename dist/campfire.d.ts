@@ -14,7 +14,7 @@ declare const extend: (elem: HTMLElement, args?: ElementProperties) => HTMLEleme
  * Each part (tag name, id, classes) is optional, and an infinite number of
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
  * `div`.
- * @param args - Optional extra properties for the created element.
+ * @param args Optional extra properties for the created element.
  * @returns The newly created DOM element.
  */
 declare const nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
@@ -164,7 +164,8 @@ declare const template: (str: string) => Template;
  * No characters other than the ones mentioned above are escaped.
  * `escape` is only provided for basic protection against XSS and if you need more
  * robust functionality consider using another HTML escaper (such as
- * [he](https://github.com/mathiasbynens/he)).
+ * [he](https://github.com/mathiasbynens/he) or
+ * [sanitize-html](https://github.com/apostrophecms/sanitize-html)).
  */
 declare const escape: (str: string) => string;
 /**
@@ -173,8 +174,6 @@ declare const escape: (str: string) => string;
  * @param str A string to unescape.
  * @returns The string, with its character references replaced by the characters it references.
  * No characters other than the ones mentioned above are unescaped.
- * If you need more robust functionality consider using another HTML
- * escaper (such as [he](https://github.com/mathiasbynens/he)).
  */
 declare const unescape: (str: string) => string;
 declare const _default: {
