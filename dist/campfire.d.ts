@@ -168,11 +168,12 @@ declare const mustache: (string: string, data?: Record<string, string>, shouldEs
  * Does not sanitize html, use with caution.
  * @param str - A string with mustaches in it. (For example:
  * `<span class='name'> {{ name }} </span>`)
+ * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
  * @returns A function that when passed an Object with templating data,
  * returns the result of the templating operation performed on the string str with
  * the data passed in.
  */
-declare const template: (str: string) => Template;
+declare const template: (str: string, shouldEscape: true) => Template;
 /**
  * a simple HTML sanitizer. Escapes `&`, `<`, `>`, `'`, and `"` by
  * replacing them with their corresponding HTML escapes
@@ -199,7 +200,7 @@ declare const _default: {
     ListStore: typeof ListStore;
     nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
     mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
-    template: (str: string) => Template;
+    template: (str: string, shouldEscape: true) => Template;
     escape: (str: string) => string;
     unescape: (str: string) => string;
     extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;

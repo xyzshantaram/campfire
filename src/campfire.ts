@@ -339,12 +339,13 @@ const mustache = (string: string, data: Record<string, string> = {}, shouldEscap
  * Does not sanitize html, use with caution.
  * @param str - A string with mustaches in it. (For example: 
  * `<span class='name'> {{ name }} </span>`)
+ * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
  * @returns A function that when passed an Object with templating data,
  * returns the result of the templating operation performed on the string str with
  * the data passed in.
  */
-const template = (str: string): Template => {
-    return (data: Record<string, string>) => mustache(str, data);
+const template = (str: string, shouldEscape: true): Template => {
+    return (data: Record<string, string>) => mustache(str, data, shouldEscape);
 }
 
 /**

@@ -150,8 +150,8 @@ var mustache = (string, data = {}, shouldEscape = true) => {
   }
   return _mustache(string, escaped);
 };
-var template = (str) => {
-  return (data) => mustache(str, data);
+var template = (str, shouldEscape) => {
+  return (data) => mustache(str, data, shouldEscape);
 };
 var escape = (str) => {
   if (!str)
