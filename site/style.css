@@ -156,13 +156,18 @@ summary {
     cursor: pointer;
 }
 
-details>p, details>pre, details>ul {
+details {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+details>p, details>pre, details>ul, details>details {
     margin-left: 2rem;
     margin-top: 1rem;
 }
 
 @media screen and (max-aspect-ratio: 4/3) {
-    details>p, details>pre, details>ul {
+    details>p, details>pre, details>ul, details>details {
         margin-left: 1rem;
     }
 }

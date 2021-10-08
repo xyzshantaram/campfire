@@ -52,23 +52,44 @@ How do I create and share reusable components?
   Campfire has no opinion on how you should do this.
   However, one option is to use a function that returns functions and stores to let you 
   manipulate the element (and the created element itself).
-
-  <pre class='microlight'><code>// a component-ified version of the reactive button demo
-  const ReactiveButton = () => {
-    const store = new cf.Store(0);
-    const btn = cf.nu('button.clicker', {
-      on: {
-        click: { store.update(store.value + 1) }
-      },
-      contents: "I have not been clicked."
-    })
-    store.on("update", (val) => {
-      btn.innerHTML = `I have been clicked ${val} time${val == 1 ? '' : 's'}.`;
-    })
-  }
-  const [btn, clickCount] = ReactiveButton();
-  document.body.appendChild(btn);</code></pre>
 </p>
+  <details>
+  <summary>Component-ified reactive button</summary>
+<pre class='microlight'><code>// a component-ified version of the reactive button demo
+const ReactiveButton = () => {
+  const store = new cf.Store(0);
+  const btn = cf.nu('button.clicker', {
+    on: {
+      click: { store.update(store.value + 1) }
+    },
+    contents: "I have not been clicked."
+  })
+  store.on("update", (val) => {
+    btn.innerHTML = `I have been clicked ${val} time${val == 1 ? '' : 's'}.`;
+  })
+
+  return [btn, store];
+}
+const [btn, clickCount] = ReactiveButton();
+document.body.appendChild(btn);</code></pre>
+  </details>
+  <details>
+  <summary>Name badge</summary>
+<pre class='microlight'><code>// a reactive representation of a name badge
+const NameBadge = () => {
+  const name = new cf.Store({});
+  const nameTemplate = cf.template("Hello! My name is {{ name }}");
+  const badge = cf.nu('div', {
+    contents: nameTemplate({ name: name.value })
+  })
+  name.on("update", (val) => {
+    cf.extend(badge, { contents: nameTemplate(val), raw: true })
+  })
+
+  return [badge, name];
+}
+</code></pre>
+  </details>
 </details>
 
 <details>
