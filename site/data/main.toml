@@ -187,9 +187,9 @@ Campfire provides the following methods and classes:
 
   if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s parent, before `reference`.
   
-  if `where` looks like `{ atStart: reference }`, the element is inserted into `reference`, before its first child.
+  if `where` looks like `{ atStartOf: reference }`, the element is inserted into `reference`, before its first child.
   
-  if `where` looks like `{ atEnd: reference }`, the element is inserted into `reference`, after its last child.
+  if `where` looks like `{ atEndOf: reference }`, the element is inserted into `reference`, after its last child.
 * `mustache` - a templating helper
   
   Uses a minimal subset of mustache.js syntax. Escapes strings by default.
