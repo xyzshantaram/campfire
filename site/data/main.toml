@@ -17,8 +17,6 @@ It is kept lightweight on purpose, aiming to provide the bare minimum necessary 
 * Provides an easy-to-understand API for implementing reactive data
 * Provides simple helpers for mustache templating
 
-[Get campfire today!](?tab=get)
-
 #### FAQs
 <details>
 <summary>
@@ -106,6 +104,8 @@ Why are escape and unescape so basic?
     <li><a href='https://github.com/apostrophecms/sanitize-html'>html-sanitize</a></li>
   </ul>
 </details>
+
+[Get campfire today!](?tab=get)
 """
 
 [playground]
