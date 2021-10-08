@@ -6,7 +6,7 @@ md = """
 
 It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development easier.
 
-Features:
+#### Features
 * Small size
 * Easy to get started with - just `import` it into your project from 
   [unpkg](https://unpkg.com/browse/campfire.js/) or 
@@ -16,6 +16,94 @@ Features:
 * Uses vanilla JS wherever possible - no unnecessary DSLs or abstractions!
 * Provides an easy-to-understand API for implementing reactive data
 * Provides simple helpers for mustache templating
+
+#### FAQs
+<details>
+<summary>
+How does it compare to $framework?
+</summary>
+<p>
+  It doesn't. Campfire and $framework have entirely different goals. Campfire is a library 
+  to make writing vanilla JS applications easier, if you don't want the level of abstraction (or
+  the associated overhead) that comes with $framework. You can build entire applications with it
+  or add it quickly to an existing project. You are afforded complete control over your project.
+</p>
+<p>
+  The learning curve is minuscule and the possibilities are endless.
+</p>
+</details>
+
+<details>
+<summary>
+What about WebComponents?
+</summary>
+<p>
+  <a href='https://lit.dev'>lit.dev</a>
+</p>
+</details>
+
+<details>
+<summary>
+How do I create and share reusable components?
+</summary>
+<p>
+  Campfire has no opinion on how you should do this.
+  However, one option is to use a function that returns functions and stores to let you 
+  manipulate the element (and the created element itself).
+</p>
+  <details>
+  <summary>Component-ified reactive button</summary>
+<pre class='microlight'><code>// a component-ified version of the reactive button demo
+const ReactiveButton = () => {
+  const store = new cf.Store(0);
+  const btn = cf.nu('button.clicker', {
+    on: {
+      click: { store.update(store.value + 1) }
+    },
+    contents: "I have not been clicked."
+  })
+  store.on("update", (val) => {
+    btn.innerHTML = `I have been clicked ${val} time${val == 1 ? '' : 's'}.`;
+  })
+
+  return [btn, store];
+}
+const [btn, clickCount] = ReactiveButton();
+document.body.appendChild(btn);</code></pre>
+  </details>
+  <details>
+  <summary>Name badge</summary>
+<pre class='microlight'><code>// a reactive representation of a name badge
+const NameBadge = () => {
+  const name = new cf.Store({});
+  const nameTemplate = cf.template("Hello! My name is {{ name }}");
+  const badge = cf.nu('div', {
+    contents: nameTemplate({ name: name.value })
+  })
+  name.on("update", (val) => {
+    cf.extend(badge, { contents: nameTemplate(val), raw: true })
+  })
+
+  return [badge, name];
+}
+</code></pre>
+  </details>
+</details>
+
+<details>
+<summary>
+Why are escape and unescape so basic?
+</summary>
+  <p>
+    <code>escape</code> and <code>unescape</code> are intended as basic HTML sanitizers mainly for 
+    setting element contents, etc. You are encouraged to use a different HTML sanitizer if you
+    need more functionality.
+  </p>
+  <ul>
+    <li><a href='https://github.com/mathiasbynens/he'>he</a></li>
+    <li><a href='https://github.com/apostrophecms/sanitize-html'>html-sanitize</a></li>
+  </ul>
+</details>
 
 [Get campfire today!](?tab=get)
 """
@@ -54,12 +142,12 @@ Campfire provides the following methods and classes:
 * `nu` - an element creation helper
   ##### a heading
   ```
-  cf.nu("h4", { innerHTML: "A heading" })
+  cf.nu("h4", { contents: "A heading" }) // contents is escaped by default
   ```
   ##### a button
   ```
   cf.nu("button#alert-btn", {
-    i: 'Click Me!', // same as innerHTML
+    c: 'Click Me!', // same as contents
     s: { border: "2px solid red" },
     on: {
       click: (e) => {
@@ -72,10 +160,47 @@ Campfire provides the following methods and classes:
   ```
   cf.nu('.class1.class2')
   ```
+* `extend` - an element manipulation helper
+  
+  Same syntax as nu, except the first argument is an existing element instead of information
+  about a new one.
+  ##### Setting the innerHTML of an element
+  ```
+  cf.extend(elem, { contents: "<b>new contents</b>", raw: true }); // using raw means the contents aren't escaped
+  ```
+  ##### adding styles
+  ```
+  cf.extend(document.body, {
+    style: {
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+    }
+  });
+  ```
+* `insert` - element insertion helper
+  Inserts an element into the DOM given a reference element and the relative position of the new element.
+
+  ```
+  const insert = (elem: Element, where: ElementPosition)
+  ```
+
+  if `where` looks like `{ after: reference }`, the element is inserted into `reference`'s parent, after `reference`.
+
+  if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s parent, before `reference`.
+  
+  if `where` looks like `{ atStart: reference }`, the element is inserted into `reference`, before its first child.
+  
+  if `where` looks like `{ atEnd: reference }`, the element is inserted into `reference`, after its last child.
 * `mustache` - a templating helper
+  
+  Uses a minimal subset of mustache.js syntax. Escapes strings by default.
   ```
-  const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."
+  const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "John" }); // "Welcome to Mars, John."
   ```
+  You can disable escaping by passing `false` as the third argument to mustache.
+  ```
+  const resultWithBoldName = cf.mustache("Welcome to Mars, {{ name }}.", { name: "<b>user</b>" }, false); // "Welcome to Mars, <b>user</b>."
+  ```
+
 * `template` - wraps `mustache()` to return a partially applied function, for strings that need to be updated frequently:
   ```
   const marsTemplate = cf.template("Welcome to Mars, {{ name }}."); // returns a function
@@ -90,8 +215,8 @@ Campfire provides the following methods and classes:
   ```
   unescape("&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;") // "<script>alert('XSS')</script>".
   ```
-* `Store` - Simple reactive data store.
-* `ListStore` - Reactive list store.
+* `Store` - Simple reactive data store. [see playground for example]
+* `ListStore` - Reactive list store. [see playground for example]
 """
 
 [get]

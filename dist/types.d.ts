@@ -8,12 +8,21 @@ export declare type Template = (e: Record<string, unknown>) => string;
  * Properties for the HTML element to be created.
  */
 export interface ElementProperties {
-    /** String that will be set as the inner HTML of the created element. */
-    innerHTML?: string;
-    /** Alias for `ElementProperties.innerHTML`. */
-    i?: string;
+    /**
+     * String that will be set as the inner HTML of the created element. By default,
+     * this is escaped using cf.escape() - however, if you supply `raw: true` in
+     * the args object passed as nu's second argument, escaping is disabled.
+    */
+    contents?: string;
+    /** Alias for `contents` */
+    c?: string;
+    /**
+     * Whether or not to escape the `contents` string. If `raw` is true, the
+     * string is not escaped.
+     */
+    raw?: boolean;
     /** Miscellaneous properties to set on the created element,
-    * for example, `type: "button"` or `checked: true`
+     * for example, `type: "button"` or `checked: true`
     */
     misc?: Record<string, unknown>;
     /** Alias for `ElementProperties.misc`. */
@@ -42,4 +51,10 @@ export interface TagStringParseResult {
     id?: string | undefined;
     /** An array of classes parsed from the info string. */
     classes?: string[] | undefined;
+}
+export interface ElementPosition {
+    before?: HTMLElement;
+    after?: HTMLElement;
+    atStartOf?: HTMLElement;
+    atEndOf?: HTMLElement;
 }

@@ -1,4 +1,4 @@
-import { ElementProperties, TagStringParseResult, Subscriber, Template } from './types';
+import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template } from './types';
 
 /**
  * 
@@ -20,39 +20,93 @@ const _parseEltString = (str: string | undefined): TagStringParseResult => {
 };
 
 /**
+ * Takes an existing element and modifies its properties.
+ * Refer ElementProperties documentation for details on
+ * what can be changed.
+ * @param elem The element to modify.
+ * @param args Properties to set on the element.
+ */
+const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
+    let { contents, c, misc, m, style, s, on, attrs, a, raw } = args;
+
+    contents = contents || c || '';
+    contents = raw ? contents : escape(contents);
+    elem.innerHTML = contents;
+
+    Object.assign(elem, misc || m);
+    Object.assign(elem.style, style || s);
+
+    Object.entries(on || {}).forEach(([evt, listener]) => elem.addEventListener(evt, listener));
+    Object.entries(attrs || a || {}).forEach(([attr, value]) => elem.setAttribute(attr, value));
+
+    return elem;
+}
+
+/**
  * An element creation helper.
- * @param {string} eltInfo Basic information about the element.
+ * @param eltInfo Basic information about the element.
  * `eltInfo` should be a string of the format `tagName#id.class1.class2`.
  * Each part (tag name, id, classes) is optional, and an infinite number of
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
  * `div`.
- * @param args - Optional extra properties for the created element.
+ * @param args Optional extra properties for the created element.
  * @returns The newly created DOM element.
  */
 const nu = (eltInfo: string, args: ElementProperties = {}) => {
-    let { innerHTML, i, misc, m, style, s, on: handlers, attrs, a } = args;
-
     let { tag, id, classes } = _parseEltString(eltInfo);
 
     if (!tag) tag = 'div';
     let elem = document.createElement(tag);
 
     if (id) elem.id = id;
+    (classes || []).forEach((cls) => elem.classList.add(cls));
 
-    if (classes) {
-        classes.forEach((cls) => elem.classList.add(cls));
+    return extend(elem, args);
+}
+
+/**
+ * Inserts an element into the DOM given a reference element and the relative position
+ * of the new element.
+ * 
+ * * if `where` looks like `{ after: reference }`, the element is inserted into `reference`'s
+ * parent, after `reference`.
+ * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
+ * parent, before `reference`.
+ * * if `where` looks like `{ atStart: reference }`, the element is inserted into `reference`,
+ * before its first child.
+ * * if `where` looks like `{ atEnd: reference }`, the element is inserted into `reference`,
+ * after its last child.
+ * @param elem The element to insert.
+ * @param where An object specifying where to insert `elem` relative to another element.
+ * @throws an Error when there are either zero or more than one keys present in `where`.
+ * @returns void
+ */
+const insert = (elem: Element, where: ElementPosition) => {
+    const keys = Object.keys(where);
+    if (keys.length !== 1) {
+        throw new Error("Too many or too few positions specified.");
     }
 
-    innerHTML = innerHTML || i;
-    misc = misc || m;
-    style = style || s;
-    attrs = attrs || a;
+    const ref: HTMLElement = Object.values(where)[0];
+    let position: InsertPosition = 'afterend';
+    
+    if (where.after) {
+        position = 'afterend';
+    }
 
-    if (innerHTML) elem.innerHTML = innerHTML;
-    if (misc) Object.assign(elem, misc);
-    if (style) Object.assign(elem.style, style);
-    if (handlers) for (const handler in handlers) elem.addEventListener(handler, handlers[handler]);
-    if (attrs) for (const attr in attrs) elem.setAttribute(attr, attrs[attr]);
+    else if (where.before) {
+        position = 'beforebegin';
+    }
+
+    else if (where.atStartOf) {
+        position = 'afterbegin';
+    }
+
+    else if (where.atEndOf) {
+        position = 'beforeend';
+    }
+
+    ref.insertAdjacentElement(position, elem);
 
     return elem;
 }
@@ -242,15 +296,13 @@ class ListStore extends Store {
 }
 
 /**
- * Applies mustache templating to a string. Any names surrounded by {{ }} will be
- * considered for templating: if the name is present as a property in `data`,
- * the mustache'd expression will be replaced with the value of the property in `data`.
- * Prefixing the opening {{ with double backslashes will escape the expression.
+ * The function that actually does the mustache templating.
  * @param string - the string to be templated.
- * @param data - The data which will be used to perform replacements.
+ * @param data - The replacement data.
+ * @internal
  * @returns the templated string.
 */
-const mustache = (string: string, data: Record<string, string> = {}): string => {
+const _mustache = (string: string, data: Record<string, string> = {}): string => {
     const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
     new RegExp(Object.keys(data).join("|"), "gi");
     return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function (matched, p1, p2) {
@@ -259,16 +311,41 @@ const mustache = (string: string, data: Record<string, string> = {}): string => 
 }
 
 /**
+ * Applies mustache templating to a string. Any names surrounded by {{ }} will be
+ * considered for templating: if the name is present as a property in `data`,
+ * the mustache'd expression will be replaced with the value of the property in `data`.
+ * Prefixing the opening {{ with double backslashes will escape the expression.
+ * By default, mustache data is escaped with campfire's escape() function - you can
+ * disable this by supplying the value of `esc` as false.
+ * @param string - the string to be templated.
+ * @param data - The data which will be used to perform replacements.
+ * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
+ * @returns the templated string.
+*/
+const mustache = (string: string, data: Record<string, string> = {}, shouldEscape = true): string => {
+    let escaped = { ...data };
+
+    if (shouldEscape) {
+        escaped = Object.fromEntries(Object.entries(escaped).map(([key, value]) => {
+            return [key, escape(value)]
+        }));
+    }
+
+    return _mustache(string, escaped);
+}
+
+/**
  * Returns a partial application that can be used to generate templated HTML strings.
  * Does not sanitize html, use with caution.
  * @param str - A string with mustaches in it. (For example: 
  * `<span class='name'> {{ name }} </span>`)
+ * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
  * @returns A function that when passed an Object with templating data,
  * returns the result of the templating operation performed on the string str with
  * the data passed in.
  */
-const template = (str: string): Template => {
-    return (data: Record<string, string>) => mustache(str, data);
+const template = (str: string, shouldEscape: true): Template => {
+    return (data: Record<string, string>) => mustache(str, data, shouldEscape);
 }
 
 /**
@@ -280,7 +357,8 @@ const template = (str: string): Template => {
  * No characters other than the ones mentioned above are escaped.
  * `escape` is only provided for basic protection against XSS and if you need more
  * robust functionality consider using another HTML escaper (such as
- * [he](https://github.com/mathiasbynens/he)).
+ * [he](https://github.com/mathiasbynens/he) or 
+ * [sanitize-html](https://github.com/apostrophecms/sanitize-html)).
  */
 const escape = (str: string) => {
     if (!str) return '';
@@ -298,8 +376,6 @@ const escape = (str: string) => {
  * @param str A string to unescape.
  * @returns The string, with its character references replaced by the characters it references.
  * No characters other than the ones mentioned above are unescaped.
- * If you need more robust functionality consider using another HTML 
- * escaper (such as [he](https://github.com/mathiasbynens/he)).
  */
 const unescape = (str: string) => {
     if (!str) return '';
@@ -317,9 +393,9 @@ const unescape = (str: string) => {
 }
 
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert
 }
 
 export {
-    Store, ListStore, nu, mustache, template, escape, unescape
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert
 }

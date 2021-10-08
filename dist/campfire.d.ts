@@ -1,15 +1,41 @@
-import { ElementProperties, Subscriber, Template } from './types';
+import { ElementProperties, ElementPosition, Subscriber, Template } from './types';
+/**
+ * Takes an existing element and modifies its properties.
+ * Refer ElementProperties documentation for details on
+ * what can be changed.
+ * @param elem The element to modify.
+ * @param args Properties to set on the element.
+ */
+declare const extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;
 /**
  * An element creation helper.
- * @param {string} eltInfo Basic information about the element.
+ * @param eltInfo Basic information about the element.
  * `eltInfo` should be a string of the format `tagName#id.class1.class2`.
  * Each part (tag name, id, classes) is optional, and an infinite number of
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
  * `div`.
- * @param args - Optional extra properties for the created element.
+ * @param args Optional extra properties for the created element.
  * @returns The newly created DOM element.
  */
 declare const nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
+/**
+ * Inserts an element into the DOM given a reference element and the relative position
+ * of the new element.
+ *
+ * * if `where` looks like `{ after: reference }`, the element is inserted into `reference`'s
+ * parent, after `reference`.
+ * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
+ * parent, before `reference`.
+ * * if `where` looks like `{ atStart: reference }`, the element is inserted into `reference`,
+ * before its first child.
+ * * if `where` looks like `{ atEnd: reference }`, the element is inserted into `reference`,
+ * after its last child.
+ * @param elem The element to insert.
+ * @param where An object specifying where to insert `elem` relative to another element.
+ * @throws an Error when there are either zero or more than one keys present in `where`.
+ * @returns void
+ */
+declare const insert: (elem: Element, where: ElementPosition) => Element;
 /**
  * A simple reactive store.
  * @class Store
@@ -129,21 +155,25 @@ declare class ListStore extends Store {
  * considered for templating: if the name is present as a property in `data`,
  * the mustache'd expression will be replaced with the value of the property in `data`.
  * Prefixing the opening {{ with double backslashes will escape the expression.
+ * By default, mustache data is escaped with campfire's escape() function - you can
+ * disable this by supplying the value of `esc` as false.
  * @param string - the string to be templated.
  * @param data - The data which will be used to perform replacements.
+ * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
  * @returns the templated string.
 */
-declare const mustache: (string: string, data?: Record<string, string>) => string;
+declare const mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
 /**
  * Returns a partial application that can be used to generate templated HTML strings.
  * Does not sanitize html, use with caution.
  * @param str - A string with mustaches in it. (For example:
  * `<span class='name'> {{ name }} </span>`)
+ * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
  * @returns A function that when passed an Object with templating data,
  * returns the result of the templating operation performed on the string str with
  * the data passed in.
  */
-declare const template: (str: string) => Template;
+declare const template: (str: string, shouldEscape: true) => Template;
 /**
  * a simple HTML sanitizer. Escapes `&`, `<`, `>`, `'`, and `"` by
  * replacing them with their corresponding HTML escapes
@@ -153,7 +183,8 @@ declare const template: (str: string) => Template;
  * No characters other than the ones mentioned above are escaped.
  * `escape` is only provided for basic protection against XSS and if you need more
  * robust functionality consider using another HTML escaper (such as
- * [he](https://github.com/mathiasbynens/he)).
+ * [he](https://github.com/mathiasbynens/he) or
+ * [sanitize-html](https://github.com/apostrophecms/sanitize-html)).
  */
 declare const escape: (str: string) => string;
 /**
@@ -162,18 +193,18 @@ declare const escape: (str: string) => string;
  * @param str A string to unescape.
  * @returns The string, with its character references replaced by the characters it references.
  * No characters other than the ones mentioned above are unescaped.
- * If you need more robust functionality consider using another HTML
- * escaper (such as [he](https://github.com/mathiasbynens/he)).
  */
 declare const unescape: (str: string) => string;
 declare const _default: {
     Store: typeof Store;
     ListStore: typeof ListStore;
     nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
-    mustache: (string: string, data?: Record<string, string>) => string;
-    template: (str: string) => Template;
+    mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
+    template: (str: string, shouldEscape: true) => Template;
     escape: (str: string) => string;
     unescape: (str: string) => string;
+    extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;
+    insert: (elem: Element, where: ElementPosition) => Element;
 };
 export default _default;
-export { Store, ListStore, nu, mustache, template, escape, unescape };
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert };

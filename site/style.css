@@ -149,3 +149,43 @@ div[class^='cf-editor'] {
     margin-top: 0.2rem;
     margin-bottom: 0.2rem;
 }
+
+summary {
+    color: #ff9a00;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+details {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+details>p, details>pre, details>ul, details>details {
+    margin-left: 2rem;
+    margin-top: 1rem;
+}
+
+@media screen and (max-aspect-ratio: 4/3) {
+    details>p, details>pre, details>ul, details>details {
+        margin-left: 1rem;
+    }
+}
+
+@keyframes details-show {
+    from {
+        opacity: 0;
+        transform: var(--details-translate, translateY(-0.5em));
+    }
+}
+
+@keyframes details-hide {
+    from {
+        opacity: 1;
+        transform: initial;
+    }
+}
+
+details[open]>*:not(summary) {
+    animation: details-show 0.2s ease-in-out;
+}
