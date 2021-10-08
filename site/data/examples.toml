@@ -49,9 +49,10 @@ title = "Reactive button"
 
 js = """\
 // A button that keeps track of how many times it's been clicked
-let count = 0;
+let count = new cf.Store(0);
+
 const btn = cf.nu("button#id.class1.class2", {
-    innerHTML: "I have not been clicked.",
+    contents: "I have not been clicked.",
     attrs: {
         // DOM attributes
         "data-an-attribute": 42,
@@ -59,7 +60,7 @@ const btn = cf.nu("button#id.class1.class2", {
     on: {
         // event handlers, assigned using addEventListener
         "click": function (e) {
-            this.innerHTML = `I have been clicked ${++count} times.`;
+            count.update(count.value + 1);
         },
     },
     style: {
@@ -76,6 +77,10 @@ const btn = cf.nu("button#id.class1.class2", {
         type: "button",
     },
 });
+
+count.on("update", (val) => {
+    btn.innerHTML = `I have been clicked ${val} times.`;
+});
 document.body.appendChild(btn);
 """
 
@@ -86,8 +91,9 @@ js = """\
     const items = new cf.ListStore([]);
 
     const root = cf.nu("#app", {
-        innerHTML: '<h1>Todo App</h1>',
-        style: { fontFamily: 'sans-serif' }
+        contents: '<h1>Todo App</h1>',
+        style: { fontFamily: 'sans-serif' },
+        raw: true
     })
 
     document.body.appendChild(root);
@@ -106,7 +112,7 @@ js = """\
                 if (value) items.push({ done: false, name: value })
             }
         },
-        innerHTML: 'Add'
+        contents: 'Add'
     });
 
     const list = cf.nu("ul#items", {
@@ -121,7 +127,7 @@ js = """\
 
     function createTodo(val, idx) {
         const elt = cf.nu("li.todo-item", {
-            innerHTML: val.name,
+            contents: val.name,
             style: { cursor: 'pointer' },
             on: { 'click': function(e) {
                 if (e.target !== this) return;
@@ -136,7 +142,7 @@ js = """\
         })
 
         elt.appendChild(cf.nu("button", {
-            innerHTML: 'remove',
+            contents: 'remove',
             style: { marginLeft: '0.5rem' },
             on: { 'click': function(e) {
                 const idx = parseInt(this.parentNode.getAttribute('data-todo-idx'));

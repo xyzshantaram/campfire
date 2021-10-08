@@ -71,19 +71,16 @@ The API reference can be found
 // A button that keeps track of how many times it's been clicked
 let count = 0;
 const btn = cf.nu("button#id.class1.class2", {
-  innerHTML: "I have not been clicked.",
-  attrs: {
-    // DOM attributes
+  contents: "I have not been clicked.", // escaped by default
+  attrs: { // DOM attributes
     "data-an-attribute": 42,
   },
-  on: {
-    // event handlers, assigned using addEventListener
+  on: { // event handlers, assigned using addEventListener
     "click": function (e) {
       this.innerHTML = `I have been clicked ${++count} times.`;
     },
   },
-  style: {
-    // Uses property names as specified in CSSStyleDeclaration.
+  style: { // Uses property names as specified in CSSStyleDeclaration.
     background: "#007cdf",
     borderRadius: "0.25em",
     margin: "0.5rem",
@@ -91,14 +88,15 @@ const btn = cf.nu("button#id.class1.class2", {
     transitionDuration: "0.2s",
     border: "2px solid black",
   }, // styles
-  misc: {
-    // miscellaneous properties
+  misc: { // miscellaneous properties
     type: "button",
   },
 });
 ```
 
 #### `mustache` - string templating with mustaches
+
+Just like nu's content argument, mustache escapes text by default.
 
 ```js
 const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "user" }); // "Welcome to Mars, user."
@@ -120,7 +118,8 @@ A function to perform basic escaping of HTML entities. `escape` will replace
 _**Note**_: No characters other than the ones mentioned above are escaped.
 `escape` is only provided for basic protection against XSS and if you need more
 robust functionality consider using another HTML escaper (such as
-[he](https://github.com/mathiasbynens/he)).
+[he](https://github.com/mathiasbynens/he) or
+[sanitize-html](https://github.com/apostrophecms/sanitize-html/)).
 
 #### `unescape` - character reference unescaper
 
@@ -170,7 +169,7 @@ homework.on("refresh", function () {
 homework.on("push", function (val) {
   if (homework.length === 1) list.innerHTML = "";
   list.appendChild(cf.nu("div", {
-    innerHTML: val.value,
+    contents: val.value,
     attrs: { "data-idx": homework.length - 1 },
     on: { click: (e) => homework.remove(getIdx(e.target)) },
     style: { cursor: "pointer" },

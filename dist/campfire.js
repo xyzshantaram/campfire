@@ -284,7 +284,8 @@ const template = (str) => {
  * No characters other than the ones mentioned above are escaped.
  * `escape` is only provided for basic protection against XSS and if you need more
  * robust functionality consider using another HTML escaper (such as
- * [he](https://github.com/mathiasbynens/he)).
+ * [he](https://github.com/mathiasbynens/he) or 
+ * [sanitize-html](https://github.com/apostrophecms/sanitize-html)).
  */
 const escape = (str) => {
     if (!str)

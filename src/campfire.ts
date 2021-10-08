@@ -309,7 +309,8 @@ const template = (str: string): Template => {
  * No characters other than the ones mentioned above are escaped.
  * `escape` is only provided for basic protection against XSS and if you need more
  * robust functionality consider using another HTML escaper (such as
- * [he](https://github.com/mathiasbynens/he)).
+ * [he](https://github.com/mathiasbynens/he) or 
+ * [sanitize-html](https://github.com/apostrophecms/sanitize-html)).
  */
 const escape = (str: string) => {
     if (!str) return '';
@@ -327,8 +328,6 @@ const escape = (str: string) => {
  * @param str A string to unescape.
  * @returns The string, with its character references replaced by the characters it references.
  * No characters other than the ones mentioned above are unescaped.
- * If you need more robust functionality consider using another HTML 
- * escaper (such as [he](https://github.com/mathiasbynens/he)).
  */
 const unescape = (str: string) => {
     if (!str) return '';
