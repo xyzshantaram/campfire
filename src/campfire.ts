@@ -392,9 +392,9 @@ const unescape = (str: string) => {
 }
 
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert
 }
 
 export {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert
 }

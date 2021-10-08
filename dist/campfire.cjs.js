@@ -13,6 +13,7 @@ __export(exports, {
   default: () => campfire_default,
   escape: () => escape,
   extend: () => extend,
+  insert: () => insert,
   mustache: () => mustache,
   nu: () => nu,
   template: () => template,
@@ -50,6 +51,25 @@ var nu = (eltInfo, args = {}) => {
     elem.id = id;
   (classes || []).forEach((cls) => elem.classList.add(cls));
   return extend(elem, args);
+};
+var insert = (elem, where) => {
+  const keys = Object.keys(where);
+  if (keys.length !== 1) {
+    throw new Error("Too many or too few positions specified.");
+  }
+  const ref = Object.values(where)[0];
+  let position = "afterend";
+  if (where.after) {
+    position = "afterend";
+  } else if (where.before) {
+    position = "beforebegin";
+  } else if (where.atStartOf) {
+    position = "afterbegin";
+  } else if (where.atEndOf) {
+    position = "beforeend";
+  }
+  ref.insertAdjacentElement(position, elem);
+  return elem;
 };
 var Store = class {
   constructor(value) {
@@ -179,5 +199,6 @@ var campfire_default = {
   template,
   escape,
   unescape,
-  extend
+  extend,
+  insert
 };

@@ -356,6 +356,6 @@ const unescape = (str) => {
     return str.replace(expr, (entity) => entities[entity] || '\'');
 };
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert
 };
-export { Store, ListStore, nu, mustache, template, escape, unescape, extend };
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert };

@@ -1,4 +1,4 @@
-import { ElementProperties, Subscriber, Template } from './types';
+import { ElementProperties, ElementPosition, Subscriber, Template } from './types';
 /**
  * Takes an existing element and modifies its properties.
  * Refer ElementProperties documentation for details on
@@ -18,6 +18,24 @@ declare const extend: (elem: HTMLElement, args?: ElementProperties) => HTMLEleme
  * @returns The newly created DOM element.
  */
 declare const nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
+/**
+ * Inserts an element into the DOM given a reference element and the relative position
+ * of the new element.
+ *
+ * * if `where` looks like `{ after: reference }`, the element is inserted into `reference`'s
+ * parent, after `reference`.
+ * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
+ * parent, before `reference`.
+ * * if `where` looks like `{ atStart: reference }`, the element is inserted into `reference`,
+ * before its first child.
+ * * if `where` looks like `{ atEnd: reference }`, the element is inserted into `reference`,
+ * after its last child.
+ * @param elem The element to insert.
+ * @param where An object specifying where to insert `elem` relative to another element.
+ * @throws an Error when there are either zero or more than one keys present in `where`.
+ * @returns void
+ */
+declare const insert: (elem: Element, where: ElementPosition) => Element;
 /**
  * A simple reactive store.
  * @class Store
@@ -185,6 +203,7 @@ declare const _default: {
     escape: (str: string) => string;
     unescape: (str: string) => string;
     extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;
+    insert: (elem: Element, where: ElementPosition) => Element;
 };
 export default _default;
-export { Store, ListStore, nu, mustache, template, escape, unescape, extend };
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert };
