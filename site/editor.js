@@ -12,14 +12,14 @@ const iframeContentTemplate = cf.template(`\
 <body>
     {{ html }}
     <script type='module'>
-        import cf from 'https://esm.sh/campfire.js';
+        import cf from 'https://esm.sh/campfire.js@2.2.0';
         window.onload = function() {
             {{ js }}
         }
     </script>
 </body>
 </html>\
-`);
+`, false);
 
 const editorReady = () => {
     const examples = document.querySelector('.cf-site-div[data-heading="playground"]');
@@ -59,7 +59,7 @@ const editorReady = () => {
         if (!current.elt) continue;
         switcher.appendChild(cf.nu('button', {
             m: { type: 'button' },
-            i: key,
+            c: key,
             a: {
                 'data-editor-view': key
             },
@@ -87,7 +87,7 @@ const editorReady = () => {
 
     switcher.appendChild(cf.nu('button', {
         m: { type: 'button' },
-        i: 'output',
+        c: 'output',
         a: {
             'data-editor-view': 'out'
         },
@@ -139,13 +139,14 @@ const editorReady = () => {
         for (let key of Object.keys(data)) {
             const itm = data[key];
             list.appendChild(cf.nu('li', {
-                i: `<a href='javascript:void(0)'>${itm.title}</a>`,
+                c: `<a href='javascript:void(0)'>${itm.title}</a>`,
                 on: {
                     'click': function(e) {
                         setActivePlaygroundDemo(itm);
                         currentEditorStore.update('out');
                     }
-                }
+                },
+                raw: true
             }));
         }
     }).catch(err => {

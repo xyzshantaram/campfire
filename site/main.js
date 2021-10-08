@@ -1,4 +1,4 @@
-import cf from 'https://esm.sh/campfire.js/';
+import cf from 'https://esm.sh/campfire.js@2.2.0/';
 import marked from 'https://esm.sh/marked/';
 import toml from 'https://esm.sh/toml';
 
@@ -60,14 +60,15 @@ window.addEventListener("DOMContentLoaded", async (e) => {
                 attrs: {
                     'data-heading': item.heading
                 },
-                innerHTML: item.innerHTML
+                contents: item.html,
+                raw: true
             }
         ), footer);
 
         nav.appendChild(cf.nu(
             "button", {
             m: { type: 'button' },
-            innerHTML: item.heading,
+            contents: item.heading,
             on: {
                 'click': function () {
                     document.querySelector('.active-tab')?.classList.remove('active-tab');
@@ -83,7 +84,7 @@ window.addEventListener("DOMContentLoaded", async (e) => {
 
         for (let key of Object.keys(data)) {
             siteData.push({
-                innerHTML: marked.parse(data[key].md),
+                html: marked.parse(data[key].md),
                 heading: key,
             })
         }
