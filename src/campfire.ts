@@ -1,4 +1,4 @@
-import { ElementProperties, TagStringParseResult, Subscriber, Template } from './types';
+import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template } from './types';
 
 /**
  * 
@@ -30,9 +30,9 @@ const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
     let { contents, c, misc, m, style, s, on, attrs, a, raw } = args;
 
     contents = contents || c || '';
-    contents = raw ? contents: escape(contents);
+    contents = raw ? contents : escape(contents);
     elem.innerHTML = contents;
-    
+
     Object.assign(elem, misc || m);
     Object.assign(elem.style, style || s);
 
@@ -49,7 +49,7 @@ const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
  * Each part (tag name, id, classes) is optional, and an infinite number of
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
  * `div`.
- * @param args - Optional extra properties for the created element.
+ * @param args Optional extra properties for the created element.
  * @returns The newly created DOM element.
  */
 const nu = (eltInfo: string, args: ElementProperties = {}) => {
@@ -62,6 +62,53 @@ const nu = (eltInfo: string, args: ElementProperties = {}) => {
     (classes || []).forEach((cls) => elem.classList.add(cls));
 
     return extend(elem, args);
+}
+
+/**
+ * Inserts an element into the DOM given a reference element and the relative position
+ * of the new element.
+ * 
+ * * if `where` looks like `{ after: reference }`, the element is inserted into `reference`'s
+ * parent, after `reference`.
+ * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
+ * parent, before `reference`.
+ * * if `where` looks like `{ atStart: reference }`, the element is inserted into `reference`,
+ * before its first child.
+ * * if `where` looks like `{ atEnd: reference }`, the element is inserted into `reference`,
+ * after its last child.
+ * @param elem The element to insert.
+ * @param where An object specifying where to insert `elem` relative to another element.
+ * @throws an Error when there are either zero or more than one keys present in `where`.
+ * @returns void
+ */
+const insert = (elem: Element, where: ElementPosition) => {
+    const keys = Object.keys(where);
+    if (keys.length !== 1) {
+        throw new Error("Too many or too few positions specified.");
+    }
+
+    const ref: HTMLElement = Object.values(where)[0];
+    let position: InsertPosition = 'afterend';
+    
+    if (where.after) {
+        position = 'afterend';
+    }
+
+    else if (where.before) {
+        position = 'beforebegin';
+    }
+
+    else if (where.atStartOf) {
+        position = 'afterbegin';
+    }
+
+    else if (where.atEndOf) {
+        position = 'beforeend';
+    }
+
+    ref.insertAdjacentElement(position, elem);
+
+    return elem;
 }
 
 /**
