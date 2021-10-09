@@ -118,7 +118,7 @@ const insert = (elem: Element, where: ElementPosition) => {
  */
 class Store {
     /**  The value of the store. */
-    value: unknown = null;
+    value: any = null;
     /** 
      * The subscribers currently registered to the store. 
      * @internal
@@ -139,7 +139,7 @@ class Store {
      * Creates an instance of Store.
      * @param value - The initial value of the store.
      */
-    constructor(value: unknown) {
+    constructor(value: any) {
         this.value = value;
     }
 
@@ -174,7 +174,7 @@ class Store {
      * Sets the value of the store to be `value`. All subscribers to the "update" event are called.
      * @param value The new value to store.
      */
-    update(value: unknown) {
+    update(value: any) {
         if (this._dead) return;
         this.value = value;
         this._sendEvent("update", value);
@@ -191,7 +191,7 @@ class Store {
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
     */
-    _sendEvent(type: string, value: unknown) {
+    _sendEvent(type: string, value: any) {
         if (this._dead) return;
         this._subscribers[type] = this._subscribers[type] || {};
         for (const idx in Object.keys(this._subscribers[type])) {
@@ -216,9 +216,9 @@ class Store {
     * setAt() sends a "mutation" event
 */
 class ListStore extends Store {
-    value: unknown[];
+    value: any[];
 
-    constructor(ls: unknown[]) {
+    constructor(ls: any[]) {
         super(ls);
     }
 
@@ -239,7 +239,7 @@ class ListStore extends Store {
      * * `idx`: the index of the new value.
      * @param val The value to append.
      */
-    push(val: unknown) {
+    push(val: any) {
         this.value.push(val);
         this._sendEvent("push", {
             value: val,
@@ -278,7 +278,7 @@ class ListStore extends Store {
      * @param idx The index to mutate.
      * @param val the new value at that index.
      */
-    setAt(idx: number, val: unknown) {
+    setAt(idx: number, val: any) {
         if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
         this.value[idx] = val;
         this._sendEvent("mutation", {

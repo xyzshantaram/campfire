@@ -1,11 +1,11 @@
 /** A signature for a subscriber type. */
-export type Subscriber = (value: unknown) => void;
+export type Subscriber = (value: any) => void;
 
 /** A generic signature for an event handler type. */
 export type EventHandler = (e: Event) => unknown;
 
 /** The function signature for a function returned by `template()`. */
-export type Template = (e: Record<string, unknown>) => string;
+export type Template = (e: Record<string, any>) => string;
 
 /**
  * Properties for the HTML element to be created.
