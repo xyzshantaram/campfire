@@ -43,7 +43,7 @@ declare const insert: (elem: Element, where: ElementPosition) => Element;
  */
 declare class Store {
     /**  The value of the store. */
-    value: unknown;
+    value: any;
     /**
      * The subscribers currently registered to the store.
      * @internal
@@ -63,7 +63,7 @@ declare class Store {
      * Creates an instance of Store.
      * @param value - The initial value of the store.
      */
-    constructor(value: unknown);
+    constructor(value: any);
     /**
      *
      * @param type The type of event to listen for.
@@ -83,7 +83,7 @@ declare class Store {
      * Sets the value of the store to be `value`. All subscribers to the "update" event are called.
      * @param value The new value to store.
      */
-    update(value: unknown): void;
+    update(value: any): void;
     /**
      * Forces all subscribers to the "update" event to be called.
      * @param value The new value to store.
@@ -93,7 +93,7 @@ declare class Store {
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
     */
-    _sendEvent(type: string, value: unknown): void;
+    _sendEvent(type: string, value: any): void;
     /**
      * Close the store so it no longer sends events.
      */
@@ -107,8 +107,8 @@ declare class Store {
     * setAt() sends a "mutation" event
 */
 declare class ListStore extends Store {
-    value: unknown[];
-    constructor(ls: unknown[]);
+    value: any[];
+    constructor(ls: any[]);
     /**
      * Empties out the list store.
      *
@@ -123,7 +123,7 @@ declare class ListStore extends Store {
      * * `idx`: the index of the new value.
      * @param val The value to append.
      */
-    push(val: unknown): void;
+    push(val: any): void;
     /**
      * Remove the element at the index `idx`. This method sends a "remove" event,
      * with the value being an object with the properties:
@@ -144,7 +144,7 @@ declare class ListStore extends Store {
      * @param idx The index to mutate.
      * @param val the new value at that index.
      */
-    setAt(idx: number, val: unknown): void;
+    setAt(idx: number, val: any): void;
     /**
      * Utility accessor to find the length of the store.
      */
