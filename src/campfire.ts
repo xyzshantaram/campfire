@@ -79,7 +79,7 @@ const nu = (eltInfo: string, args: ElementProperties = {}) => {
  * @param elem The element to insert.
  * @param where An object specifying where to insert `elem` relative to another element.
  * @throws an Error when there are either zero or more than one keys present in `where`.
- * @returns void
+ * @returns the element that was inserted, so you can do `const a = insert(nu(), _)`.
  */
 const insert = (elem: Element, where: ElementPosition) => {
     const keys = Object.keys(where);

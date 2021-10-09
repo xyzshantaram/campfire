@@ -33,7 +33,7 @@ declare const nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
  * @param elem The element to insert.
  * @param where An object specifying where to insert `elem` relative to another element.
  * @throws an Error when there are either zero or more than one keys present in `where`.
- * @returns void
+ * @returns the element that was inserted, so you can do `const a = insert(nu(), _)`.
  */
 declare const insert: (elem: Element, where: ElementPosition) => Element;
 /**
