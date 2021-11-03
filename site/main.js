@@ -1,5 +1,5 @@
 import cf from 'https://esm.sh/campfire.js@2.2.0/';
-import marked from 'https://esm.sh/marked/';
+import { marked } from 'https://esm.sh/marked';
 import toml from 'https://esm.sh/toml';
 
 window.cf = cf;
