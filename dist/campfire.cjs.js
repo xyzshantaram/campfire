@@ -170,7 +170,7 @@ var mustache = (string, data = {}, shouldEscape = true) => {
   }
   return _mustache(string, escaped);
 };
-var template = (str, shouldEscape) => {
+var template = (str, shouldEscape = true) => {
   return (data) => mustache(str, data, shouldEscape);
 };
 var escape = (str) => {

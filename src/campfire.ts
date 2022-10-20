@@ -89,7 +89,7 @@ const insert = (elem: Element, where: ElementPosition) => {
 
     const ref: HTMLElement = Object.values(where)[0];
     let position: InsertPosition = 'afterend';
-    
+
     if (where.after) {
         position = 'afterend';
     }
@@ -344,7 +344,7 @@ const mustache = (string: string, data: Record<string, string> = {}, shouldEscap
  * returns the result of the templating operation performed on the string str with
  * the data passed in.
  */
-const template = (str: string, shouldEscape: true): Template => {
+const template = (str: string, shouldEscape = true): Template => {
     return (data: Record<string, string>) => mustache(str, data, shouldEscape);
 }
 

@@ -1,25 +1,25 @@
 :root {
-    --light-hl-0: #24292EFF;
+    --light-hl-0: #000000;
     --dark-hl-0: #A6ACCD;
-    --light-hl-1: #D32F2F;
+    --light-hl-1: #AF00DB;
     --dark-hl-1: #89DDFF;
-    --light-hl-2: #22863A;
-    --dark-hl-2: #89DDFF;
-    --light-hl-3: #22863A;
-    --dark-hl-3: #C3E88D;
-    --light-hl-4: #24292EFF;
-    --dark-hl-4: #89DDFF;
-    --light-hl-5: #D32F2F;
-    --dark-hl-5: #C792EA;
-    --light-hl-6: #1976D2;
-    --dark-hl-6: #A6ACCD;
-    --light-hl-7: #6F42C1;
-    --dark-hl-7: #82AAFF;
-    --light-hl-8: #212121;
-    --dark-hl-8: #89DDFF;
-    --light-hl-9: #24292EFF;
+    --light-hl-2: #001080;
+    --dark-hl-2: #A6ACCD;
+    --light-hl-3: #A31515;
+    --dark-hl-3: #89DDFF;
+    --light-hl-4: #A31515;
+    --dark-hl-4: #C3E88D;
+    --light-hl-5: #000000;
+    --dark-hl-5: #89DDFF;
+    --light-hl-6: #0000FF;
+    --dark-hl-6: #C792EA;
+    --light-hl-7: #0070C1;
+    --dark-hl-7: #A6ACCD;
+    --light-hl-8: #795E26;
+    --dark-hl-8: #82AAFF;
+    --light-hl-9: #000000;
     --dark-hl-9: #F07178;
-    --light-code-background: #ffffff;
+    --light-code-background: #F5F5F5;
     --dark-code-background: #292D3E;
 }
 

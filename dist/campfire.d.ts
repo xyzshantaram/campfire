@@ -173,7 +173,7 @@ declare const mustache: (string: string, data?: Record<string, string>, shouldEs
  * returns the result of the templating operation performed on the string str with
  * the data passed in.
  */
-declare const template: (str: string, shouldEscape: true) => Template;
+declare const template: (str: string, shouldEscape?: boolean) => Template;
 /**
  * a simple HTML sanitizer. Escapes `&`, `<`, `>`, `'`, and `"` by
  * replacing them with their corresponding HTML escapes
@@ -200,7 +200,7 @@ declare const _default: {
     ListStore: typeof ListStore;
     nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
     mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
-    template: (str: string, shouldEscape: true) => Template;
+    template: (str: string, shouldEscape?: boolean) => Template;
     escape: (str: string) => string;
     unescape: (str: string) => string;
     extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;

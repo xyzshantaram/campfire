@@ -312,7 +312,7 @@ const mustache = (string, data = {}, shouldEscape = true) => {
  * returns the result of the templating operation performed on the string str with
  * the data passed in.
  */
-const template = (str, shouldEscape) => {
+const template = (str, shouldEscape = true) => {
     return (data) => mustache(str, data, shouldEscape);
 };
 /**
