@@ -392,10 +392,48 @@ const unescape = (str: string) => {
     return str.replace(expr, (entity) => entities[entity] || '\'');
 }
 
+/**
+ * Fires a callback when the DOMContentLoaded event fires.
+ * @param cb The callback to run.
+ * @returns void
+ */
+const onload = (cb: (ev: Event) => void) => globalThis.addEventListener('DOMContentLoaded', cb);
+
+/**
+ * Queries the DOM for a particular selector, and returns the first element matching it.
+ * @param selector The selector to query.
+ * @returns The first element matching the given selector, or null.
+ */
+const select = (selector: string) => document.querySelector(selector);
+
+/**
+ * Queries the DOM for a particular selector, and returns all elements that match it.
+ * @param selector The selector to query.
+ * @returns An array of elements matching the given selector.
+ */
+const selectAll = (selector: string) => Array.from(document.querySelectorAll(selector));
+
+/**
+ * Removes `elt` from the DOM.
+ * @param elt The element to remove.
+ * @returns void
+ */
+const rm = (elt: Element) => elt.remove();
+
+/**
+ * Empties a DOM element of its content.
+ * @param elt The element to empty.
+ */
+const empty = (elt: Element) => {
+    while (elt.lastChild) {
+        elt.removeChild(elt.lastChild);
+    }
+};
+
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload
 }
 
 export {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload
 }

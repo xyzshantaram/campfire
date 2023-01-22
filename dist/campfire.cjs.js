@@ -11,11 +11,16 @@ __export(exports, {
   ListStore: () => ListStore,
   Store: () => Store,
   default: () => campfire_default,
+  empty: () => empty,
   escape: () => escape,
   extend: () => extend,
   insert: () => insert,
   mustache: () => mustache,
   nu: () => nu,
+  onload: () => onload,
+  rm: () => rm,
+  select: () => select,
+  selectAll: () => selectAll,
   template: () => template,
   unescape: () => unescape
 });
@@ -191,6 +196,15 @@ var unescape = (str) => {
   };
   return str.replace(expr, (entity) => entities[entity] || "'");
 };
+var onload = (cb) => globalThis.addEventListener("DOMContentLoaded", cb);
+var select = (selector) => document.querySelector(selector);
+var selectAll = (selector) => Array.from(document.querySelectorAll(selector));
+var rm = (elt) => elt.remove();
+var empty = (elt) => {
+  while (elt.lastChild) {
+    elt.removeChild(elt.lastChild);
+  }
+};
 var campfire_default = {
   Store,
   ListStore,
@@ -200,5 +214,10 @@ var campfire_default = {
   escape,
   unescape,
   extend,
-  insert
+  insert,
+  empty,
+  rm,
+  selectAll,
+  select,
+  onload
 };

@@ -195,6 +195,35 @@ declare const escape: (str: string) => string;
  * No characters other than the ones mentioned above are unescaped.
  */
 declare const unescape: (str: string) => string;
+/**
+ * Fires a callback when the DOMContentLoaded event fires.
+ * @param cb The callback to run.
+ * @returns void
+ */
+declare const onload: (cb: (ev: Event) => void) => void;
+/**
+ * Queries the DOM for a particular selector, and returns the first element matching it.
+ * @param selector The selector to query.
+ * @returns The first element matching the given selector, or null.
+ */
+declare const select: (selector: string) => Element | null;
+/**
+ * Queries the DOM for a particular selector, and returns all elements that match it.
+ * @param selector The selector to query.
+ * @returns An array of elements matching the given selector.
+ */
+declare const selectAll: (selector: string) => Element[];
+/**
+ * Removes `elt` from the DOM.
+ * @param elt The element to remove.
+ * @returns void
+ */
+declare const rm: (elt: Element) => void;
+/**
+ * Empties a DOM element of its content.
+ * @param elt The element to empty.
+ */
+declare const empty: (elt: Element) => void;
 declare const _default: {
     Store: typeof Store;
     ListStore: typeof ListStore;
@@ -205,6 +234,11 @@ declare const _default: {
     unescape: (str: string) => string;
     extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;
     insert: (elem: Element, where: ElementPosition) => Element;
+    empty: (elt: Element) => void;
+    rm: (elt: Element) => void;
+    selectAll: (selector: string) => Element[];
+    select: (selector: string) => Element | null;
+    onload: (cb: (ev: Event) => void) => void;
 };
 export default _default;
-export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert };
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload };
