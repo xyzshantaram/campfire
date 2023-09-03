@@ -172,8 +172,8 @@ var unescape = (str) => {
   return str.replace(expr, (entity) => entities[entity] || "'");
 };
 var onload = (cb) => globalThis.addEventListener("DOMContentLoaded", cb);
-var select = (selector) => document.querySelector(selector);
-var selectAll = (selector) => Array.from(document.querySelectorAll(selector));
+var select = (selector, from = document) => from.querySelector(selector);
+var selectAll = (selector, from = document) => Array.from(from.querySelectorAll(selector));
 var rm = (elt) => elt.remove();
 var empty = (elt) => {
   while (elt.lastChild) {

@@ -365,15 +365,17 @@ const onload = (cb) => globalThis.addEventListener('DOMContentLoaded', cb);
 /**
  * Queries the DOM for a particular selector, and returns the first element matching it.
  * @param selector The selector to query.
+ * @param from The node to query.
  * @returns The first element matching the given selector, or null.
  */
-const select = (selector) => document.querySelector(selector);
+const select = (selector, from = document) => from.querySelector(selector);
 /**
  * Queries the DOM for a particular selector, and returns all elements that match it.
  * @param selector The selector to query.
+ * @param from The node to query.
  * @returns An array of elements matching the given selector.
  */
-const selectAll = (selector) => Array.from(document.querySelectorAll(selector));
+const selectAll = (selector, from = document) => Array.from(from.querySelectorAll(selector));
 /**
  * Removes `elt` from the DOM.
  * @param elt The element to remove.

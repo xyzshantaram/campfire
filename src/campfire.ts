@@ -402,16 +402,18 @@ const onload = (cb: (ev: Event) => void) => globalThis.addEventListener('DOMCont
 /**
  * Queries the DOM for a particular selector, and returns the first element matching it.
  * @param selector The selector to query.
+ * @param from The node to query.
  * @returns The first element matching the given selector, or null.
  */
-const select = (selector: string) => document.querySelector(selector);
+const select = (selector: string, from = document) => from.querySelector(selector);
 
 /**
  * Queries the DOM for a particular selector, and returns all elements that match it.
  * @param selector The selector to query.
+ * @param from The node to query.
  * @returns An array of elements matching the given selector.
  */
-const selectAll = (selector: string) => Array.from(document.querySelectorAll(selector));
+const selectAll = (selector: string, from = document) => Array.from(from.querySelectorAll(selector));
 
 /**
  * Removes `elt` from the DOM.
