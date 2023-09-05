@@ -1,4 +1,4 @@
-import cf from 'https://esm.sh/campfire.js/';
+import cf from 'https://esm.sh/campfire.js@2.2.0';
 import toml from 'https://esm.sh/toml';
 
 const iframeContentTemplate = cf.template(`\
@@ -141,7 +141,7 @@ const editorReady = () => {
             list.appendChild(cf.nu('li', {
                 c: `<a href='javascript:void(0)'>${itm.title}</a>`,
                 on: {
-                    'click': function(e) {
+                    'click': function (e) {
                         setActivePlaygroundDemo(itm);
                         currentEditorStore.update('out');
                     }
