@@ -2,7 +2,28 @@ import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, T
 
 /**
  * 
- * @param str A string to parse.
+ * @param strings The constant portions of the template string.
+ * @param values The templated values.
+ * @returns The built HTML.
+ * @example
+ * ```
+ * const unsafe = `oops <script>alert(1)</script>`;
+ * testing.innerHTML = html`foo bar baz ${unsafe}`;
+ * console.assert(testing === "foo bar baz oops%20%3Cscript%3Ealert%281%29%3C/script%3E");
+ * ```
+ */
+const html = (strings: string[], ...values: string[]) => {
+    const built = [];
+    for (let i = 0; i < strings.length; i++) {
+        built.push(strings[i] || '');
+        built.push(escape(values[i] || ''));
+    }
+    return built.join('');
+}
+
+/**
+ * 
+ * @param str A string to parse, of the form tag#id.classes[.classes].
  * @returns A `TagStringParseResult` object containing the parsed information.
  * @internal
  */
@@ -27,19 +48,27 @@ const _parseEltString = (str: string | undefined): TagStringParseResult => {
  * @param args Properties to set on the element.
  */
 const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
-    let { contents, c, misc, m, style, s, on, attrs, a, raw } = args;
+    let { contents, c, misc, m, style, s, on, attrs, a, raw, g, gimme } = args;
 
+    let result: (HTMLElement | null)[] = [elem];
     contents = contents || c || '';
     contents = raw ? contents : escape(contents);
-    elem.innerHTML = contents;
+    if (contents) elem.innerHTML = contents;
 
     Object.assign(elem, misc || m);
     Object.assign(elem.style, style || s);
 
+    const toGet = gimme || g || [];
+    if (toGet && toGet.length) {
+        for (const selector of toGet) {
+            result.push(elem.querySelector(selector));
+        }
+    }
+
     Object.entries(on || {}).forEach(([evt, listener]) => elem.addEventListener(evt, listener));
     Object.entries(attrs || a || {}).forEach(([attr, value]) => elem.setAttribute(attr, value));
 
-    return elem;
+    return result;
 }
 
 /**
@@ -50,10 +79,31 @@ const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
  * `div`.
  * @param args Optional extra properties for the created element.
- * @returns The newly created DOM element.
+ * @returns The newly created DOM element and any other elements requested in the
+ * `gimme` parameter specified in args.
+ * @example
+ * ```
+ * cf.nu(`elt#id.class1`, {
+ *  raw: true,
+ *  c: html`<span class=some-span>foo bar</span>`,
+ *  gimme: ['.some-span']
+ * }) // Output: [<elt#id.class1>, <the span some-span>]
+ * ```
+ * @example
+ * ```
+ * cf.nu(`span.some-span`, {
+ *  // properties...
+ *  // no gimme specified
+ * }) // Output is still a list [<span.some-span>]
+ * ```
  */
 const nu = (eltInfo: string, args: ElementProperties = {}) => {
     let { tag, id, classes } = _parseEltString(eltInfo);
+
+    if (classes?.some(itm => itm.includes("#"))) {
+        throw new Error("Error: Found # in a class name. " +
+            "Did you mean to do elt#id.classes instead of elt.classes#id?");
+    }
 
     if (!tag) tag = 'div';
     let elem = document.createElement(tag);
@@ -427,15 +477,13 @@ const rm = (elt: Element) => elt.remove();
  * @param elt The element to empty.
  */
 const empty = (elt: Element) => {
-    while (elt.lastChild) {
-        elt.removeChild(elt.lastChild);
-    }
+    elt.innerHTML = '';
 };
 
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html
 }
 
 export {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html
 }

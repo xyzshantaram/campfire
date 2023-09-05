@@ -28,17 +28,21 @@ export interface ElementProperties {
     /** Alias for `ElementProperties.misc`. */
     m?: Record<string, unknown>;
     /** Contains styles that will be applied to the new element. Property names must be the same as those in `CSSStyleDeclaration`. */
-    style?: Record<string, unknown>;
+    style?: Record<keyof CSSStyleDeclaration, unknown>;
     /** Alias for `ElementProperties.style`. */
     s?: Record<string, unknown>;
     /** An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
     on?: Record<string, EventHandler>;
-    /** Attributes that will be set on the newly created element using `Element.setAttribute`. */
+    /** Attributes that will be set on the element using `Element.setAttribute`. */
     attrs?: Record<string, string>;
     /** Alias for `ElementProperties.attrs`. */
     a?: Record<string, string>;
+    /** A list of elements to query from the element. Will be returned as subsequent members of the returned Array after the element itself. */
+    gimme?: string[];
+    /** Alias for `ElementProperties.gimme` */
+    g?: string[];
 }
 /**
  * An interface to store data parsed from an element descriptor string passed to `nu`.

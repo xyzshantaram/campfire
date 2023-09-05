@@ -4,19 +4,19 @@
 
 const { describe, test, expect } = require("@jest/globals");
 // @ts-ignore
-const { escape, unescape, mustache, template, nu, extend } = require('../dist/testing/campfire.cjs');
+const { escape, unescape, mustache, template, nu, extend, html } = require('../dist/testing/campfire.cjs');
 
 describe('Tests for nu', () => {
     test('should create a div when no args are passed', () => {
-        expect(nu().tagName).toBe('DIV');
+        expect(nu()[0].tagName).toBe('DIV');
     })
 
     test('the new div must be empty', () => {
-        expect(nu()).toBeEmptyDOMElement();
+        expect(nu()[0]).toBeEmptyDOMElement();
     })
 
     test('should parse element string correctly', () => {
-        const elt = nu('button#click-me.btn.cls');
+        const [elt] = nu('button#click-me.btn.cls');
         expect(elt).toHaveClass('btn', 'cls');
         expect(elt.id).toBe('click-me');
         expect(elt.tagName).toBe('BUTTON');
@@ -25,7 +25,7 @@ describe('Tests for nu', () => {
 
 describe('Tests for extend', () => {
     test('should work properly with nu', () => {
-        const elt = nu('#id', { style: { textAlign: 'center' }, attrs: { 'data-an-attribute': 32 } });
+        const [elt] = nu('#id', { style: { textAlign: 'center' }, attrs: { 'data-an-attribute': 32 } });
         expect(elt.id).toBe('id');
         expect(elt.tagName).toBe('DIV');
         expect(elt).toHaveAttribute('style', 'text-align: center;');
@@ -33,21 +33,35 @@ describe('Tests for extend', () => {
     })
 
     test('should add styles', () => {
-        const elt = nu();
+        const [elt] = nu();
         extend(elt, { style: { margin: 0 } });
         expect(elt).toHaveAttribute('style', 'margin: 0px;');
     })
 
     test('should escape and set contents', () => {
-        const elt = nu();
+        const [elt] = nu();
         extend(elt, { contents: "<b> bold </b>" });
         expect(elt.innerHTML).toBe('&lt;b&gt; bold &lt;/b&gt;');
     })
 
     test('should not escape contents with raw flag', () => {
-        const elt = nu();
+        const [elt] = nu();
         extend(elt, { contents: "<b> bold </b>", raw: true });
         expect(elt.innerHTML).toBe('<b> bold </b>');
+    })
+
+    test('should return elements passed in gimme param', () => {
+        const [elt, span] = nu(`div#container`, {
+            raw: true,
+            contents: html`
+            <span class=some-span>42</span>
+            `,
+            gimme: ['span.some-span']
+        });
+        expect(elt.id).toBe('container');
+        expect(span.tagName).toBe('SPAN');
+        expect(span).toHaveClass('some-span');
+        expect(span.innerHTML).toBe('42');
     })
 })
 

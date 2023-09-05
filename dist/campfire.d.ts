@@ -1,12 +1,25 @@
 import { ElementProperties, ElementPosition, Subscriber, Template } from './types';
 /**
+ *
+ * @param strings The constant portions of the template string.
+ * @param values The templated values.
+ * @returns The built HTML.
+ * @example
+ * ```
+ * const unsafe = `oops <script>alert(1)</script>`;
+ * testing.innerHTML = html`foo bar baz ${unsafe}`;
+ * console.assert(testing === "foo bar baz oops%20%3Cscript%3Ealert%281%29%3C/script%3E");
+ * ```
+ */
+declare const html: (strings: string[], ...values: string[]) => string;
+/**
  * Takes an existing element and modifies its properties.
  * Refer ElementProperties documentation for details on
  * what can be changed.
  * @param elem The element to modify.
  * @param args Properties to set on the element.
  */
-declare const extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;
+declare const extend: (elem: HTMLElement, args?: ElementProperties) => (HTMLElement | null)[];
 /**
  * An element creation helper.
  * @param eltInfo Basic information about the element.
@@ -15,9 +28,25 @@ declare const extend: (elem: HTMLElement, args?: ElementProperties) => HTMLEleme
  * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
  * `div`.
  * @param args Optional extra properties for the created element.
- * @returns The newly created DOM element.
+ * @returns The newly created DOM element and any other elements requested in the
+ * `gimme` parameter specified in args.
+ * @example
+ * ```
+ * cf.nu(`elt#id.class1`, {
+ *  raw: true,
+ *  c: html`<span class=some-span>foo bar</span>`,
+ *  gimme: ['.some-span']
+ * }) // Output: [<elt#id.class1>, <the span some-span>]
+ * ```
+ * @example
+ * ```
+ * cf.nu(`span.some-span`, {
+ *  // properties...
+ *  // no gimme specified
+ * }) // Output is still a list [<span.some-span>]
+ * ```
  */
-declare const nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
+declare const nu: (eltInfo: string, args?: ElementProperties) => (HTMLElement | null)[];
 /**
  * Inserts an element into the DOM given a reference element and the relative position
  * of the new element.
@@ -229,18 +258,19 @@ declare const empty: (elt: Element) => void;
 declare const _default: {
     Store: typeof Store;
     ListStore: typeof ListStore;
-    nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
+    nu: (eltInfo: string, args?: ElementProperties) => (HTMLElement | null)[];
     mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
     template: (str: string, shouldEscape?: boolean) => Template;
     escape: (str: string) => string;
     unescape: (str: string) => string;
-    extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement;
+    extend: (elem: HTMLElement, args?: ElementProperties) => (HTMLElement | null)[];
     insert: (elem: Element, where: ElementPosition) => Element;
     empty: (elt: Element) => void;
     rm: (elt: Element) => void;
     selectAll: (selector: string, from?: Document) => Element[];
     select: (selector: string, from?: Document) => Element | null;
     onload: (cb: (ev: Event) => void) => void;
+    html: (strings: string[], ...values: string[]) => string;
 };
 export default _default;
-export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload };
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html };

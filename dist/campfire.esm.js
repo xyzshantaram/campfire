@@ -1,4 +1,12 @@
 // dist/testing/campfire.js
+var html = (strings, ...values) => {
+  const built = [];
+  for (let i = 0; i < strings.length; i++) {
+    built.push(strings[i] || "");
+    built.push(escape(values[i] || ""));
+  }
+  return built.join("");
+};
 var _parseEltString = (str) => {
   var _a;
   const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/) : void 0;
@@ -12,18 +20,29 @@ var _parseEltString = (str) => {
   } : {};
 };
 var extend = (elem, args = {}) => {
-  let { contents, c, misc, m, style, s, on, attrs, a, raw } = args;
+  let { contents, c, misc, m, style, s, on, attrs, a, raw, g, gimme } = args;
+  let result = [elem];
   contents = contents || c || "";
   contents = raw ? contents : escape(contents);
-  elem.innerHTML = contents;
+  if (contents)
+    elem.innerHTML = contents;
   Object.assign(elem, misc || m);
   Object.assign(elem.style, style || s);
+  const toGet = gimme || g || [];
+  if (toGet && toGet.length) {
+    for (const selector of toGet) {
+      result.push(elem.querySelector(selector));
+    }
+  }
   Object.entries(on || {}).forEach(([evt, listener]) => elem.addEventListener(evt, listener));
   Object.entries(attrs || a || {}).forEach(([attr, value]) => elem.setAttribute(attr, value));
-  return elem;
+  return result;
 };
 var nu = (eltInfo, args = {}) => {
   let { tag, id, classes } = _parseEltString(eltInfo);
+  if (classes === null || classes === void 0 ? void 0 : classes.some((itm) => itm.includes("#"))) {
+    throw new Error("Error: Found # in a class name. Did you mean to do elt#id.classes instead of elt.classes#id?");
+  }
   if (!tag)
     tag = "div";
   let elem = document.createElement(tag);
@@ -176,9 +195,7 @@ var select = (selector, from = document) => from.querySelector(selector);
 var selectAll = (selector, from = document) => Array.from(from.querySelectorAll(selector));
 var rm = (elt) => elt.remove();
 var empty = (elt) => {
-  while (elt.lastChild) {
-    elt.removeChild(elt.lastChild);
-  }
+  elt.innerHTML = "";
 };
 var campfire_default = {
   Store,
@@ -194,7 +211,8 @@ var campfire_default = {
   rm,
   selectAll,
   select,
-  onload
+  onload,
+  html
 };
 export {
   ListStore,
@@ -203,6 +221,7 @@ export {
   empty,
   escape,
   extend,
+  html,
   insert,
   mustache,
   nu,
