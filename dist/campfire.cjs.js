@@ -68,9 +68,9 @@ var insert = (elem, where) => {
     position = "afterend";
   } else if (where.before) {
     position = "beforebegin";
-  } else if (where.atStartOf) {
+  } else if (where.prependTo) {
     position = "afterbegin";
-  } else if (where.atEndOf) {
+  } else if (where.appendTo) {
     position = "beforeend";
   }
   ref.insertAdjacentElement(position, elem);

@@ -19,7 +19,7 @@ export interface ElementProperties {
     contents?: string,
     /** Alias for `contents` */
     c?: string,
-    
+
     /**
      * Whether or not to escape the `contents` string. If `raw` is true, the
      * string is not escaped.
@@ -37,7 +37,7 @@ export interface ElementProperties {
     style?: Record<string, unknown>,
     /** Alias for `ElementProperties.style`. */
     s?: Record<string, unknown>,
-    
+
     /** An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
@@ -66,6 +66,6 @@ export interface TagStringParseResult {
 export interface ElementPosition {
     before?: HTMLElement;
     after?: HTMLElement;
-    atStartOf?: HTMLElement;
-    atEndOf?: HTMLElement;
+    prependTo?: HTMLElement;
+    appendTo?: HTMLElement;
 }

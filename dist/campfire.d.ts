@@ -26,9 +26,9 @@ declare const nu: (eltInfo: string, args?: ElementProperties) => HTMLElement;
  * parent, after `reference`.
  * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
  * parent, before `reference`.
- * * if `where` looks like `{ atStartOf: reference }`, the element is inserted into `reference`,
+ * * if `where` looks like `{ prependTo: reference }`, the element is inserted into `reference`,
  * before its first child.
- * * if `where` looks like `{ atEndOf: reference }`, the element is inserted into `reference`,
+ * * if `where` looks like `{ appendTo: reference }`, the element is inserted into `reference`,
  * after its last child.
  * @param elem The element to insert.
  * @param where An object specifying where to insert `elem` relative to another element.

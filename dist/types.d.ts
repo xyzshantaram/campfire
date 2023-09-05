@@ -55,6 +55,6 @@ export interface TagStringParseResult {
 export interface ElementPosition {
     before?: HTMLElement;
     after?: HTMLElement;
-    atStartOf?: HTMLElement;
-    atEndOf?: HTMLElement;
+    prependTo?: HTMLElement;
+    appendTo?: HTMLElement;
 }
