@@ -29,7 +29,8 @@ var html = (strings, ...values) => {
   const built = [];
   for (let i = 0; i < strings.length; i++) {
     built.push(strings[i] || "");
-    built.push(escape(values[i] || ""));
+    const value = (values[i] || "").toString();
+    built.push(escape(value));
   }
   return built.join("");
 };
