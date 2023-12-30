@@ -1,5 +1,22 @@
 import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template } from './types';
 
+interface RawHtml {
+    raw: true,
+    contents: string
+}
+
+/**
+ * Prevent values from being escaped by html``.
+ * @param val Any value.
+ * @returns An object that tells html`` to not escape `val` while building the HTML string.
+ */
+const r = (val: any): RawHtml => {
+    return {
+        raw: true,
+        contents: val.toString()
+    }
+}
+
 /**
  * 
  * @param strings The constant portions of the template string.
@@ -12,12 +29,17 @@ import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, T
  * console.assert(testing === "foo bar baz oops%20%3Cscript%3Ealert%281%29%3C/script%3E");
  * ```
  */
-const html = (strings: string[], ...values: string[]) => {
+const html = (strings: TemplateStringsArray, ...values: (string | number | RawHtml)[]) => {
     const built = [];
     for (let i = 0; i < strings.length; i++) {
         built.push(strings[i] || '');
-        const value = (values[i] || '').toString();
-        built.push(escape(value));
+        let val = values[i];
+        if (typeof val !== 'undefined' && typeof val !== 'object') {
+            built.push(escape((val || '').toString()));
+        }
+        else {
+            built.push(val?.contents || '');
+        }
     }
     return built.join('');
 }
@@ -167,9 +189,9 @@ const insert = (elem: Element, where: ElementPosition) => {
  * @class Store
  * @public
  */
-class Store {
+class Store<T> {
     /**  The value of the store. */
-    value: any = null;
+    value: T;
     /** 
      * The subscribers currently registered to the store. 
      * @internal
@@ -190,12 +212,12 @@ class Store {
      * Creates an instance of Store.
      * @param value - The initial value of the store.
      */
-    constructor(value: any) {
+    constructor(value: T) {
         this.value = value;
     }
 
     /**
-     * 
+     * Add an event listener to the store.
      * @param type The type of event to listen for.
      * @param fn A function that will be called every time the store experiences an event of type `type`.
      * @param callNow Whether the function should be called once with the current value of the store.
@@ -225,7 +247,7 @@ class Store {
      * Sets the value of the store to be `value`. All subscribers to the "update" event are called.
      * @param value The new value to store.
      */
-    update(value: any) {
+    update(value: T) {
         if (this._dead) return;
         this.value = value;
         this._sendEvent("update", value);
@@ -242,7 +264,7 @@ class Store {
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
     */
-    _sendEvent(type: string, value: any) {
+    _sendEvent(type: string, value: T) {
         if (this._dead) return;
         this._subscribers[type] = this._subscribers[type] || {};
         for (const idx in Object.keys(this._subscribers[type])) {
@@ -266,10 +288,10 @@ class Store {
     * remove() sends a "remove" event
     * setAt() sends a "mutation" event
 */
-class ListStore extends Store {
-    value: any[];
+class ListStore<T> extends Store<any> {
+    value: T[];
 
-    constructor(ls: any[]) {
+    constructor(ls: T[]) {
         super(ls);
     }
 
@@ -290,7 +312,7 @@ class ListStore extends Store {
      * * `idx`: the index of the new value.
      * @param val The value to append.
      */
-    push(val: any) {
+    push(val: T) {
         this.value.push(val);
         this._sendEvent("push", {
             value: val,
@@ -329,7 +351,7 @@ class ListStore extends Store {
      * @param idx The index to mutate.
      * @param val the new value at that index.
      */
-    setAt(idx: number, val: any) {
+    setAt(idx: number, val: T) {
         if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
         this.value[idx] = val;
         this._sendEvent("mutation", {
@@ -343,6 +365,90 @@ class ListStore extends Store {
      */
     get length() {
         return this.value.length;
+    }
+}
+
+/**
+ * A reactive map store. [UNSTABLE: DO NOT USE!]
+ * Implements set(key, value), remove(key), clear(), transform(key, fn), and get(key).
+ * set() sends a "set" event, remove() sends a "remove" event, clear() sends a "clear" event,
+ * and transform() sends a "mutation" event.
+ */
+class MapStore<T> extends Store<any> {
+    value: Map<string, T>;
+
+    /**
+     * Constructor for MapStore.
+     * Initializes the store with the provided initial key-value pairs.
+     * @param init Initial key-value pairs to populate the store.
+     */
+    constructor(init: Record<string, T>) {
+        super(new Map());
+
+        // Populates the store with initial key-value pairs.
+        for (const [k, v] of Object.entries(init)) {
+            this.value.set(k, v);
+        }
+    }
+
+    /**
+     * Sets the value for the specified key. This method sends a "set" event,
+     * with the value being an object with the properties:
+     * * `key`: the key that was set
+     * * `value`: the new value associated with the key
+     * @param key The key to set.
+     * @param value The value to associate with the key.
+     */
+    set(key: string, value: T) {
+        this.value.set(key, value);
+        this._sendEvent('set', {
+            key, value
+        });
+    }
+
+    /**
+     * Removes the value associated with the specified key. This method sends a "remove" event,
+     * with the value being an object with the property:
+     * * `key`: the key whose value was removed
+     * @param key The key to remove.
+     */
+    remove(key: string) {
+        this.value.delete(key);
+        this._sendEvent('remove', {
+            key, value: this.value
+        });
+    }
+
+    /**
+     * Clears the entire map store. This method sends a "clear" event.
+     */
+    clear() {
+        this.value = new Map();
+        this._sendEvent('clear', undefined);
+    }
+
+    /**
+     * Applies a transformation function to the value associated with the specified key.
+     * This method sends a "mutation" event, with the value being an object with the properties:
+     * * `key`: the key that was mutated
+     * * `value`: the new value after applying the transformation function
+     * @param key The key to transform.
+     * @param fn The transformation function to apply.
+     */
+    transform(key: string, fn: (val: T) => T) {
+        const old = this.value.get(key);
+        if (!old) throw new Error(`ERROR: key ${key} does not exist in store!`);
+        const transformed = fn(old);
+        this.set(key, transformed);
+    }
+
+    /**
+     * Retrieves the value associated with the specified key.
+     * @param key The key to retrieve the value for.
+     * @returns The value associated with the key.
+     */
+    get(key: string) {
+        return this.value.get(key);
     }
 }
 
@@ -481,10 +587,30 @@ const empty = (elt: Element) => {
     elt.innerHTML = '';
 };
 
+const seq = (...args: number[]) => {
+    let start = 0, stop = args[0], step = 1;
+    if (typeof args[1] !== 'undefined') {
+        start = args[0];
+        stop = args[1];
+    }
+
+    if (args[2]) step = args[2];
+    const result = [];
+    for (let i = start; i < stop; i += step) {
+        result.push(i);
+    }
+
+    return result;
+}
+
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore
 }
 
 export {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore
+}
+
+export type {
+    RawHtml, ElementPosition, ElementProperties, Subscriber, Template
 }

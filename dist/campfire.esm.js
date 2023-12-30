@@ -1,10 +1,20 @@
 // dist/testing/campfire.js
+var r = (val) => {
+  return {
+    raw: true,
+    contents: val.toString()
+  };
+};
 var html = (strings, ...values) => {
   const built = [];
   for (let i = 0; i < strings.length; i++) {
     built.push(strings[i] || "");
-    const value = (values[i] || "").toString();
-    built.push(escape(value));
+    let val = values[i];
+    if (typeof val !== "undefined" && typeof val !== "object") {
+      built.push(escape((val || "").toString()));
+    } else {
+      built.push((val === null || val === void 0 ? void 0 : val.contents) || "");
+    }
   }
   return built.join("");
 };
@@ -73,7 +83,6 @@ var insert = (elem, where) => {
 };
 var Store = class {
   constructor(value) {
-    this.value = null;
     this._subscribers = {};
     this._subscriberCounts = {};
     this._dead = false;
@@ -154,6 +163,42 @@ var ListStore = class extends Store {
     return this.value.length;
   }
 };
+var MapStore = class extends Store {
+  constructor(init) {
+    super(new Map());
+    for (const [k, v] of Object.entries(init)) {
+      this.value.set(k, v);
+    }
+  }
+  set(key, value) {
+    this.value.set(key, value);
+    this._sendEvent("set", {
+      key,
+      value
+    });
+  }
+  remove(key) {
+    this.value.delete(key);
+    this._sendEvent("remove", {
+      key,
+      value: this.value
+    });
+  }
+  clear() {
+    this.value = new Map();
+    this._sendEvent("clear", void 0);
+  }
+  transform(key, fn) {
+    const old = this.value.get(key);
+    if (!old)
+      throw new Error(`ERROR: key ${key} does not exist in store!`);
+    const transformed = fn(old);
+    this.set(key, transformed);
+  }
+  get(key) {
+    return this.value.get(key);
+  }
+};
 var _mustache = (string, data = {}) => {
   const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
   new RegExp(Object.keys(data).join("|"), "gi");
@@ -198,6 +243,20 @@ var rm = (elt) => elt.remove();
 var empty = (elt) => {
   elt.innerHTML = "";
 };
+var seq = (...args) => {
+  let start = 0, stop = args[0], step = 1;
+  if (typeof args[1] !== "undefined") {
+    start = args[0];
+    stop = args[1];
+  }
+  if (args[2])
+    step = args[2];
+  const result = [];
+  for (let i = start; i < stop; i += step) {
+    result.push(i);
+  }
+  return result;
+};
 var campfire_default = {
   Store,
   ListStore,
@@ -213,10 +272,14 @@ var campfire_default = {
   selectAll,
   select,
   onload,
-  html
+  html,
+  r,
+  seq,
+  MapStore
 };
 export {
   ListStore,
+  MapStore,
   Store,
   campfire_default as default,
   empty,
@@ -227,9 +290,11 @@ export {
   mustache,
   nu,
   onload,
+  r,
   rm,
   select,
   selectAll,
+  seq,
   template,
   unescape
 };

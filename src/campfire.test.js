@@ -4,7 +4,7 @@
 
 const { describe, test, expect } = require("@jest/globals");
 // @ts-ignore
-const { escape, unescape, mustache, template, nu, extend, html } = require('../dist/testing/campfire.cjs');
+const { escape, unescape, mustache, template, nu, extend, html, r, seq } = require('../dist/testing/campfire.cjs');
 
 describe('Tests for nu', () => {
     test('should create a div when no args are passed', () => {
@@ -106,6 +106,44 @@ describe('tests for escape() and unescape()', () => {
         expect(unescape('&#000039;')).toStrictEqual("'");
     });
 
+})
+
+describe('tests for html``', () => {
+    test('should escape parameters', () => {
+        expect(mustache(html`<div>${"<script> alert('xss') </script>"}</div>`))
+            .toBe("<div>&lt;script&gt; alert(&#39;xss&#39;) &lt;/script&gt;</div>")
+    })
+
+    test('should not escape r() values', () => {
+        expect(mustache(html`<div>${r("<script> alert('xss') </script>")}</div>`))
+            .toBe("<div><script> alert('xss') </script></div>")
+    })
+})
+
+describe('tests for seq', () => {
+    test('should use args[0] as stop if only one param provided', () => {
+        expect(seq(3)).toStrictEqual([0, 1, 2]);
+    })
+
+    test('should work for ranges', () => {
+        expect(seq(1, 4)).toStrictEqual([1, 2, 3]);
+    })
+
+    test('should return empty list if start is negative', () => {
+        expect(seq(-1)).toStrictEqual([]);
+    })
+
+    test('should work for negative ranges', () => {
+        expect(seq(-4, -1)).toStrictEqual([-4, -3, -2]);
+    })
+
+    test('should work for ranges with a step', () => {
+        expect(seq(0, 7, 2)).toStrictEqual([0, 2, 4, 6]);
+    })
+
+    test('should work for negative ranges with a step', () => {
+        expect(seq(-8, -4, 2)).toStrictEqual([-8, -6]);
+    })
 })
 
 describe('Tests for mustache', () => {

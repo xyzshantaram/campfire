@@ -1,4 +1,14 @@
 import { ElementProperties, ElementPosition, Subscriber, Template } from './types';
+interface RawHtml {
+    raw: true;
+    contents: string;
+}
+/**
+ * Prevent values from being escaped by html``.
+ * @param val Any value.
+ * @returns An object that tells html`` to not escape `val` while building the HTML string.
+ */
+declare const r: (val: any) => RawHtml;
 /**
  *
  * @param strings The constant portions of the template string.
@@ -11,7 +21,7 @@ import { ElementProperties, ElementPosition, Subscriber, Template } from './type
  * console.assert(testing === "foo bar baz oops%20%3Cscript%3Ealert%281%29%3C/script%3E");
  * ```
  */
-declare const html: (strings: string[], ...values: string[]) => string;
+declare const html: (strings: TemplateStringsArray, ...values: (string | number | RawHtml)[]) => string;
 /**
  * Takes an existing element and modifies its properties.
  * Refer ElementProperties documentation for details on
@@ -70,9 +80,9 @@ declare const insert: (elem: Element, where: ElementPosition) => Element;
  * @class Store
  * @public
  */
-declare class Store {
+declare class Store<T> {
     /**  The value of the store. */
-    value: any;
+    value: T;
     /**
      * The subscribers currently registered to the store.
      * @internal
@@ -92,9 +102,9 @@ declare class Store {
      * Creates an instance of Store.
      * @param value - The initial value of the store.
      */
-    constructor(value: any);
+    constructor(value: T);
     /**
-     *
+     * Add an event listener to the store.
      * @param type The type of event to listen for.
      * @param fn A function that will be called every time the store experiences an event of type `type`.
      * @param callNow Whether the function should be called once with the current value of the store.
@@ -112,7 +122,7 @@ declare class Store {
      * Sets the value of the store to be `value`. All subscribers to the "update" event are called.
      * @param value The new value to store.
      */
-    update(value: any): void;
+    update(value: T): void;
     /**
      * Forces all subscribers to the "update" event to be called.
      * @param value The new value to store.
@@ -122,7 +132,7 @@ declare class Store {
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
     */
-    _sendEvent(type: string, value: any): void;
+    _sendEvent(type: string, value: T): void;
     /**
      * Close the store so it no longer sends events.
      */
@@ -135,9 +145,9 @@ declare class Store {
     * remove() sends a "remove" event
     * setAt() sends a "mutation" event
 */
-declare class ListStore extends Store {
-    value: any[];
-    constructor(ls: any[]);
+declare class ListStore<T> extends Store<any> {
+    value: T[];
+    constructor(ls: T[]);
     /**
      * Empties out the list store.
      *
@@ -152,7 +162,7 @@ declare class ListStore extends Store {
      * * `idx`: the index of the new value.
      * @param val The value to append.
      */
-    push(val: any): void;
+    push(val: T): void;
     /**
      * Remove the element at the index `idx`. This method sends a "remove" event,
      * with the value being an object with the properties:
@@ -166,18 +176,68 @@ declare class ListStore extends Store {
      * @param idx The index of the value to retrieve.
      * @returns The value at the index `idx`.
      */
-    get(idx: number): any;
+    get(idx: number): false | T;
     /**
      * Sets the element at the given index `idx` to the value `val`. Sends a mutation event
      * with the value being an object bearing the properties:
      * @param idx The index to mutate.
      * @param val the new value at that index.
      */
-    setAt(idx: number, val: any): void;
+    setAt(idx: number, val: T): void;
     /**
      * Utility accessor to find the length of the store.
      */
     get length(): number;
+}
+/**
+ * A reactive map store. [UNSTABLE: DO NOT USE!]
+ * Implements set(key, value), remove(key), clear(), transform(key, fn), and get(key).
+ * set() sends a "set" event, remove() sends a "remove" event, clear() sends a "clear" event,
+ * and transform() sends a "mutation" event.
+ */
+declare class MapStore<T> extends Store<any> {
+    value: Map<string, T>;
+    /**
+     * Constructor for MapStore.
+     * Initializes the store with the provided initial key-value pairs.
+     * @param init Initial key-value pairs to populate the store.
+     */
+    constructor(init: Record<string, T>);
+    /**
+     * Sets the value for the specified key. This method sends a "set" event,
+     * with the value being an object with the properties:
+     * * `key`: the key that was set
+     * * `value`: the new value associated with the key
+     * @param key The key to set.
+     * @param value The value to associate with the key.
+     */
+    set(key: string, value: T): void;
+    /**
+     * Removes the value associated with the specified key. This method sends a "remove" event,
+     * with the value being an object with the property:
+     * * `key`: the key whose value was removed
+     * @param key The key to remove.
+     */
+    remove(key: string): void;
+    /**
+     * Clears the entire map store. This method sends a "clear" event.
+     */
+    clear(): void;
+    /**
+     * Applies a transformation function to the value associated with the specified key.
+     * This method sends a "mutation" event, with the value being an object with the properties:
+     * * `key`: the key that was mutated
+     * * `value`: the new value after applying the transformation function
+     * @param key The key to transform.
+     * @param fn The transformation function to apply.
+     */
+    transform(key: string, fn: (val: T) => T): void;
+    /**
+     * Retrieves the value associated with the specified key.
+     * @param key The key to retrieve the value for.
+     * @returns The value associated with the key.
+     */
+    get(key: string): T | undefined;
 }
 /**
  * Applies mustache templating to a string. Any names surrounded by {{ }} will be
@@ -255,6 +315,7 @@ declare const rm: (elt: Element) => void;
  * @param elt The element to empty.
  */
 declare const empty: (elt: Element) => void;
+declare const seq: (...args: number[]) => number[];
 declare const _default: {
     Store: typeof Store;
     ListStore: typeof ListStore;
@@ -270,7 +331,11 @@ declare const _default: {
     selectAll: (selector: string, from?: Document) => Element[];
     select: (selector: string, from?: Document) => Element | null;
     onload: (cb: (ev: Event) => void) => void;
-    html: (strings: string[], ...values: string[]) => string;
+    html: (strings: TemplateStringsArray, ...values: (string | number | RawHtml)[]) => string;
+    r: (val: any) => RawHtml;
+    seq: (...args: number[]) => number[];
+    MapStore: typeof MapStore;
 };
 export default _default;
-export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html };
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore };
+export type { RawHtml, ElementPosition, ElementProperties, Subscriber, Template };

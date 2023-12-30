@@ -1,4 +1,15 @@
 /**
+ * Prevent values from being escaped by html``.
+ * @param val Any value.
+ * @returns An object that tells html`` to not escape `val` while building the HTML string.
+ */
+const r = (val) => {
+    return {
+        raw: true,
+        contents: val.toString()
+    };
+};
+/**
  *
  * @param strings The constant portions of the template string.
  * @param values The templated values.
@@ -14,8 +25,13 @@ const html = (strings, ...values) => {
     const built = [];
     for (let i = 0; i < strings.length; i++) {
         built.push(strings[i] || '');
-        const value = (values[i] || '').toString();
-        built.push(escape(value));
+        let val = values[i];
+        if (typeof val !== 'undefined' && typeof val !== 'object') {
+            built.push(escape((val || '').toString()));
+        }
+        else {
+            built.push((val === null || val === void 0 ? void 0 : val.contents) || '');
+        }
     }
     return built.join('');
 };
@@ -153,8 +169,6 @@ class Store {
      * @param value - The initial value of the store.
      */
     constructor(value) {
-        /**  The value of the store. */
-        this.value = null;
         /**
          * The subscribers currently registered to the store.
          * @internal
@@ -173,7 +187,7 @@ class Store {
         this.value = value;
     }
     /**
-     *
+     * Add an event listener to the store.
      * @param type The type of event to listen for.
      * @param fn A function that will be called every time the store experiences an event of type `type`.
      * @param callNow Whether the function should be called once with the current value of the store.
@@ -317,6 +331,82 @@ class ListStore extends Store {
     }
 }
 /**
+ * A reactive map store. [UNSTABLE: DO NOT USE!]
+ * Implements set(key, value), remove(key), clear(), transform(key, fn), and get(key).
+ * set() sends a "set" event, remove() sends a "remove" event, clear() sends a "clear" event,
+ * and transform() sends a "mutation" event.
+ */
+class MapStore extends Store {
+    /**
+     * Constructor for MapStore.
+     * Initializes the store with the provided initial key-value pairs.
+     * @param init Initial key-value pairs to populate the store.
+     */
+    constructor(init) {
+        super(new Map());
+        // Populates the store with initial key-value pairs.
+        for (const [k, v] of Object.entries(init)) {
+            this.value.set(k, v);
+        }
+    }
+    /**
+     * Sets the value for the specified key. This method sends a "set" event,
+     * with the value being an object with the properties:
+     * * `key`: the key that was set
+     * * `value`: the new value associated with the key
+     * @param key The key to set.
+     * @param value The value to associate with the key.
+     */
+    set(key, value) {
+        this.value.set(key, value);
+        this._sendEvent('set', {
+            key, value
+        });
+    }
+    /**
+     * Removes the value associated with the specified key. This method sends a "remove" event,
+     * with the value being an object with the property:
+     * * `key`: the key whose value was removed
+     * @param key The key to remove.
+     */
+    remove(key) {
+        this.value.delete(key);
+        this._sendEvent('remove', {
+            key, value: this.value
+        });
+    }
+    /**
+     * Clears the entire map store. This method sends a "clear" event.
+     */
+    clear() {
+        this.value = new Map();
+        this._sendEvent('clear', undefined);
+    }
+    /**
+     * Applies a transformation function to the value associated with the specified key.
+     * This method sends a "mutation" event, with the value being an object with the properties:
+     * * `key`: the key that was mutated
+     * * `value`: the new value after applying the transformation function
+     * @param key The key to transform.
+     * @param fn The transformation function to apply.
+     */
+    transform(key, fn) {
+        const old = this.value.get(key);
+        if (!old)
+            throw new Error(`ERROR: key ${key} does not exist in store!`);
+        const transformed = fn(old);
+        this.set(key, transformed);
+    }
+    /**
+     * Retrieves the value associated with the specified key.
+     * @param key The key to retrieve the value for.
+     * @returns The value associated with the key.
+     */
+    get(key) {
+        return this.value.get(key);
+    }
+}
+/**
  * The function that actually does the mustache templating.
  * @param string - the string to be templated.
  * @param data - The replacement data.
@@ -438,7 +528,21 @@ const rm = (elt) => elt.remove();
 const empty = (elt) => {
     elt.innerHTML = '';
 };
-export default {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html
+const seq = (...args) => {
+    let start = 0, stop = args[0], step = 1;
+    if (typeof args[1] !== 'undefined') {
+        start = args[0];
+        stop = args[1];
+    }
+    if (args[2])
+        step = args[2];
+    const result = [];
+    for (let i = start; i < stop; i += step) {
+        result.push(i);
+    }
+    return result;
 };
-export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html };
+export default {
+    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore
+};
+export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore };
