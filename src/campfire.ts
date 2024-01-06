@@ -6,14 +6,23 @@ interface RawHtml {
 }
 
 /**
+ * Options for r()
+ */
+interface RawHtmlOptions {
+    joiner?: string;
+}
+
+/**
  * Prevent values from being escaped by html``.
  * @param val Any value.
  * @returns An object that tells html`` to not escape `val` while building the HTML string.
  */
-const r = (val: any): RawHtml => {
+const r = (val: any, options?: RawHtmlOptions): RawHtml => {
     return {
         raw: true,
-        contents: val.toString()
+        contents: Array.isArray(val) ?
+            val.join(options?.joiner ?? ' ') :
+            val.toString()
     }
 }
 
@@ -91,7 +100,7 @@ const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
     Object.entries(on || {}).forEach(([evt, listener]) => elem.addEventListener(evt, listener));
     Object.entries(attrs || a || {}).forEach(([attr, value]) => elem.setAttribute(attr, value));
 
-    return result;
+    return result as HTMLElement[];
 }
 
 /**

@@ -1,8 +1,9 @@
 // dist/testing/campfire.js
-var r = (val) => {
+var r = (val, options) => {
+  var _a;
   return {
     raw: true,
-    contents: val.toString()
+    contents: Array.isArray(val) ? val.join((_a = options === null || options === void 0 ? void 0 : options.joiner) !== null && _a !== void 0 ? _a : " ") : val.toString()
   };
 };
 var html = (strings, ...values) => {

@@ -4,11 +4,17 @@ interface RawHtml {
     contents: string;
 }
 /**
+ * Options for r()
+ */
+interface RawHtmlOptions {
+    joiner?: string;
+}
+/**
  * Prevent values from being escaped by html``.
  * @param val Any value.
  * @returns An object that tells html`` to not escape `val` while building the HTML string.
  */
-declare const r: (val: any) => RawHtml;
+declare const r: (val: any, options?: RawHtmlOptions) => RawHtml;
 /**
  *
  * @param strings The constant portions of the template string.
@@ -29,7 +35,7 @@ declare const html: (strings: TemplateStringsArray, ...values: (string | number 
  * @param elem The element to modify.
  * @param args Properties to set on the element.
  */
-declare const extend: (elem: HTMLElement, args?: ElementProperties) => (HTMLElement | null)[];
+declare const extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement[];
 /**
  * An element creation helper.
  * @param eltInfo Basic information about the element.
@@ -56,7 +62,7 @@ declare const extend: (elem: HTMLElement, args?: ElementProperties) => (HTMLElem
  * }) // Output is still a list [<span.some-span>]
  * ```
  */
-declare const nu: (eltInfo: string, args?: ElementProperties) => (HTMLElement | null)[];
+declare const nu: (eltInfo: string, args?: ElementProperties) => HTMLElement[];
 /**
  * Inserts an element into the DOM given a reference element and the relative position
  * of the new element.
@@ -319,12 +325,12 @@ declare const seq: (...args: number[]) => number[];
 declare const _default: {
     Store: typeof Store;
     ListStore: typeof ListStore;
-    nu: (eltInfo: string, args?: ElementProperties) => (HTMLElement | null)[];
+    nu: (eltInfo: string, args?: ElementProperties) => HTMLElement[];
     mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
     template: (str: string, shouldEscape?: boolean) => Template;
     escape: (str: string) => string;
     unescape: (str: string) => string;
-    extend: (elem: HTMLElement, args?: ElementProperties) => (HTMLElement | null)[];
+    extend: (elem: HTMLElement, args?: ElementProperties) => HTMLElement[];
     insert: (elem: Element, where: ElementPosition) => Element;
     empty: (elt: Element) => void;
     rm: (elt: Element) => void;
@@ -332,7 +338,7 @@ declare const _default: {
     select: (selector: string, from?: Document) => Element | null;
     onload: (cb: (ev: Event) => void) => void;
     html: (strings: TemplateStringsArray, ...values: (string | number | RawHtml)[]) => string;
-    r: (val: any) => RawHtml;
+    r: (val: any, options?: RawHtmlOptions | undefined) => RawHtml;
     seq: (...args: number[]) => number[];
     MapStore: typeof MapStore;
 };

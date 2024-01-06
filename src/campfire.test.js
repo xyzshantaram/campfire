@@ -118,6 +118,27 @@ describe('tests for html``', () => {
         expect(mustache(html`<div>${r("<script> alert('xss') </script>")}</div>`))
             .toBe("<div><script> alert('xss') </script></div>")
     })
+
+    test('should join arrays together', () => {
+        const transform = itm => html`<li>${itm.toString()}</li>`;
+        const list = html`<ul> ${r(seq(3).map(transform))} </ul>`;
+
+        expect(list).toStrictEqual('<ul> <li>0</li> <li>1</li> <li>2</li> </ul>')
+    })
+
+    test('should enable custom joiners', () => {
+        const transform = itm => html`<span>${itm.toString()}</span>`;
+        const spans = html`${r(seq(3).map(transform), { joiner: ', ' })}`;
+
+        expect(spans).toStrictEqual('<span>0</span>, <span>1</span>, <span>2</span>')
+    })
+
+    test('should allow empty custom joiner', () => {
+        const transform = itm => itm.toString();
+        const num = html`${r(seq(3).map(transform), { joiner: '' })}`;
+
+        expect(num).toStrictEqual('012');
+    })
 })
 
 describe('tests for seq', () => {
