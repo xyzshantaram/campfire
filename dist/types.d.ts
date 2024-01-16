@@ -15,7 +15,7 @@ export interface ElementProperties {
     */
     contents?: string;
     /** Alias for `contents` */
-    c?: string;
+    c?: ElementProperties['contents'];
     /**
      * Whether or not to escape the `contents` string. If `raw` is true, the
      * string is not escaped.
@@ -26,11 +26,11 @@ export interface ElementProperties {
     */
     misc?: Record<string, unknown>;
     /** Alias for `ElementProperties.misc`. */
-    m?: Record<string, unknown>;
+    m?: ElementProperties['misc'];
     /** Contains styles that will be applied to the new element. Property names must be the same as those in `CSSStyleDeclaration`. */
-    style?: Record<keyof CSSStyleDeclaration, unknown>;
+    style?: Partial<CSSStyleDeclaration>;
     /** Alias for `ElementProperties.style`. */
-    s?: Record<string, unknown>;
+    s?: ElementProperties['style'];
     /** An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
@@ -38,11 +38,11 @@ export interface ElementProperties {
     /** Attributes that will be set on the element using `Element.setAttribute`. */
     attrs?: Record<string, string>;
     /** Alias for `ElementProperties.attrs`. */
-    a?: Record<string, string>;
+    a?: ElementProperties['contents'];
     /** A list of elements to query from the element. Will be returned as subsequent members of the returned Array after the element itself. */
     gimme?: string[];
     /** Alias for `ElementProperties.gimme` */
-    g?: string[];
+    g?: ElementProperties['gimme'];
 }
 /**
  * An interface to store data parsed from an element descriptor string passed to `nu`.
