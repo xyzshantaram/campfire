@@ -169,20 +169,25 @@ const insert = (elem: Element, where: ElementPosition) => {
         throw new Error("Too many or too few positions specified.");
     }
 
-    const ref: HTMLElement = Object.values(where).filter(itm => itm instanceof HTMLElement)[0];
-
     let position: InsertPosition = 'beforeend';
+    let ref: Element;
+
     if ('after' in where) {
         position = 'afterend';
+        ref = where.after;
     }
     else if ('before' in where) {
         position = 'beforebegin';
+        ref = where.before;
     }
     else if ('into' in where && where.at === 'start') {
         position = 'afterbegin';
+        ref = where.into;
+    }
+    else {
+        ref = where.into;
     }
     ref.insertAdjacentElement(position, elem);
-
     return elem;
 }
 
@@ -236,9 +241,8 @@ class Store<T> {
      */
     on(type: StoreEvent['type'], fn: Subscriber, callNow: boolean = false): number {
         this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
-        this._subscribers[type] = this._subscribers[type] || {};
-
-        this._subscribers[type][this._subscriberCounts[type]] = fn;
+        this._subscribers[type] ??= {};
+        this._subscribers[type]![this._subscriberCounts[type]] = fn;
         if (callNow && !["push", "remove", "mutation", "setAt"].includes(type)) {
             fn({ type: 'change', value: this.value });
         }
