@@ -3,9 +3,9 @@ import { Store } from "./Store.ts";
 /**
     * A reactive list store. 
     * Implements push(item). remove(idx), get(idx), and setAt(idx, item).
-    * push() sends a "push" event
-    * remove() sends a "remove" event
-    * setAt() sends a "mutation" event
+    * push() sends an "append" event
+    * remove() sends a "deletion" event
+    * setAt() sends a "change" event with idx
 */
 export class ListStore<T> extends Store<any> {
     value: T[];

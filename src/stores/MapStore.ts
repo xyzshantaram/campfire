@@ -4,8 +4,8 @@ import { Store } from "./Store.ts";
  * A reactive map store.
  * Implements set(key, value), remove(key), clear(), transform(key, fn), has(key), entries(), 
  * and get(key).
- * set() sends a "set" event, remove() sends a "remove" event, clear() sends a "clear" event,
- * and transform() sends a "mutation" event.
+ * set() sends a "change" event, remove() sends a "deletion" event, clear() sends a "clear" event,
+ * and transform() sends a "change" event.
  */
 export class MapStore<T> extends Store<any> {
     value: Map<string, T>;

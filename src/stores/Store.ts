@@ -51,19 +51,19 @@ export class Store<T> {
     }
 
     /**
-     * Add an event listener to the store.
-     * @param type The type of event to listen for.
-     *   Supported event types include:
-     *   - 'change': Triggered when the store's value is updated via `update()`.
-     *   - Other custom event types may be supported depending on the store implementation.
-     * @param fn A callback function that will be invoked when the specified event occurs.
-     *   The function receives a `StoreEvent` object with details about the event.
-     * @param callNow Determines whether the callback should be immediately invoked 
-     *   with the current store value. Note: Not applicable for events like "append",
-     *   "remove" which have list/map-specific behaviors.
-     * @returns A unique subscriber ID that can be used to unsubscribe the listener.
-     * @throws May throw an error if the event type is invalid or if the callback is not a function.
-     */
+ * Add an event listener to the store.
+ * @param type The type of event to listen for.
+ *   Supported event types include:
+ *   - 'change': Triggered when the store's value is updated via `update()`.
+ *   - 'append': For ListStore - Triggered when an item is added to the list.
+ *   - 'deletion': For ListStore/MapStore - Triggered when an item is removed.
+ *   - 'clear': Triggered when the store is cleared.
+ * @param fn A callback function that will be invoked when the specified event occurs.
+ *   The function receives a `StoreEvent` object with details about the event.
+ * @param callNow Determines whether the callback should be immediately invoked 
+ *   with the current store value. Only applies to 'change' event type.
+ * @returns A unique subscriber ID that can be used to unsubscribe the listener.
+ */
     on(type: StoreEvent['type'], fn: Subscriber, callNow: boolean = false): number {
         this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
         this._subscribers[type] ??= {};
@@ -74,6 +74,14 @@ export class Store<T> {
         return this._subscriberCounts[type]++;
     }
 
+/**
+     * Subscribes the provided function to all store events.
+     * This is a convenience method that registers the function for 'change',
+     * 'append', 'clear', and 'deletion' events.
+     * 
+     * @param fn A callback function that will be called for all store events
+     * @returns void
+     */
     any(fn: Subscriber) {
         this.on('append', fn);
         this.on('change', fn);
