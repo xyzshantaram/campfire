@@ -1,4 +1,4 @@
-import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template, StoreEvent } from './types';
+import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template, StoreEvent, StoreInitializer } from './types';
 
 interface RawHtml {
     raw: true,
@@ -216,8 +216,8 @@ class Store<T> {
      * Creates an instance of Store.
      * @param value - The initial value of the store.
      */
-    constructor(value: T) {
-        this.value = value;
+    constructor(value?: T) {
+        if (value) this.value = value;
     }
 
     /**
@@ -300,7 +300,7 @@ class Store<T> {
 class ListStore<T> extends Store<any> {
     value: T[];
 
-    constructor(ls: T[]) {
+    constructor(ls?: T[]) {
         super(ls);
     }
 
@@ -380,8 +380,9 @@ class ListStore<T> extends Store<any> {
 }
 
 /**
- * A reactive map store. [UNSTABLE: DO NOT USE!]
- * Implements set(key, value), remove(key), clear(), transform(key, fn), and get(key).
+ * A reactive map store.
+ * Implements set(key, value), remove(key), clear(), transform(key, fn), has(key), entries(), 
+ * and get(key).
  * set() sends a "set" event, remove() sends a "remove" event, clear() sends a "clear" event,
  * and transform() sends a "mutation" event.
  */
@@ -393,11 +394,11 @@ class MapStore<T> extends Store<any> {
      * Initializes the store with the provided initial key-value pairs.
      * @param init Initial key-value pairs to populate the store.
      */
-    constructor(init: Record<string, T>) {
+    constructor(init?: Record<string, T>) {
         super(new Map());
 
         // Populates the store with initial key-value pairs.
-        for (const [k, v] of Object.entries(init)) {
+        for (const [k, v] of Object.entries(init || {})) {
             this.value.set(k, v);
         }
     }
@@ -582,21 +583,29 @@ const unescape = (str: string) => {
  */
 const onload = (cb: (ev: Event) => void) => globalThis.addEventListener('DOMContentLoaded', cb);
 
-/**
- * Queries the DOM for a particular selector, and returns the first element matching it.
- * @param selector The selector to query.
- * @param from The node to query.
- * @returns The first element matching the given selector, or null.
- */
-const select = (selector: string, from = document) => from.querySelector(selector);
+export interface SelectParams {
+    /** The selector to query for. */
+    selector: string;
+    /** The parent node to query. Defaults to `document`. */
+    from?: ParentNode;
+    /** Whether to return all elements matching the given selector or just the first. */
+    all?: true;
+}
 
 /**
- * Queries the DOM for a particular selector, and returns all elements that match it.
- * @param selector The selector to query.
- * @param from The node to query.
- * @returns An array of elements matching the given selector.
+ * Queries the DOM for a particular selector, and returns the first element matching it.
+ * @param opts See SelectParams.
+ * @returns Element(s) matching the given selector, or an empty list.
  */
-const selectAll = (selector: string, from = document) => Array.from(from.querySelectorAll(selector));
+const select = ({ selector, all, from }: SelectParams) => {
+    from ??= document;
+    if (all) {
+        return Array.from(from.querySelectorAll(selector));
+    }
+    else {
+        return [from.querySelector(selector)];
+    }
+}
 
 /**
  * Removes `elt` from the DOM.
@@ -629,12 +638,20 @@ const seq = (...args: number[]) => {
     return result;
 }
 
+const store = <T>(opts: StoreInitializer<T>) => {
+    if ('type' in opts) {
+        if (opts.type === 'list') return new ListStore(opts.value);
+        else if (opts.type === 'map') return new MapStore(opts.value);
+    }
+    return new Store<T>(opts.value);
+}
+
 export default {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore
+    store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq
 }
 
 export {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore
+    store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq
 }
 
 export type {
