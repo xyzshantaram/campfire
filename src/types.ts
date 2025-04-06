@@ -19,16 +19,6 @@ export type StoreEvent =
     };
 
 
-export type StoreInitializer<T> = {
-    type: 'list',
-    value?: Array<T>,
-} | {
-    type: 'map',
-    value?: Record<string, T>
-} | {
-    value?: T
-}
-
 /** A signature for a subscriber type. */
 export type Subscriber = (event: StoreEvent) => void;
 
