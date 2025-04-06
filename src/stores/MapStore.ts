@@ -7,8 +7,7 @@ import { Store } from "./Store.ts";
  * set() sends a "change" event, remove() sends a "deletion" event, clear() sends a "clear" event,
  * and transform() sends a "change" event.
  */
-export class MapStore<T> extends Store<any> {
-    value: Map<string, T>;
+export class MapStore<T> extends Store<Map<string, T>> {
 
     /**
      * Constructor for MapStore.
