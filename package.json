@@ -1,13 +1,19 @@
 {
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/dom": "^9.3.4",
+    "@types/chai": "^4.3.11",
+    "@types/jsdom": "^21.1.6",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^22.14.0",
+    "@types/sinon": "^17.0.3",
+    "chai": "^5.1.0",
+    "chai-dom": "^1.12.0",
     "esbuild": "^0.25.2",
     "esbuild-node-externals": "^1.18.0",
-    "jest": "^29.0.0",
-    "jest-cli": "^29.0.0",
-    "jest-environment-jsdom": "^29.7.0",
-    "ts-jest": "^29.3.1",
+    "jsdom": "^24.0.0",
+    "jsdom-global": "^3.0.2",
+    "mocha": "^10.3.0",
+    "sinon": "^17.0.1",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.1",
     "typescript": "^5.7.3"
@@ -22,9 +28,9 @@
     "dist"
   ],
   "scripts": {
-    "test": "npx jest",
+    "test": "npx tsc --no-emit && npx mocha",
     "mkdocs": "npx typedoc src/campfire.ts src/types.ts --cleanOutputDir --out site/docs/ --darkHighlightTheme material-palenight --customCss site/tsdoc_style.css && cp campfire.png site/docs/campfire.png",
-    "build": "node esbuild.config.js && npx jest && cp dist/testing/* dist/ && rm -rf dist/testing/"
+    "build": "node esbuild.config.js && npm test && cp dist/testing/* dist/ && rm -rf dist/testing/"
   },
   "repository": {
     "type": "git",

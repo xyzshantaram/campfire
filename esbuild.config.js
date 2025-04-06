@@ -1,11 +1,11 @@
-const esbuild = require('esbuild')
+import { build } from 'esbuild'
 
 // Automatically exclude all node_modules from the bundled version
-const { nodeExternalsPlugin } = require('esbuild-node-externals')
+import { nodeExternalsPlugin } from 'esbuild-node-externals'
 
 // Full-size ESM version
-esbuild.build({
-    entryPoints: ['./dist/testing/campfire.js'],
+build({
+    entryPoints: ['src/campfire.ts'],
     outfile: './dist/testing/campfire.esm.js',
     bundle: true,
     minify: false,
@@ -20,8 +20,8 @@ esbuild.build({
 })
 
 // Full-size CJS version
-esbuild.build({
-    entryPoints: ['./dist/testing/campfire.js'],
+build({
+    entryPoints: ['src/campfire.ts'],
     outfile: './dist/testing/campfire.cjs.js',
     bundle: true,
     minify: false,
@@ -36,8 +36,8 @@ esbuild.build({
 })
 
 // minified ESM version
-esbuild.build({
-    entryPoints: ['./dist/testing/campfire.js'],
+build({
+    entryPoints: ['src/campfire.ts'],
     outfile: './dist/testing/campfire.esm.min.js',
     bundle: true,
     minify: true,
@@ -52,8 +52,8 @@ esbuild.build({
 })
 
 // minified CJS version
-esbuild.build({
-    entryPoints: ['./dist/testing/campfire.js'],
+build({
+    entryPoints: ['src/campfire.ts'],
     outfile: './dist/testing/campfire.cjs.min.js',
     bundle: true,
     minify: true,

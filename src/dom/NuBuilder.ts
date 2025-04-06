@@ -1,5 +1,12 @@
 import { Store } from "../stores/mod.ts";
-import { ElementProperties, InferElementType, RenderFunction, StringStyleProps, TagStringParseResult, DOMEventHandlers } from "../types.ts";
+import type {
+    ElementProperties,
+    InferElementType,
+    RenderFunction,
+    StringStyleProps,
+    TagStringParseResult,
+    DOMEventHandlers
+} from "../types.ts";
 import { extend } from "./nu.ts";
 
 

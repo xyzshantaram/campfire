@@ -1,4 +1,4 @@
-import { StoreEvent, Subscriber } from "../types.ts";
+import type { StoreEvent, Subscriber } from "../types.ts";
 
 const storeIds = new Set<string>();
 const genId = () => 'cf-' + Math.random().toString(36).slice(2, 8);
@@ -74,14 +74,14 @@ export class Store<T> {
         return this._subscriberCounts[type]++;
     }
 
-/**
-     * Subscribes the provided function to all store events.
-     * This is a convenience method that registers the function for 'change',
-     * 'append', 'clear', and 'deletion' events.
-     * 
-     * @param fn A callback function that will be called for all store events
-     * @returns void
-     */
+    /**
+         * Subscribes the provided function to all store events.
+         * This is a convenience method that registers the function for 'change',
+         * 'append', 'clear', and 'deletion' events.
+         * 
+         * @param fn A callback function that will be called for all store events
+         * @returns void
+         */
     any(fn: Subscriber) {
         this.on('append', fn);
         this.on('change', fn);
