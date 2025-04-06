@@ -6,8 +6,8 @@ import { nodeExternalsPlugin } from 'esbuild-node-externals'
 // Full-size ESM version
 build({
     entryPoints: ['src/campfire.ts'],
-    outfile: './dist/campfire.js',
-    bundle: true,
+    outdir: './dist/',
+    bundle: false,
     minify: false,
     platform: 'browser',
     sourcemap: false,
@@ -22,7 +22,7 @@ build({
 // Full-size CJS version
 build({
     entryPoints: ['src/campfire.ts'],
-    outfile: './dist/testing/campfire.cjs.js',
+    outfile: './dist/cjs/campfire.js',
     bundle: true,
     minify: false,
     platform: 'browser',
@@ -54,7 +54,7 @@ build({
 // minified CJS version
 build({
     entryPoints: ['src/campfire.ts'],
-    outfile: './dist/campfire.cjs.min.js',
+    outfile: './dist/cjs/campfire.min.js',
     bundle: true,
     minify: true,
     platform: 'browser',
