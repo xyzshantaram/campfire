@@ -24,15 +24,20 @@ export type StoreEvent =
 /** A signature for a subscriber type. */
 export type Subscriber = (event: StoreEvent) => void;
 
-/** A generic signature for an event handler type. */
-export type DomEventHandler = (e: Event) => unknown;
-
 /** The function signature for a function returned by `template()`. */
 export type Template = (e: Record<string, any>) => string;
 
-export type RenderFunction<T, D> = (props: {
+export type RenderFunction<T extends HTMLElement, D> = (props: {
     [K in keyof D]: D[K] extends Store<infer V> ? V : never;
 }, opts: { event?: StoreEvent & { triggeredBy: string }, elt: T }) => string | undefined;
+
+export type StringStyleProps = keyof {
+    [K in keyof CSSStyleDeclaration as CSSStyleDeclaration[K] extends string ? K : never]: true
+};
+
+export type DOMEventHandlers = {
+    [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void;
+};
 
 /**
  * Properties for the HTML element to be created.
@@ -58,12 +63,12 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
     misc?: Record<string, unknown>;
 
     /** Contains styles that will be applied to the new element. Property names must be the same as those in `CSSStyleDeclaration`. */
-    style?: Partial<CSSStyleDeclaration>;
+    style?: Partial<Record<StringStyleProps, string>>;
 
     /** An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
-    on?: Record<string, DomEventHandler>;
+    on?: DOMEventHandlers;
 
     /** Attributes that will be set on the element using `Element.setAttribute`. */
     attrs?: Record<string, string>;

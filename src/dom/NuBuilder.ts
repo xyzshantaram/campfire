@@ -1,5 +1,5 @@
 import { Store } from "../stores/mod.ts";
-import { ElementProperties, InferElementType, TagStringParseResult } from "../types.ts";
+import { ElementProperties, InferElementType, RenderFunction, StringStyleProps, TagStringParseResult, DOMEventHandlers } from "../types.ts";
 import { extend } from "./nu";
 
 
@@ -52,5 +52,59 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
         classes.forEach((cls) => elem.classList.add(cls));
 
         return extend(elem as E, this.props);
+    }
+
+    content(value: string | RenderFunction<E, D>) {
+        this.props.contents = value;
+        return this;
+    }
+
+    attr(name: string, value: string | boolean | number) {
+        this.props.attrs ||= {};
+        this.props.attrs[name] = value.toString();
+        return this;
+    }
+
+    attrs(value: Required<ElementProperties<E, D>['attrs']>) {
+        this.props.attrs = value;
+        return this;
+    }
+
+    raw(value: boolean) {
+        this.props.raw = value;
+        return this;
+    }
+
+    misc(obj: string, value: unknown): NuBuilder<T, E, D>;
+    misc(obj: Record<string, unknown>): NuBuilder<T, E, D>;
+    misc(obj: string | Record<string, unknown>, value?: unknown): NuBuilder<T, E, D> {
+        this.props.misc ||= {};
+        if (typeof obj === 'object') this.props.misc = obj;
+        else this.props.misc[obj] = value;
+        return this;
+    }
+
+    style(prop: StringStyleProps, value: string) {
+        this.props.style ||= {};
+        this.props.style[prop] = value;
+        return this;
+    }
+
+    styles(value: Required<ElementProperties<E, D>['style']>) {
+        this.props.style = value;
+        return this;
+    }
+
+    on<K extends keyof HTMLElementEventMap>(type: K, handler: (event: HTMLElementEventMap[K]) => void) {
+        this.props.on ||= {};
+        this.props.on[type] = handler as DOMEventHandlers[K];
+        return this;
+    }
+
+    gimme(selectors: string | string[]) {
+        this.props.gimme ||= [];
+        if (Array.isArray(selectors)) this.props.gimme = selectors;
+        else this.props.gimme.push(selectors);
+        return this;
     }
 }
