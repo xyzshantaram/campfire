@@ -38,23 +38,30 @@ export const extend = <
 ): [T, ...HTMLElement[]] => {
     let { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D) } = args;
 
+    let content = '';
     if (isValidRenderFn<T>(contents)) {
         Object.entries(deps).forEach(([name, dep]) => {
             dep.any(evt => {
                 const res = contents(unwrapDeps(deps), { event: { ...evt, triggeredBy: name }, elt });
-                if (res && res.length) elt.innerHTML = res;
+                if (res !== undefined) elt.innerHTML = res;
             })
         });
+
+        const result = contents(unwrapDeps(deps), { elt });
+        content = result || '';
+    } else if (typeof contents === 'string') {
+        content = contents;
     }
+
+    if (content?.trim()) {
+        elt.innerHTML = raw ? content : escape(content);
+    }
+
     const depIds = Object.values(deps).map(dep => dep.id);
-    elt.setAttribute('data-cf-reacting-to', depIds.join(','));
-    let content = (typeof contents === 'function' ? contents(unwrapDeps(deps), { elt }) : contents) || '';
-    content = raw ? content : escape(content);
+    if (depIds.length) elt.setAttribute('data-cf-deps', depIds.join(','));
 
-    if (content.trim()) elt.innerHTML = content;
-
-    Object.assign(elt, misc);
-    Object.assign(elt.style, style);
+    if (misc) Object.assign(elt, misc);
+    if (style) Object.assign(elt.style, style);
 
     Object.entries(on).forEach(([evt, listener]) =>
         elt.addEventListener(evt, listener)
@@ -67,6 +74,9 @@ export const extend = <
     const extras: HTMLElement[] = [];
     for (const selector of gimme) {
         const found = elt.querySelector(selector);
+        // This is on purpose.
+        // The user will expect the items to be at the same indices
+        // as the selectors they supplied.
         extras.push(found as HTMLElement);
     }
 
