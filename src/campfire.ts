@@ -223,10 +223,16 @@ class Store<T> {
     /**
      * Add an event listener to the store.
      * @param type The type of event to listen for.
-     * @param fn A function that will be called every time the store experiences an event of type `type`.
-     * @param callNow Whether the function should be called once with the current value of the store.
-     * The function will not be called for ListStore events "push", "remove", or "mutation".
-     * @returns A number which can be passed to `Store.unsubscribe` to stop `fn` from being called from then on.
+     *   Supported event types include:
+     *   - 'change': Triggered when the store's value is updated via `update()`.
+     *   - Other custom event types may be supported depending on the store implementation.
+     * @param fn A callback function that will be invoked when the specified event occurs.
+     *   The function receives a `StoreEvent` object with details about the event.
+     * @param callNow Determines whether the callback should be immediately invoked 
+     *   with the current store value. Note: Not applicable for events like "append",
+     *   "remove" which have list/map-specific behaviors.
+     * @returns A unique subscriber ID that can be used to unsubscribe the listener.
+     * @throws May throw an error if the event type is invalid or if the callback is not a function.
      */
     on(type: StoreEvent['type'], fn: Subscriber, callNow: boolean = false): number {
         this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
@@ -238,18 +244,22 @@ class Store<T> {
         }
         return this._subscriberCounts[type]++;
     }
+
     /**
-     * 
-     * @param type The type of event to unsubscribe from.
-     * @param id The value returned by `Store.on` when the subscriber was registered.
+     * Removes a specific event listener from the store.
+     * @param type The type of event from which to unsubscribe.
+     * @param id The subscriber ID returned by the `on()` method when the listener was registered.
+     * @throws Will throw an error if the subscriber ID is invalid or not found.
      */
     unsubscribe(type: StoreEvent['type'], id: number) {
         delete this._subscribers[type]?.[id];
     }
 
     /**
-     * Sets the value of the store to be `value`. All subscribers to the "update" event are called.
-     * @param value The new value to store.
+     * Updates the store's value and notifies all subscribers.
+     * @param value The new value to set for the store.
+     * @emits 'change' event with the new value when successfully updated.
+     * @note No-op if the store has been disposed via `dispose()`.
      */
     update(value: T) {
         if (this._dead) return;
@@ -295,37 +305,36 @@ class ListStore<T> extends Store<any> {
     }
 
     /**
-     * Empties out the list store.
-     * 
-     * A helper function that sends an `update` event
-     * and sets the value of the store to [].
+     * Clears all elements from the store.
+     * @description Sets the store's value to an empty array and triggers a 'clear' event.
+     * @emits 'clear' event.
      */
     clear() {
-        this.update([]);
+        this.value = [];
+        this._sendEvent({ type: "clear" });
     }
 
     /**
-     * Append the value `val` to the end of the list. This method sends a "push" event, 
-     * with the value being an object with the properties:
-     * * `value`: the value that was pushed
-     * * `idx`: the index of the new value.
-     * @param val The value to append.
+     * Appends a new element to the end of the list.
+     * @param val The value to add to the list.
+     * @returns The new length of the list after appending.
+     * @emits 'append' event with:
+     *   - `value`: The appended item
+     *   - `idx`: The index where the item was inserted (length - 1)
      */
     push(val: T) {
         this.value.push(val);
-        this._sendEvent({
-            type: "append",
-            value: val,
-            idx: this.value.length - 1
-        })
+        this._sendEvent({ type: "append", value: val, idx: this.value.length - 1 });
+        return this.value.length;
     }
 
     /**
-     * Remove the element at the index `idx`. This method sends a "remove" event, 
-     * with the value being an object with the properties:
-     * * `value`: the value that was removed
-     * * `idx`: the index the removed value was at
-     * @param val The value to append.
+     * Removes the element at the specified index.
+     * @param idx The index of the element to remove.
+     * @throws {RangeError} If the index is out of bounds.
+     * @emits 'deletion' event with:
+     *   - `value`: The removed item
+     *   - `idx`: The index from which the item was removed
      */
     remove(idx: number) {
         if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
@@ -333,33 +342,33 @@ class ListStore<T> extends Store<any> {
             type: 'deletion',
             idx,
             value: this.value.splice(idx, 1)[0]
-        })
+        });
     }
 
     /**
-     * Retrieves the value at the given index.
-     * @param idx The index of the value to retrieve.
-     * @returns The value at the index `idx`. 
+     * Retrieves the element at the specified index.
+     * @param idx The index of the element to retrieve.
+     * @returns The element at the specified index.
+     * @throws {RangeError} If the index is out of bounds.
      */
     get(idx: number) {
-        if (idx < 0 || idx > this.value.length) throw new RangeError("Invalid index.");
-        return this.value instanceof Array && this.value[idx];
+        if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
+        return this.value[idx];
     }
 
     /**
-     * Sets the element at the given index `idx` to the value `val`. Sends a mutation event
-     * with the value being an object bearing the properties:
-     * @param idx The index to mutate.
-     * @param value the new value at that index.
+     * Sets the value of an element at a specific index.
+     * @param idx The index of the element to modify.
+     * @param value The new value to set at the specified index.
+     * @throws {RangeError} If the index is out of bounds.
+     * @emits 'change' event with:
+     *   - `value`: The new value
+     *   - `idx`: The index of the modified element
      */
-    setAt(idx: number, value: T) {
+    set(idx: number, value: T) {
         if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
         this.value[idx] = value;
-        this._sendEvent({
-            type: "mutation",
-            value,
-            idx,
-        });
+        this._sendEvent({ type: "change", value, idx });
     }
 
     /**
@@ -394,27 +403,33 @@ class MapStore<T> extends Store<any> {
     }
 
     /**
-     * Sets the value for the specified key. This method sends a "set" event,
-     * with the value being an object with the properties:
-     * * `key`: the key that was set
-     * * `value`: the new value associated with the key
-     * @param key The key to set.
+     * Sets a value for a specific key in the store.
+     * @param key The key to set or update.
      * @param value The value to associate with the key.
+     * @emits 'change' event with:
+     *   - `key`: The key that was set or updated
+     *   - `value`: The new value associated with the key
      */
     set(key: string, value: T) {
         this.value.set(key, value);
         this._sendEvent({ key, value, type: 'change' });
     }
 
+    /**
+     * A no-operation method for MapStore to maintain base Store compatibility.
+     * Does not perform any action.
+     * @deprecated
+     */
     update() {
-        // no-op for MapStore
+        // Intentionally left as a no-op for MapStore
     }
 
     /**
-     * Removes the value associated with the specified key. This method sends a "remove" event,
-     * with the value being an object with the property:
-     * * `key`: the key whose value was removed
+     * Removes a key-value pair from the store.
      * @param key The key to remove.
+     * @emits 'deletion' event with:
+     *   - `key`: The key that was removed
+     *   - `value`: The current state of the map after deletion
      */
     remove(key: string) {
         this.value.delete(key);
@@ -422,7 +437,8 @@ class MapStore<T> extends Store<any> {
     }
 
     /**
-     * Clears the entire map store. This method sends a "clear" event.
+     * Removes all key-value pairs from the store.
+     * @emits 'clear' event indicating the store has been emptied.
      */
     clear() {
         this.value = new Map();
@@ -430,27 +446,35 @@ class MapStore<T> extends Store<any> {
     }
 
     /**
-     * Applies a transformation function to the value associated with the specified key.
-     * This method sends a "mutation" event, with the value being an object with the properties:
-     * * `key`: the key that was mutated
-     * * `value`: the new value after applying the transformation function
-     * @param key The key to transform.
-     * @param fn The transformation function to apply.
+     * Applies a transformation function to the value of a specific key.
+     * @param key The key whose value will be transformed.
+     * @param fn A function that takes the current value and returns a new value.
+     * @throws {Error} If the key does not exist in the store.
+     * @emits 'change' event with the transformed value (via internal `set` method)
      */
     transform(key: string, fn: (val: T) => T) {
         const old = this.value.get(key);
         if (!old) throw new Error(`ERROR: key ${key} does not exist in store!`);
         const transformed = fn(old);
         this.set(key, transformed);
+        this._sendEvent({ type: "change", value: transformed, key });
     }
 
     /**
-     * Retrieves the value associated with the specified key.
-     * @param key The key to retrieve the value for.
-     * @returns The value associated with the key.
+     * Retrieves the value associated with a specific key.
+     * @param key The key to look up.
+     * @returns The value associated with the key, or undefined if the key does not exist.
      */
     get(key: string) {
         return this.value.get(key);
+    }
+
+    has(key: string): boolean {
+        return this.value.has(key);
+    }
+
+    entries() {
+        return this.value.entries();
     }
 }
 

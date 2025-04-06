@@ -3,9 +3,10 @@ export type StoreEvent =
         type: "change";
         value: any;
         key?: string;
+        idx?: number;
     }
     | {
-        type: "mutation" | "deletion";
+        type: "deletion";
         value: any;
     } & ({ key: string } | { idx: number })
     | {
