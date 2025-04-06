@@ -26,8 +26,25 @@ const parseEltString = (str: string | undefined): TagStringParseResult => {
     } : {};
 };
 
+/**
+ * Builder class for creating and configuring HTML elements using a fluent API.
+ * 
+ * This class provides a chainable interface for configuring element properties
+ * before creating the actual DOM element with the `done()` method.
+ * 
+ * @example
+ * ```typescript
+ * // Create a button with multiple options
+ * const [button] = nu('button#submit.primary')
+ *   .content('Submit')
+ *   .attr('type', 'submit')
+ *   .on('click', () => console.log('Clicked!'))
+ *   .style('backgroundColor', 'blue')
+ *   .done();
+ * ```
+ */
 export class NuBuilder<T extends string, E extends InferElementType<T>, D extends Record<string, Store<any>>> {
-    props: ElementProperties<E, D>;
+    props: ElementProperties<E, D> = {};
     info: T;
 
     constructor(info: T, props?: ElementProperties<E, D>) {
