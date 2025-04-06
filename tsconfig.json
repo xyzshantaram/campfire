@@ -11,8 +11,7 @@
         ],
         "module": "NodeNext",
         "declaration": true,
-        "moduleResolution": "nodenext",
-        "noEmit": true,
+        "emitDeclarationOnly": true,
         "allowImportingTsExtensions": true
     },
     "include": [
