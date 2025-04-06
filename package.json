@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@asamuzakjp/dom-selector": "^6.4.7",
     "@testing-library/dom": "^9.3.4",
     "@types/chai": "^4.3.11",
     "@types/jsdom": "^21.1.6",
@@ -28,9 +29,9 @@
     "dist"
   ],
   "scripts": {
-    "test": "npx tsc --no-emit && npx mocha",
+    "test": "npx tsc --noEmit && npx mocha 'src/**/*.test.{js,ts}'",
     "mkdocs": "npx typedoc src/campfire.ts src/types.ts --cleanOutputDir --out site/docs/ --darkHighlightTheme material-palenight --customCss site/tsdoc_style.css && cp campfire.png site/docs/campfire.png",
-    "build": "node esbuild.config.js && npm test && cp dist/testing/* dist/ && rm -rf dist/testing/"
+    "build": "pnpm test && node esbuild.config.js"
   },
   "repository": {
     "type": "git",
@@ -47,5 +48,8 @@
     "url": "https://github.com/xyzshantaram/campfire/issues"
   },
   "homepage": "https://xyzshantaram.github.io/campfire/",
-  "type": "module"
+  "type": "module",
+  "pnpm.onlyBuiltDependencies": [
+    "esbuild"
+  ]
 }

@@ -1,4 +1,4 @@
-import { Store } from '../stores/mod.ts';
+import type { Store } from '../stores/mod.ts';
 import type { ElementProperties, InferElementType, RenderFunction } from '../types.ts';
 import { escape } from '../utils.ts';
 import { NuBuilder } from './NuBuilder.ts';

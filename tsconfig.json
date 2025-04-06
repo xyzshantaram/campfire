@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "./dist/testing",
+        "outDir": "./dist",
         "allowJs": true,
         "target": "es6",
         "noImplicitAny": true,
@@ -20,5 +20,7 @@
     "exclude": [
         "./src/**/*.test.ts",
         "./src/**/*.test.js",
+        "./test/setup.ts",
+        "node_modules"
     ]
 }

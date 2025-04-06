@@ -7,9 +7,7 @@ import { Store } from "./Store.ts";
     * remove() sends a "deletion" event
     * setAt() sends a "change" event with idx
 */
-export class ListStore<T> extends Store<any> {
-    value: T[];
-
+export class ListStore<T> extends Store<T[]> {
     constructor(ls?: T[]) {
         super(ls);
     }
