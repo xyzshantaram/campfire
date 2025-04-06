@@ -1,4 +1,4 @@
-import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template, StoreEvent, StoreInitializer } from './types';
+import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template, StoreEvent, StoreInitializer, InferElementType } from './types';
 
 interface RawHtml {
     raw: true,
@@ -79,10 +79,12 @@ const _parseEltString = (str: string | undefined): TagStringParseResult => {
  * @param elem The element to modify.
  * @param args Properties to set on the element.
  */
-const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
+const extend = <T extends HTMLElement>(
+    elem: T,
+    args: ElementProperties = {}
+): [T, ...HTMLElement[]] => {
     let { contents, c, misc, m, style, s, on, attrs, a, raw, g, gimme } = args;
 
-    let result: (HTMLElement | null)[] = [elem];
     contents = contents || c || '';
     contents = raw ? contents : escape(contents);
     if (contents) elem.innerHTML = contents;
@@ -90,17 +92,25 @@ const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
     Object.assign(elem, misc || m);
     Object.assign(elem.style, style || s);
 
-    const toGet = gimme || g || [];
-    if (toGet && toGet.length) {
-        for (const selector of toGet) {
-            result.push(elem.querySelector(selector));
-        }
+    Object.entries(on || {}).forEach(([evt, listener]) =>
+        elem.addEventListener(evt, listener)
+    );
+
+    Object.entries(attrs || a || {}).forEach(([attr, value]) =>
+        elem.setAttribute(attr, value)
+    );
+
+    const extras: HTMLElement[] = [];
+    for (const selector of gimme || g || []) {
+        const found = elem.querySelector(selector);
+        extras.push(found as HTMLElement);
     }
 
-    Object.entries(on || {}).forEach(([evt, listener]) => elem.addEventListener(evt, listener));
-    Object.entries(attrs || a || {}).forEach(([attr, value]) => elem.setAttribute(attr, value));
+    return [elem, ...extras];
+};
 
-    return result as HTMLElement[];
+const createTypedElement = <K extends keyof HTMLElementTagNameMap>(name: K) => {
+    return document.createElement(name);
 }
 
 /**
@@ -129,22 +139,27 @@ const extend = (elem: HTMLElement, args: ElementProperties = {}) => {
  * }) // Output is still a list [<span.some-span>]
  * ```
  */
-const nu = (eltInfo: string, args: ElementProperties = {}) => {
+const nu = <T extends string>(
+    eltInfo: T,
+    args: ElementProperties = {}
+): [InferElementType<T>, ...HTMLElement[]] => {
     let { tag, id, classes } = _parseEltString(eltInfo);
 
-    if (classes?.some(itm => itm.includes("#"))) {
-        throw new Error("Error: Found # in a class name. " +
-            "Did you mean to do elt#id.classes instead of elt.classes#id?");
+    if (classes?.some((itm) => itm.includes('#'))) {
+        throw new Error(
+            "Error: Found # in a class name. " +
+            "Did you mean to do elt#id.classes instead of elt.classes#id?"
+        );
     }
 
     if (!tag) tag = 'div';
-    let elem = document.createElement(tag);
+    const elem = createTypedElement(tag as keyof HTMLElementTagNameMap);
 
     if (id) elem.id = id;
     (classes || []).forEach((cls) => elem.classList.add(cls));
 
-    return extend(elem, args);
-}
+    return extend(elem as InferElementType<T>, args);
+};
 
 /**
  * Inserts an element into the DOM given a reference element and the relative position
@@ -191,12 +206,28 @@ const insert = (elem: Element, where: ElementPosition) => {
     return elem;
 }
 
+const storeIds = new Set<string>();
+const genId = () => 'cf-' + Math.random().toString(36).slice(2, 8);
+
+const storeId = () => {
+    let id = genId();
+    while (storeIds.has(id)) id = genId();
+    storeIds.add(id);
+    return id;
+}
+
 /**
  * A simple reactive store.
  * @class Store
  * @public
  */
 class Store<T> {
+    /**
+     * A unique ID for the store, to track nested reactive elements to warn the user.
+     * @internal
+     */
+    id = storeId();
+
     /**  The value of the store. */
     value: T;
     /** 

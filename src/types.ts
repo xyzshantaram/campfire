@@ -102,3 +102,11 @@ export type ElementPosition =
     | { before: HTMLElement }
     | { after: HTMLElement }
     | { into: HTMLElement; at?: "start" };
+
+type TagName = keyof HTMLElementTagNameMap;
+
+type EltInfoToTag<T extends string> =
+    T extends `${infer TagNameOnly extends TagName}${string}` ? TagNameOnly : 'div';
+
+export type InferElementType<T extends string> =
+    HTMLElementTagNameMap[EltInfoToTag<T>];
