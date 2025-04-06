@@ -27,15 +27,16 @@ export const r = (val: any, options?: RawHtmlOptions): RawHtml => {
 }
 
 /**
- * 
+ * Creates an HTML string with automatic escaping of interpolated values.
+ * Use r() to prevent escaping specific values.
  * @param strings The constant portions of the template string.
- * @param values The templated values.
- * @returns The built HTML.
+ * @param values The dynamic values to be interpolated (automatically escaped unless wrapped with r()).
+ * @returns The built HTML string with all values properly escaped.
  * @example
  * ```
  * const unsafe = `oops <script>alert(1)</script>`;
- * testing.innerHTML = html`foo bar baz ${unsafe}`;
- * console.assert(testing === "foo bar baz oops%20%3Cscript%3Ealert%281%29%3C/script%3E");
+ * testing.innerHTML = html`foo bar baz ${unsafe}`; // Values are automatically escaped
+ * const safeHtml = html`<div>${r("<b>Bold</b>")}</div>`; // Using r() to prevent escaping
  * ```
  */
 export const html = (strings: TemplateStringsArray, ...values: (string | number | RawHtml)[]) => {
