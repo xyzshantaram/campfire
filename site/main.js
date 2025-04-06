@@ -1,12 +1,12 @@
 import cf from 'https://esm.sh/campfire.js@2.2.0/';
-import { marked } from 'https://esm.sh/marked';
+import { marked } from 'https://esm.sh/marked@15.0.7';
 import toml from 'https://esm.sh/toml';
 
 window.cf = cf;
 
 const PageRenderer = {
-    code: (code, infostring, escaped) => {
-        code = code.replace(/\n$/, '') + '\n';
+    code: (code, _info, escaped) => {
+        code = code.text.replace(/\n$/, '') + '\n';
 
         return '<pre class="microlight"><code>'
             + (escaped ? code : cf.escape(code, true))
