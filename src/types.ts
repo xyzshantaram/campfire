@@ -2,7 +2,7 @@
 export type Subscriber = (value: any) => void;
 
 /** A generic signature for an event handler type. */
-export type EventHandler = (e: Event) => unknown;
+export type DomEventHandler = (e: Event) => unknown;
 
 /** The function signature for a function returned by `template()`. */
 export type Template = (e: Record<string, any>) => string;
@@ -41,7 +41,7 @@ export interface ElementProperties {
     /** An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
-    on?: Record<string, EventHandler>,
+    on?: Record<string, DomEventHandler>,
 
     /** Attributes that will be set on the element using `Element.setAttribute`. */
     attrs?: Record<string, string>,
@@ -68,9 +68,7 @@ export interface TagStringParseResult {
     classes?: string[] | undefined
 }
 
-export interface ElementPosition {
-    before?: HTMLElement;
-    after?: HTMLElement;
-    prependTo?: HTMLElement;
-    appendTo?: HTMLElement;
-}
+export type ElementPosition =
+    { before: HTMLElement } |
+    { after: HTMLElement } |
+    { into: HTMLElement, at?: 'start' };

@@ -154,9 +154,9 @@ const nu = (eltInfo: string, args: ElementProperties = {}) => {
  * parent, after `reference`.
  * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
  * parent, before `reference`.
- * * if `where` looks like `{ prependTo: reference }`, the element is inserted into `reference`,
- * before its first child.
- * * if `where` looks like `{ appendTo: reference }`, the element is inserted into `reference`,
+ * * if `where` looks like `{ into: reference, at: 'start' }`, the element is inserted into 
+ * `reference`, before its first child.
+ * * if `where` looks like `{ into: reference }`, the element is inserted into `reference`,
  * after its last child.
  * @param elem The element to insert.
  * @param where An object specifying where to insert `elem` relative to another element.
@@ -169,25 +169,18 @@ const insert = (elem: Element, where: ElementPosition) => {
         throw new Error("Too many or too few positions specified.");
     }
 
-    const ref: HTMLElement = Object.values(where)[0];
-    let position: InsertPosition = 'afterend';
+    const ref: HTMLElement = Object.values(where).filter(itm => itm instanceof HTMLElement)[0];
 
-    if (where.after) {
+    let position: InsertPosition = 'beforeend';
+    if ('after' in where) {
         position = 'afterend';
     }
-
-    else if (where.before) {
+    else if ('before' in where) {
         position = 'beforebegin';
     }
-
-    else if (where.prependTo) {
+    else if ('into' in where && where.at === 'start') {
         position = 'afterbegin';
     }
-
-    else if (where.appendTo) {
-        position = 'beforeend';
-    }
-
     ref.insertAdjacentElement(position, elem);
 
     return elem;
