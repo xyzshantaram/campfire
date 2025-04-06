@@ -1,4 +1,4 @@
-import { ElementProperties, ElementPosition, Subscriber, Template } from './types';
+import { ElementProperties, ElementPosition, Subscriber, Template, StoreEvent, StoreInitializer } from './types';
 interface RawHtml {
     raw: true;
     contents: string;
@@ -71,9 +71,9 @@ declare const nu: (eltInfo: string, args?: ElementProperties) => HTMLElement[];
  * parent, after `reference`.
  * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
  * parent, before `reference`.
- * * if `where` looks like `{ prependTo: reference }`, the element is inserted into `reference`,
- * before its first child.
- * * if `where` looks like `{ appendTo: reference }`, the element is inserted into `reference`,
+ * * if `where` looks like `{ into: reference, at: 'start' }`, the element is inserted into
+ * `reference`, before its first child.
+ * * if `where` looks like `{ into: reference }`, the element is inserted into `reference`,
  * after its last child.
  * @param elem The element to insert.
  * @param where An object specifying where to insert `elem` relative to another element.
@@ -93,7 +93,9 @@ declare class Store<T> {
      * The subscribers currently registered to the store.
      * @internal
     */
-    _subscribers: Record<string, Record<number, Subscriber>>;
+    _subscribers: {
+        [K in StoreEvent['type']]?: Record<number, Subscriber>;
+    };
     /**
      * The subscribers currently registered to the store.
      * @internal
@@ -108,37 +110,41 @@ declare class Store<T> {
      * Creates an instance of Store.
      * @param value - The initial value of the store.
      */
-    constructor(value: T);
+    constructor(value?: T);
     /**
      * Add an event listener to the store.
      * @param type The type of event to listen for.
-     * @param fn A function that will be called every time the store experiences an event of type `type`.
-     * @param callNow Whether the function should be called once with the current value of the store.
-     * The function will not be called for ListStore events "push", "remove", or "mutation".
-     * @returns A number which can be passed to `Store.unsubscribe` to stop `fn` from being called from then on.
+     *   Supported event types include:
+     *   - 'change': Triggered when the store's value is updated via `update()`.
+     *   - Other custom event types may be supported depending on the store implementation.
+     * @param fn A callback function that will be invoked when the specified event occurs.
+     *   The function receives a `StoreEvent` object with details about the event.
+     * @param callNow Determines whether the callback should be immediately invoked
+     *   with the current store value. Note: Not applicable for events like "append",
+     *   "remove" which have list/map-specific behaviors.
+     * @returns A unique subscriber ID that can be used to unsubscribe the listener.
+     * @throws May throw an error if the event type is invalid or if the callback is not a function.
      */
-    on(type: string, fn: Subscriber, callNow?: boolean): number;
+    on(type: StoreEvent['type'], fn: Subscriber, callNow?: boolean): number;
     /**
-     *
-     * @param type The type of event to unsubscribe from.
-     * @param id The value returned by `Store.on` when the subscriber was registered.
+     * Removes a specific event listener from the store.
+     * @param type The type of event from which to unsubscribe.
+     * @param id The subscriber ID returned by the `on()` method when the listener was registered.
+     * @throws Will throw an error if the subscriber ID is invalid or not found.
      */
-    unsubscribe(type: string, id: number): void;
+    unsubscribe(type: StoreEvent['type'], id: number): void;
     /**
-     * Sets the value of the store to be `value`. All subscribers to the "update" event are called.
-     * @param value The new value to store.
+     * Updates the store's value and notifies all subscribers.
+     * @param value The new value to set for the store.
+     * @emits 'change' event with the new value when successfully updated.
+     * @note No-op if the store has been disposed via `dispose()`.
      */
     update(value: T): void;
-    /**
-     * Forces all subscribers to the "update" event to be called.
-     * @param value The new value to store.
-     */
-    refresh(): void;
     /**
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
     */
-    _sendEvent(type: string, value: T): void;
+    _sendEvent(event: StoreEvent): void;
     /**
      * Close the store so it no longer sends events.
      */
@@ -153,51 +159,57 @@ declare class Store<T> {
 */
 declare class ListStore<T> extends Store<any> {
     value: T[];
-    constructor(ls: T[]);
+    constructor(ls?: T[]);
     /**
-     * Empties out the list store.
-     *
-     * A helper function that sends an `update` event
-     * and sets the value of the store to [].
+     * Clears all elements from the store.
+     * @description Sets the store's value to an empty array and triggers a 'clear' event.
+     * @emits 'clear' event.
      */
     clear(): void;
     /**
-     * Append the value `val` to the end of the list. This method sends a "push" event,
-     * with the value being an object with the properties:
-     * * `value`: the value that was pushed
-     * * `idx`: the index of the new value.
-     * @param val The value to append.
+     * Appends a new element to the end of the list.
+     * @param val The value to add to the list.
+     * @returns The new length of the list after appending.
+     * @emits 'append' event with:
+     *   - `value`: The appended item
+     *   - `idx`: The index where the item was inserted (length - 1)
      */
-    push(val: T): void;
+    push(val: T): number;
     /**
-     * Remove the element at the index `idx`. This method sends a "remove" event,
-     * with the value being an object with the properties:
-     * * `value`: the value that was removed
-     * * `idx`: the index the removed value was at
-     * @param val The value to append.
+     * Removes the element at the specified index.
+     * @param idx The index of the element to remove.
+     * @throws {RangeError} If the index is out of bounds.
+     * @emits 'deletion' event with:
+     *   - `value`: The removed item
+     *   - `idx`: The index from which the item was removed
      */
     remove(idx: number): void;
     /**
-     * Retrieves the value at the given index.
-     * @param idx The index of the value to retrieve.
-     * @returns The value at the index `idx`.
+     * Retrieves the element at the specified index.
+     * @param idx The index of the element to retrieve.
+     * @returns The element at the specified index.
+     * @throws {RangeError} If the index is out of bounds.
      */
-    get(idx: number): false | T;
+    get(idx: number): T;
     /**
-     * Sets the element at the given index `idx` to the value `val`. Sends a mutation event
-     * with the value being an object bearing the properties:
-     * @param idx The index to mutate.
-     * @param val the new value at that index.
+     * Sets the value of an element at a specific index.
+     * @param idx The index of the element to modify.
+     * @param value The new value to set at the specified index.
+     * @throws {RangeError} If the index is out of bounds.
+     * @emits 'change' event with:
+     *   - `value`: The new value
+     *   - `idx`: The index of the modified element
      */
-    setAt(idx: number, val: T): void;
+    set(idx: number, value: T): void;
     /**
      * Utility accessor to find the length of the store.
      */
     get length(): number;
 }
 /**
- * A reactive map store. [UNSTABLE: DO NOT USE!]
- * Implements set(key, value), remove(key), clear(), transform(key, fn), and get(key).
+ * A reactive map store.
+ * Implements set(key, value), remove(key), clear(), transform(key, fn), has(key), entries(),
+ * and get(key).
  * set() sends a "set" event, remove() sends a "remove" event, clear() sends a "clear" event,
  * and transform() sends a "mutation" event.
  */
@@ -208,42 +220,51 @@ declare class MapStore<T> extends Store<any> {
      * Initializes the store with the provided initial key-value pairs.
      * @param init Initial key-value pairs to populate the store.
      */
-    constructor(init: Record<string, T>);
+    constructor(init?: Record<string, T>);
     /**
-     * Sets the value for the specified key. This method sends a "set" event,
-     * with the value being an object with the properties:
-     * * `key`: the key that was set
-     * * `value`: the new value associated with the key
-     * @param key The key to set.
+     * Sets a value for a specific key in the store.
+     * @param key The key to set or update.
      * @param value The value to associate with the key.
+     * @emits 'change' event with:
+     *   - `key`: The key that was set or updated
+     *   - `value`: The new value associated with the key
      */
     set(key: string, value: T): void;
     /**
-     * Removes the value associated with the specified key. This method sends a "remove" event,
-     * with the value being an object with the property:
-     * * `key`: the key whose value was removed
+     * A no-operation method for MapStore to maintain base Store compatibility.
+     * Does not perform any action.
+     * @deprecated
+     */
+    update(): void;
+    /**
+     * Removes a key-value pair from the store.
      * @param key The key to remove.
+     * @emits 'deletion' event with:
+     *   - `key`: The key that was removed
+     *   - `value`: The current state of the map after deletion
      */
     remove(key: string): void;
     /**
-     * Clears the entire map store. This method sends a "clear" event.
+     * Removes all key-value pairs from the store.
+     * @emits 'clear' event indicating the store has been emptied.
      */
     clear(): void;
     /**
-     * Applies a transformation function to the value associated with the specified key.
-     * This method sends a "mutation" event, with the value being an object with the properties:
-     * * `key`: the key that was mutated
-     * * `value`: the new value after applying the transformation function
-     * @param key The key to transform.
-     * @param fn The transformation function to apply.
+     * Applies a transformation function to the value of a specific key.
+     * @param key The key whose value will be transformed.
+     * @param fn A function that takes the current value and returns a new value.
+     * @throws {Error} If the key does not exist in the store.
+     * @emits 'change' event with the transformed value (via internal `set` method)
      */
     transform(key: string, fn: (val: T) => T): void;
     /**
-     * Retrieves the value associated with the specified key.
-     * @param key The key to retrieve the value for.
-     * @returns The value associated with the key.
+     * Retrieves the value associated with a specific key.
+     * @param key The key to look up.
+     * @returns The value associated with the key, or undefined if the key does not exist.
      */
     get(key: string): T | undefined;
+    has(key: string): boolean;
+    entries(): IterableIterator<[string, T]>;
 }
 /**
  * Applies mustache templating to a string. Any names surrounded by {{ }} will be
@@ -296,20 +317,20 @@ declare const unescape: (str: string) => string;
  * @returns void
  */
 declare const onload: (cb: (ev: Event) => void) => void;
+export interface SelectParams {
+    /** The selector to query for. */
+    selector: string;
+    /** The parent node to query. Defaults to `document`. */
+    from?: ParentNode;
+    /** Whether to return all elements matching the given selector or just the first. */
+    all?: true;
+}
 /**
  * Queries the DOM for a particular selector, and returns the first element matching it.
- * @param selector The selector to query.
- * @param from The node to query.
- * @returns The first element matching the given selector, or null.
+ * @param opts See SelectParams.
+ * @returns Element(s) matching the given selector, or an empty list.
  */
-declare const select: (selector: string, from?: Document) => Element | null;
-/**
- * Queries the DOM for a particular selector, and returns all elements that match it.
- * @param selector The selector to query.
- * @param from The node to query.
- * @returns An array of elements matching the given selector.
- */
-declare const selectAll: (selector: string, from?: Document) => Element[];
+declare const select: ({ selector, all, from }: SelectParams) => (Element | null)[];
 /**
  * Removes `elt` from the DOM.
  * @param elt The element to remove.
@@ -322,9 +343,9 @@ declare const rm: (elt: Element) => void;
  */
 declare const empty: (elt: Element) => void;
 declare const seq: (...args: number[]) => number[];
+declare const store: <T>(opts: StoreInitializer<T>) => ListStore<T> | MapStore<T> | Store<T>;
 declare const _default: {
-    Store: typeof Store;
-    ListStore: typeof ListStore;
+    store: <T>(opts: StoreInitializer<T>) => ListStore<T> | MapStore<T> | Store<T>;
     nu: (eltInfo: string, args?: ElementProperties) => HTMLElement[];
     mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
     template: (str: string, shouldEscape?: boolean) => Template;
@@ -334,14 +355,12 @@ declare const _default: {
     insert: (elem: Element, where: ElementPosition) => Element;
     empty: (elt: Element) => void;
     rm: (elt: Element) => void;
-    selectAll: (selector: string, from?: Document) => Element[];
-    select: (selector: string, from?: Document) => Element | null;
+    select: ({ selector, all, from }: SelectParams) => (Element | null)[];
     onload: (cb: (ev: Event) => void) => void;
     html: (strings: TemplateStringsArray, ...values: (string | number | RawHtml)[]) => string;
     r: (val: any, options?: RawHtmlOptions | undefined) => RawHtml;
     seq: (...args: number[]) => number[];
-    MapStore: typeof MapStore;
 };
 export default _default;
-export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore };
+export { store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq };
 export type { RawHtml, ElementPosition, ElementProperties, Subscriber, Template };

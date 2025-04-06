@@ -130,9 +130,9 @@ const nu = (eltInfo, args = {}) => {
  * parent, after `reference`.
  * * if `where` looks like `{ before: reference }`, the element is inserted into `reference`'s
  * parent, before `reference`.
- * * if `where` looks like `{ prependTo: reference }`, the element is inserted into `reference`,
- * before its first child.
- * * if `where` looks like `{ appendTo: reference }`, the element is inserted into `reference`,
+ * * if `where` looks like `{ into: reference, at: 'start' }`, the element is inserted into
+ * `reference`, before its first child.
+ * * if `where` looks like `{ into: reference }`, the element is inserted into `reference`,
  * after its last child.
  * @param elem The element to insert.
  * @param where An object specifying where to insert `elem` relative to another element.
@@ -144,19 +144,22 @@ const insert = (elem, where) => {
     if (keys.length !== 1) {
         throw new Error("Too many or too few positions specified.");
     }
-    const ref = Object.values(where)[0];
-    let position = 'afterend';
-    if (where.after) {
+    let position = 'beforeend';
+    let ref;
+    if ('after' in where) {
         position = 'afterend';
+        ref = where.after;
     }
-    else if (where.before) {
+    else if ('before' in where) {
         position = 'beforebegin';
+        ref = where.before;
     }
-    else if (where.prependTo) {
+    else if ('into' in where && where.at === 'start') {
         position = 'afterbegin';
+        ref = where.into;
     }
-    else if (where.appendTo) {
-        position = 'beforeend';
+    else {
+        ref = where.into;
     }
     ref.insertAdjacentElement(position, elem);
     return elem;
@@ -187,60 +190,69 @@ class Store {
          * @internal
          */
         this._dead = false;
-        this.value = value;
+        if (value)
+            this.value = value;
     }
     /**
      * Add an event listener to the store.
      * @param type The type of event to listen for.
-     * @param fn A function that will be called every time the store experiences an event of type `type`.
-     * @param callNow Whether the function should be called once with the current value of the store.
-     * The function will not be called for ListStore events "push", "remove", or "mutation".
-     * @returns A number which can be passed to `Store.unsubscribe` to stop `fn` from being called from then on.
+     *   Supported event types include:
+     *   - 'change': Triggered when the store's value is updated via `update()`.
+     *   - Other custom event types may be supported depending on the store implementation.
+     * @param fn A callback function that will be invoked when the specified event occurs.
+     *   The function receives a `StoreEvent` object with details about the event.
+     * @param callNow Determines whether the callback should be immediately invoked
+     *   with the current store value. Note: Not applicable for events like "append",
+     *   "remove" which have list/map-specific behaviors.
+     * @returns A unique subscriber ID that can be used to unsubscribe the listener.
+     * @throws May throw an error if the event type is invalid or if the callback is not a function.
      */
     on(type, fn, callNow = false) {
+        var _a;
+        var _b;
         this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
-        this._subscribers[type] = this._subscribers[type] || {};
+        (_a = (_b = this._subscribers)[type]) !== null && _a !== void 0 ? _a : (_b[type] = {});
         this._subscribers[type][this._subscriberCounts[type]] = fn;
         if (callNow && !["push", "remove", "mutation", "setAt"].includes(type)) {
-            fn(this.value);
+            fn({ type: 'change', value: this.value });
         }
         return this._subscriberCounts[type]++;
     }
     /**
-     *
-     * @param type The type of event to unsubscribe from.
-     * @param id The value returned by `Store.on` when the subscriber was registered.
+     * Removes a specific event listener from the store.
+     * @param type The type of event from which to unsubscribe.
+     * @param id The subscriber ID returned by the `on()` method when the listener was registered.
+     * @throws Will throw an error if the subscriber ID is invalid or not found.
      */
     unsubscribe(type, id) {
-        delete this._subscribers[type][id];
+        var _a;
+        (_a = this._subscribers[type]) === null || _a === void 0 ? true : delete _a[id];
     }
     /**
-     * Sets the value of the store to be `value`. All subscribers to the "update" event are called.
-     * @param value The new value to store.
+     * Updates the store's value and notifies all subscribers.
+     * @param value The new value to set for the store.
+     * @emits 'change' event with the new value when successfully updated.
+     * @note No-op if the store has been disposed via `dispose()`.
      */
     update(value) {
         if (this._dead)
             return;
         this.value = value;
-        this._sendEvent("update", value);
-    }
-    /**
-     * Forces all subscribers to the "update" event to be called.
-     * @param value The new value to store.
-     */
-    refresh() {
-        this._sendEvent("refresh", this.value);
+        this._sendEvent({ type: 'change', value });
     }
     /**
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
     */
-    _sendEvent(type, value) {
+    _sendEvent(event) {
         if (this._dead)
             return;
-        this._subscribers[type] = this._subscribers[type] || {};
-        for (const idx in Object.keys(this._subscribers[type])) {
-            this._subscribers[type][idx](value);
+        this._subscribers[event.type] = this._subscribers[event.type] || {};
+        const subs = this._subscribers[event.type];
+        if (!subs)
+            return;
+        for (const idx in Object.keys(subs)) {
+            subs[idx](event);
         }
     }
     /**
@@ -264,67 +276,69 @@ class ListStore extends Store {
         super(ls);
     }
     /**
-     * Empties out the list store.
-     *
-     * A helper function that sends an `update` event
-     * and sets the value of the store to [].
+     * Clears all elements from the store.
+     * @description Sets the store's value to an empty array and triggers a 'clear' event.
+     * @emits 'clear' event.
      */
     clear() {
-        this.update([]);
+        this.value = [];
+        this._sendEvent({ type: "clear" });
     }
     /**
-     * Append the value `val` to the end of the list. This method sends a "push" event,
-     * with the value being an object with the properties:
-     * * `value`: the value that was pushed
-     * * `idx`: the index of the new value.
-     * @param val The value to append.
+     * Appends a new element to the end of the list.
+     * @param val The value to add to the list.
+     * @returns The new length of the list after appending.
+     * @emits 'append' event with:
+     *   - `value`: The appended item
+     *   - `idx`: The index where the item was inserted (length - 1)
      */
     push(val) {
         this.value.push(val);
-        this._sendEvent("push", {
-            value: val,
-            idx: this.value.length - 1
-        });
+        this._sendEvent({ type: "append", value: val, idx: this.value.length - 1 });
+        return this.value.length;
     }
     /**
-     * Remove the element at the index `idx`. This method sends a "remove" event,
-     * with the value being an object with the properties:
-     * * `value`: the value that was removed
-     * * `idx`: the index the removed value was at
-     * @param val The value to append.
+     * Removes the element at the specified index.
+     * @param idx The index of the element to remove.
+     * @throws {RangeError} If the index is out of bounds.
+     * @emits 'deletion' event with:
+     *   - `value`: The removed item
+     *   - `idx`: The index from which the item was removed
      */
     remove(idx) {
         if (idx < 0 || idx >= this.value.length)
             throw new RangeError("Invalid index.");
-        this._sendEvent("remove", {
-            value: this.value.splice(idx, 1)[0],
-            idx: idx
+        this._sendEvent({
+            type: 'deletion',
+            idx,
+            value: this.value.splice(idx, 1)[0]
         });
     }
     /**
-     * Retrieves the value at the given index.
-     * @param idx The index of the value to retrieve.
-     * @returns The value at the index `idx`.
+     * Retrieves the element at the specified index.
+     * @param idx The index of the element to retrieve.
+     * @returns The element at the specified index.
+     * @throws {RangeError} If the index is out of bounds.
      */
     get(idx) {
-        if (idx < 0 || idx > this.value.length)
-            throw new RangeError("Invalid index.");
-        return this.value instanceof Array && this.value[idx];
-    }
-    /**
-     * Sets the element at the given index `idx` to the value `val`. Sends a mutation event
-     * with the value being an object bearing the properties:
-     * @param idx The index to mutate.
-     * @param val the new value at that index.
-     */
-    setAt(idx, val) {
         if (idx < 0 || idx >= this.value.length)
             throw new RangeError("Invalid index.");
-        this.value[idx] = val;
-        this._sendEvent("mutation", {
-            value: val,
-            idx: idx,
-        });
+        return this.value[idx];
+    }
+    /**
+     * Sets the value of an element at a specific index.
+     * @param idx The index of the element to modify.
+     * @param value The new value to set at the specified index.
+     * @throws {RangeError} If the index is out of bounds.
+     * @emits 'change' event with:
+     *   - `value`: The new value
+     *   - `idx`: The index of the modified element
+     */
+    set(idx, value) {
+        if (idx < 0 || idx >= this.value.length)
+            throw new RangeError("Invalid index.");
+        this.value[idx] = value;
+        this._sendEvent({ type: "change", value, idx });
     }
     /**
      * Utility accessor to find the length of the store.
@@ -334,8 +348,9 @@ class ListStore extends Store {
     }
 }
 /**
- * A reactive map store. [UNSTABLE: DO NOT USE!]
- * Implements set(key, value), remove(key), clear(), transform(key, fn), and get(key).
+ * A reactive map store.
+ * Implements set(key, value), remove(key), clear(), transform(key, fn), has(key), entries(),
+ * and get(key).
  * set() sends a "set" event, remove() sends a "remove" event, clear() sends a "clear" event,
  * and transform() sends a "mutation" event.
  */
@@ -348,50 +363,55 @@ class MapStore extends Store {
     constructor(init) {
         super(new Map());
         // Populates the store with initial key-value pairs.
-        for (const [k, v] of Object.entries(init)) {
+        for (const [k, v] of Object.entries(init || {})) {
             this.value.set(k, v);
         }
     }
     /**
-     * Sets the value for the specified key. This method sends a "set" event,
-     * with the value being an object with the properties:
-     * * `key`: the key that was set
-     * * `value`: the new value associated with the key
-     * @param key The key to set.
+     * Sets a value for a specific key in the store.
+     * @param key The key to set or update.
      * @param value The value to associate with the key.
+     * @emits 'change' event with:
+     *   - `key`: The key that was set or updated
+     *   - `value`: The new value associated with the key
      */
     set(key, value) {
         this.value.set(key, value);
-        this._sendEvent('set', {
-            key, value
-        });
+        this._sendEvent({ key, value, type: 'change' });
     }
     /**
-     * Removes the value associated with the specified key. This method sends a "remove" event,
-     * with the value being an object with the property:
-     * * `key`: the key whose value was removed
+     * A no-operation method for MapStore to maintain base Store compatibility.
+     * Does not perform any action.
+     * @deprecated
+     */
+    update() {
+        // Intentionally left as a no-op for MapStore
+    }
+    /**
+     * Removes a key-value pair from the store.
      * @param key The key to remove.
+     * @emits 'deletion' event with:
+     *   - `key`: The key that was removed
+     *   - `value`: The current state of the map after deletion
      */
     remove(key) {
         this.value.delete(key);
-        this._sendEvent('remove', {
-            key, value: this.value
-        });
+        this._sendEvent({ key, value: this.value, type: 'deletion' });
     }
     /**
-     * Clears the entire map store. This method sends a "clear" event.
+     * Removes all key-value pairs from the store.
+     * @emits 'clear' event indicating the store has been emptied.
      */
     clear() {
         this.value = new Map();
-        this._sendEvent('clear', undefined);
+        this._sendEvent({ type: 'clear' });
     }
     /**
-     * Applies a transformation function to the value associated with the specified key.
-     * This method sends a "mutation" event, with the value being an object with the properties:
-     * * `key`: the key that was mutated
-     * * `value`: the new value after applying the transformation function
-     * @param key The key to transform.
-     * @param fn The transformation function to apply.
+     * Applies a transformation function to the value of a specific key.
+     * @param key The key whose value will be transformed.
+     * @param fn A function that takes the current value and returns a new value.
+     * @throws {Error} If the key does not exist in the store.
+     * @emits 'change' event with the transformed value (via internal `set` method)
      */
     transform(key, fn) {
         const old = this.value.get(key);
@@ -399,14 +419,21 @@ class MapStore extends Store {
             throw new Error(`ERROR: key ${key} does not exist in store!`);
         const transformed = fn(old);
         this.set(key, transformed);
+        this._sendEvent({ type: "change", value: transformed, key });
     }
     /**
-     * Retrieves the value associated with the specified key.
-     * @param key The key to retrieve the value for.
-     * @returns The value associated with the key.
+     * Retrieves the value associated with a specific key.
+     * @param key The key to look up.
+     * @returns The value associated with the key, or undefined if the key does not exist.
      */
     get(key) {
         return this.value.get(key);
+    }
+    has(key) {
+        return this.value.has(key);
+    }
+    entries() {
+        return this.value.entries();
     }
 }
 /**
@@ -506,18 +533,18 @@ const unescape = (str) => {
 const onload = (cb) => globalThis.addEventListener('DOMContentLoaded', cb);
 /**
  * Queries the DOM for a particular selector, and returns the first element matching it.
- * @param selector The selector to query.
- * @param from The node to query.
- * @returns The first element matching the given selector, or null.
+ * @param opts See SelectParams.
+ * @returns Element(s) matching the given selector, or an empty list.
  */
-const select = (selector, from = document) => from.querySelector(selector);
-/**
- * Queries the DOM for a particular selector, and returns all elements that match it.
- * @param selector The selector to query.
- * @param from The node to query.
- * @returns An array of elements matching the given selector.
- */
-const selectAll = (selector, from = document) => Array.from(from.querySelectorAll(selector));
+const select = ({ selector, all, from }) => {
+    from !== null && from !== void 0 ? from : (from = document);
+    if (all) {
+        return Array.from(from.querySelectorAll(selector));
+    }
+    else {
+        return [from.querySelector(selector)];
+    }
+};
 /**
  * Removes `elt` from the DOM.
  * @param elt The element to remove.
@@ -545,7 +572,16 @@ const seq = (...args) => {
     }
     return result;
 };
-export default {
-    Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore
+const store = (opts) => {
+    if ('type' in opts) {
+        if (opts.type === 'list')
+            return new ListStore(opts.value);
+        else if (opts.type === 'map')
+            return new MapStore(opts.value);
+    }
+    return new Store(opts.value);
 };
-export { Store, ListStore, nu, mustache, template, escape, unescape, extend, insert, empty, rm, selectAll, select, onload, html, r, seq, MapStore };
+export default {
+    store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq
+};
+export { store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq };

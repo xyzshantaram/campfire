@@ -68,16 +68,19 @@ var insert = (elem, where) => {
   if (keys.length !== 1) {
     throw new Error("Too many or too few positions specified.");
   }
-  const ref = Object.values(where)[0];
-  let position = "afterend";
-  if (where.after) {
+  let position = "beforeend";
+  let ref;
+  if ("after" in where) {
     position = "afterend";
-  } else if (where.before) {
+    ref = where.after;
+  } else if ("before" in where) {
     position = "beforebegin";
-  } else if (where.prependTo) {
+    ref = where.before;
+  } else if ("into" in where && where.at === "start") {
     position = "afterbegin";
-  } else if (where.appendTo) {
-    position = "beforeend";
+    ref = where.into;
+  } else {
+    ref = where.into;
   }
   ref.insertAdjacentElement(position, elem);
   return elem;
@@ -87,35 +90,39 @@ var Store = class {
     this._subscribers = {};
     this._subscriberCounts = {};
     this._dead = false;
-    this.value = value;
+    if (value)
+      this.value = value;
   }
   on(type, fn, callNow = false) {
+    var _a;
+    var _b;
     this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
-    this._subscribers[type] = this._subscribers[type] || {};
+    (_a = (_b = this._subscribers)[type]) !== null && _a !== void 0 ? _a : _b[type] = {};
     this._subscribers[type][this._subscriberCounts[type]] = fn;
     if (callNow && !["push", "remove", "mutation", "setAt"].includes(type)) {
-      fn(this.value);
+      fn({ type: "change", value: this.value });
     }
     return this._subscriberCounts[type]++;
   }
   unsubscribe(type, id) {
-    delete this._subscribers[type][id];
+    var _a;
+    (_a = this._subscribers[type]) === null || _a === void 0 ? true : delete _a[id];
   }
   update(value) {
     if (this._dead)
       return;
     this.value = value;
-    this._sendEvent("update", value);
+    this._sendEvent({ type: "change", value });
   }
-  refresh() {
-    this._sendEvent("refresh", this.value);
-  }
-  _sendEvent(type, value) {
+  _sendEvent(event) {
     if (this._dead)
       return;
-    this._subscribers[type] = this._subscribers[type] || {};
-    for (const idx in Object.keys(this._subscribers[type])) {
-      this._subscribers[type][idx](value);
+    this._subscribers[event.type] = this._subscribers[event.type] || {};
+    const subs = this._subscribers[event.type];
+    if (!subs)
+      return;
+    for (const idx in Object.keys(subs)) {
+      subs[idx](event);
     }
   }
   dispose() {
@@ -129,36 +136,33 @@ var ListStore = class extends Store {
     super(ls);
   }
   clear() {
-    this.update([]);
+    this.value = [];
+    this._sendEvent({ type: "clear" });
   }
   push(val) {
     this.value.push(val);
-    this._sendEvent("push", {
-      value: val,
-      idx: this.value.length - 1
-    });
+    this._sendEvent({ type: "append", value: val, idx: this.value.length - 1 });
+    return this.value.length;
   }
   remove(idx) {
     if (idx < 0 || idx >= this.value.length)
       throw new RangeError("Invalid index.");
-    this._sendEvent("remove", {
-      value: this.value.splice(idx, 1)[0],
-      idx
+    this._sendEvent({
+      type: "deletion",
+      idx,
+      value: this.value.splice(idx, 1)[0]
     });
   }
   get(idx) {
-    if (idx < 0 || idx > this.value.length)
-      throw new RangeError("Invalid index.");
-    return this.value instanceof Array && this.value[idx];
-  }
-  setAt(idx, val) {
     if (idx < 0 || idx >= this.value.length)
       throw new RangeError("Invalid index.");
-    this.value[idx] = val;
-    this._sendEvent("mutation", {
-      value: val,
-      idx
-    });
+    return this.value[idx];
+  }
+  set(idx, value) {
+    if (idx < 0 || idx >= this.value.length)
+      throw new RangeError("Invalid index.");
+    this.value[idx] = value;
+    this._sendEvent({ type: "change", value, idx });
   }
   get length() {
     return this.value.length;
@@ -167,27 +171,23 @@ var ListStore = class extends Store {
 var MapStore = class extends Store {
   constructor(init) {
     super(new Map());
-    for (const [k, v] of Object.entries(init)) {
+    for (const [k, v] of Object.entries(init || {})) {
       this.value.set(k, v);
     }
   }
   set(key, value) {
     this.value.set(key, value);
-    this._sendEvent("set", {
-      key,
-      value
-    });
+    this._sendEvent({ key, value, type: "change" });
+  }
+  update() {
   }
   remove(key) {
     this.value.delete(key);
-    this._sendEvent("remove", {
-      key,
-      value: this.value
-    });
+    this._sendEvent({ key, value: this.value, type: "deletion" });
   }
   clear() {
     this.value = new Map();
-    this._sendEvent("clear", void 0);
+    this._sendEvent({ type: "clear" });
   }
   transform(key, fn) {
     const old = this.value.get(key);
@@ -195,9 +195,16 @@ var MapStore = class extends Store {
       throw new Error(`ERROR: key ${key} does not exist in store!`);
     const transformed = fn(old);
     this.set(key, transformed);
+    this._sendEvent({ type: "change", value: transformed, key });
   }
   get(key) {
     return this.value.get(key);
+  }
+  has(key) {
+    return this.value.has(key);
+  }
+  entries() {
+    return this.value.entries();
   }
 };
 var _mustache = (string, data = {}) => {
@@ -238,8 +245,14 @@ var unescape = (str) => {
   return str.replace(expr, (entity) => entities[entity] || "'");
 };
 var onload = (cb) => globalThis.addEventListener("DOMContentLoaded", cb);
-var select = (selector, from = document) => from.querySelector(selector);
-var selectAll = (selector, from = document) => Array.from(from.querySelectorAll(selector));
+var select = ({ selector, all, from }) => {
+  from !== null && from !== void 0 ? from : from = document;
+  if (all) {
+    return Array.from(from.querySelectorAll(selector));
+  } else {
+    return [from.querySelector(selector)];
+  }
+};
 var rm = (elt) => elt.remove();
 var empty = (elt) => {
   elt.innerHTML = "";
@@ -258,9 +271,17 @@ var seq = (...args) => {
   }
   return result;
 };
+var store = (opts) => {
+  if ("type" in opts) {
+    if (opts.type === "list")
+      return new ListStore(opts.value);
+    else if (opts.type === "map")
+      return new MapStore(opts.value);
+  }
+  return new Store(opts.value);
+};
 var campfire_default = {
-  Store,
-  ListStore,
+  store,
   nu,
   mustache,
   template,
@@ -270,18 +291,13 @@ var campfire_default = {
   insert,
   empty,
   rm,
-  selectAll,
   select,
   onload,
   html,
   r,
-  seq,
-  MapStore
+  seq
 };
 export {
-  ListStore,
-  MapStore,
-  Store,
   campfire_default as default,
   empty,
   escape,
@@ -294,8 +310,8 @@ export {
   r,
   rm,
   select,
-  selectAll,
   seq,
+  store,
   template,
   unescape
 };
