@@ -301,7 +301,7 @@ describe('Tests for NuBuilder', () => {
         const [container, title, firstContent, secondContent] = nu('div')
             .content(html)
             .raw(true)
-            .gimme(['.title', '.content:first-child', '.content:last-child'])
+            .gimme(['.title', '.content:first-of-type', '.content:last-child'])
             .done();
 
         expect(title.innerHTML).to.equal('Hello');
@@ -322,7 +322,7 @@ describe('Tests for NuBuilder', () => {
     });
 });
 
-describe('Tests for Store', () => {
+describe('Tests for stores', () => {
     it('Store should store and update values', () => {
         const s = cf.store({ value: 'test' });
         expect(s.value).to.equal('test');
@@ -350,11 +350,14 @@ describe('Tests for Store', () => {
 
     it('MapStore should handle object operations', () => {
         const ms = cf.store({ type: 'map', value: { name: 'John' } });
-        expect(ms.value).to.deep.equal({ name: 'John' });
+        expect(ms.get('name')).to.deep.equal('John');
+
         const mockFn = sinon.spy();
         ms.on('change', mockFn);
+
         ms.set('age', 30);
-        expect(ms.value).to.deep.equal({ name: 'John', age: 30 });
+        expect(ms.get('age')).to.deep.equal(30);
+
         expect(mockFn.calledWith({
             type: 'change', value: 30, key: 'age'
         })).to.be.true;
@@ -437,7 +440,7 @@ describe('Tests for Reactivity', () => {
         });
 
         const renderUser = (data) => {
-            const user = data.user;
+            console.log({ data });
             return `
                 <div class="user">
                     <h2>${user.name}</h2>
@@ -447,15 +450,18 @@ describe('Tests for Reactivity', () => {
             `;
         };
 
-        const [container] = nu('div', {
+        const [container, first, second] = nu('div', {
             contents: renderUser,
             raw: true,
-            deps: { user: userStore }
+            deps: { user: userStore },
+            gimme: ['h2', 'p:nth-child(2)', 'p:nth-child(3)']
         }).done();
 
-        expect(container.querySelector('h2').textContent).to.equal('John');
-        expect(container.querySelector('p:nth-child(2)').textContent).to.equal('Age: 30');
-        expect(container.querySelector('p:nth-child(3)').textContent).to.equal('Role: User');
+        console.log({ container: JSON.stringify(container.textContent), first: JSON.stringify(first.textContent), second: JSON.stringify(second.textContent) });
+
+        expect(container.textContent).to.equal('John');
+        expect(first.textContent).to.equal('Age: 30');
+        expect(second.textContent).to.equal('Role: User');
 
         userStore.set('name', 'Jane');
         expect(container.querySelector('h2').textContent).to.equal('Jane');

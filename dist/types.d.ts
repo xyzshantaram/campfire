@@ -1,4 +1,5 @@
-export declare type StoreEvent = {
+import { Store } from "./stores/mod.ts";
+export type StoreEvent = {
     type: "change";
     value: any;
     key?: string;
@@ -17,33 +18,34 @@ export declare type StoreEvent = {
     value: any;
     idx: any;
 };
-export declare type StoreInitializer<T> = {
-    type: 'list';
-    value?: Array<T>;
-} | {
-    type: 'map';
-    value?: Record<string, T>;
-} | {
-    value?: T;
-};
 /** A signature for a subscriber type. */
-export declare type Subscriber = (event: StoreEvent) => void;
-/** A generic signature for an event handler type. */
-export declare type DomEventHandler = (e: Event) => unknown;
+export type Subscriber = (event: StoreEvent) => void;
 /** The function signature for a function returned by `template()`. */
-export declare type Template = (e: Record<string, any>) => string;
+export type Template = (e: Record<string, any>) => string;
+export type RenderFunction<T extends HTMLElement, D> = (props: {
+    [K in keyof D]: D[K] extends Store<infer V> ? V : never;
+}, opts: {
+    event?: StoreEvent & {
+        triggeredBy: string;
+    };
+    elt: T;
+}) => string | undefined;
+export type StringStyleProps = keyof {
+    [K in keyof CSSStyleDeclaration as CSSStyleDeclaration[K] extends string ? K : never]: true;
+};
+export type DOMEventHandlers = {
+    [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void;
+};
 /**
  * Properties for the HTML element to be created.
  */
-export interface ElementProperties {
+export interface ElementProperties<T extends HTMLElement, D extends Record<string, Store<any>> = {}> {
     /**
      * String that will be set as the inner HTML of the created element. By default,
      * this is escaped using cf.escape() - however, if you supply `raw: true` in
      * the args object passed as nu's second argument, escaping is disabled.
      */
-    contents?: string;
-    /** Alias for `contents` */
-    c?: ElementProperties["contents"];
+    contents?: RenderFunction<T, D> | string;
     /**
      * Whether or not to escape the `contents` string. If `raw` is true, the
      * string is not escaped.
@@ -53,24 +55,17 @@ export interface ElementProperties {
      * for example, `type: "button"` or `checked: true`
      */
     misc?: Record<string, unknown>;
-    /** Alias for `ElementProperties.misc`. */
-    m?: ElementProperties["misc"];
     /** Contains styles that will be applied to the new element. Property names must be the same as those in `CSSStyleDeclaration`. */
-    style?: Partial<CSSStyleDeclaration>;
-    /** Alias for `ElementProperties.style`. */
-    s?: ElementProperties["style"];
+    style?: Partial<Record<StringStyleProps, string>>;
     /** An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
-    on?: Record<string, DomEventHandler>;
+    on?: DOMEventHandlers;
     /** Attributes that will be set on the element using `Element.setAttribute`. */
     attrs?: Record<string, string>;
-    /** Alias for `ElementProperties.attrs`. */
-    a?: ElementProperties["contents"];
     /** A list of elements to query from the element. Will be returned as subsequent members of the returned Array after the element itself. */
     gimme?: string[];
-    /** Alias for `ElementProperties.gimme` */
-    g?: ElementProperties["gimme"];
+    deps?: D;
 }
 /**
  * An interface to store data parsed from an element descriptor string passed to `nu`.
@@ -84,7 +79,7 @@ export interface TagStringParseResult {
     /** An array of classes parsed from the info string. */
     classes?: string[] | undefined;
 }
-export declare type ElementPosition = {
+export type ElementPosition = {
     before: HTMLElement;
 } | {
     after: HTMLElement;
@@ -92,3 +87,7 @@ export declare type ElementPosition = {
     into: HTMLElement;
     at?: "start";
 };
+type TagName = keyof HTMLElementTagNameMap;
+export type EltInfoToTag<T extends string> = T extends `${infer Tag extends TagName}#${string}.${string}` ? Tag : T extends `${infer Tag extends TagName}#${string}` ? Tag : T extends `${infer Tag extends TagName}.${string}` ? Tag : T extends `${infer Tag extends TagName}` ? Tag : 'div';
+export type InferElementType<T extends string> = HTMLElementTagNameMap[EltInfoToTag<T>];
+export {};
