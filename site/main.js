@@ -1,6 +1,7 @@
-import cf from 'https://esm.sh/campfire.js@4.0.0-alpha4';
+import * as cf from '../dist/campfire.esm.js';
 import { marked } from 'https://esm.sh/marked@15.0.7';
 import toml from 'https://esm.sh/toml@3.0.0';
+import { highlightAll, HL_KEYWORDS } from 'https://esm.sh/macrolight@1.5.0';
 
 window.cf = cf;
 
@@ -22,7 +23,7 @@ window.addEventListener("DOMContentLoaded", async (e) => {
 
     marked.use({ renderer: PageRenderer });
 
-    const nav = cf.nu('nav', {
+    const [nav] = cf.nu('nav', {
         style: {
             display: 'flex',
             width: '100%',
@@ -30,8 +31,8 @@ window.addEventListener("DOMContentLoaded", async (e) => {
         }
     });
 
-    app.insertBefore(nav, footer);
-    const siteData = new cf.ListStore([]);
+    cf.insert(nav, { before: footer });
+    const siteData = cf.store({ type: 'list', value: [] });
 
     const getTabURL = (name) => {
         const params = new URLSearchParams();
@@ -54,19 +55,17 @@ window.addEventListener("DOMContentLoaded", async (e) => {
     siteData.on('append', (item) => {
         const value = item.value;
 
-        app.insertBefore(cf.nu(
-            'div.cf-site-div',
-            {
-                attrs: {
-                    'data-heading': value.heading
-                },
-                contents: value.html,
-                raw: true
-            }
-        ), footer);
+        const [siteDiv] = cf.nu('div.cf-site-div', {
+            attrs: {
+                'data-heading': value.heading
+            },
+            contents: value.html,
+            raw: true
+        });
 
-        nav.appendChild(cf.nu(
-            "button", {
+        cf.insert(siteDiv, { before: footer });
+
+        const [button] = cf.nu("button", {
             m: { type: 'button' },
             contents: value.heading,
             on: {
@@ -76,7 +75,9 @@ window.addEventListener("DOMContentLoaded", async (e) => {
                     focusTab(value.heading);
                 }
             }
-        }));
+        });
+
+        cf.insert(button, { into: nav });
     })
 
     await fetch('site/data/main.toml')
@@ -96,8 +97,19 @@ window.addEventListener("DOMContentLoaded", async (e) => {
             focusTab(tab || 'home');
 
             if (window.editorReady) window.editorReady();
-
             mask.style.display = 'none';
+
+            highlightAll({
+                keywords: HL_KEYWORDS.javascript,
+                styles: {
+                    unformatted: 'color: white;',
+                    keyword: 'color: #ff9a00; font-weight: bold;',
+                    punctuation: 'color: #7f7f7f;',
+                    string: 'color: #3cb371;',
+                    comment: 'color: #7f7f7f; font-style: italic;'
+                }
+            }, '.microlight');
+
         }).catch(err => {
             mask.innerHTML = `Error loading site data: ${err}`;
         })

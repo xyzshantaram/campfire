@@ -1,5 +1,5 @@
-import cf from 'https://esm.sh/campfire.js@4.0.0-alpha4';
-import { highlight } from 'https://esm.sh/macrolight';
+import * as cf from 'https://esm.sh/campfire.js@4.0.0-alpha4';
+import { highlight } from 'https://esm.sh/macrolight@1.5.0';
 import toml from 'https://esm.sh/toml';
 
 import { CodeJar } from 'https://esm.sh/codejar@4.2.0';
@@ -15,7 +15,7 @@ const iframeContentTemplate = cf.template(`\
 <body>
     {{ html }}
     <script type='module'>
-        import cf from 'https://esm.sh/campfire.js@4.0.0-alpha4';
+        import cf from 'https://esm.sh/campfire.js@2.2.0';
         window.onload = function() {
             {{ js }}
         }
@@ -57,21 +57,21 @@ const editorReady = () => {
     }
 
     const wrapper = examples.querySelector('.editor-wrapper');
-    const switcher = cf.nu('div.switcher');
+    const [switcher] = cf.nu('div.switcher');
 
-    wrapper.append(switcher);
+    cf.insert(switcher, { into: wrapper });
 
-    const currentEditorStore = new cf.Store('html');
+    const currentEditorStore = cf.store({ value: 'html' });
 
     for (const key in editorConfigs) {
         if (key === 'out') continue;
         const current = editorConfigs[key];
         if (!current.elt) continue;
 
-        switcher.appendChild(cf.nu('button', {
+        const [button] = cf.nu('button', {
             m: { type: 'button' },
-            c: key,
-            a: {
+            contents: key,
+            attrs: {
                 'data-editor-view': key
             },
             on: {
@@ -79,7 +79,9 @@ const editorReady = () => {
                     currentEditorStore.update(key);
                 }
             }
-        }));
+        });
+
+        cf.insert(button, { into: switcher });
 
         const config = {
             keywords: current.keywords,
@@ -105,10 +107,10 @@ const editorReady = () => {
         });
     }
 
-    switcher.appendChild(cf.nu('button', {
+    const [outputButton] = cf.nu('button', {
         m: { type: 'button' },
-        c: 'output',
-        a: {
+        contents: 'output',
+        attrs: {
             'data-editor-view': 'out'
         },
         on: {
@@ -116,22 +118,24 @@ const editorReady = () => {
                 currentEditorStore.update('out');
             }
         }
-    }));
+    });
+
+    cf.insert(outputButton, { into: switcher });
 
     function generateOutput() {
-        const iframeContents = getIframeContents();
-        editorConfigs.out.elt.innerHTML = ''
-        const frame = cf.nu('iframe.cf-editor-output-iframe', {
+        cf.empty(editorConfigs.out.elt);
+        const [frame] = cf.nu('iframe.cf-editor-output-iframe', {
             style: { width: '100%', height: '100%', background: 'white' },
             m: {
-                srcdoc: iframeContents,
+                srcdoc: getIframeContents(),
                 sandbox: 'allow-modals allow-scripts'
             }
         });
-        editorConfigs.out.elt.appendChild(frame);
+        cf.insert(frame, { into: editorConfigs.out.elt });
     }
 
-    currentEditorStore.on('change', (val) => {
+    currentEditorStore.on('change', (event) => {
+        const val = event.value;
         Array.from(document.querySelectorAll('.editor-wrapper > :not(.switcher)')).forEach(elem => elem.style.display = 'none');
         editorConfigs[val].elt.style.display = 'block';
         document.querySelector(`.switcher>button.active`)?.classList.remove('active');
@@ -157,8 +161,8 @@ const editorReady = () => {
         const data = toml.parse(text);
         for (let key of Object.keys(data)) {
             const itm = data[key];
-            list.appendChild(cf.nu('li', {
-                c: `<a href='javascript:void(0)'>${itm.title}</a>`,
+            const [item] = cf.nu('li', {
+                contents: `<a href='javascript:void(0)'>${itm.title}</a>`,
                 on: {
                     'click': function (e) {
                         setActivePlaygroundDemo(itm);
@@ -166,7 +170,8 @@ const editorReady = () => {
                     }
                 },
                 raw: true
-            }));
+            });
+            cf.insert(item, { into: list });
         }
     }).catch(err => {
         list.appendChild(document.createTextNode(`Error loading demos: ${err}. The playground should still work, sorry for the inconvenience!`));
@@ -176,12 +181,13 @@ const editorReady = () => {
     const dlBtn = document.querySelector("#cf-editor-dl");
 
     dlBtn.onclick = (e) => {
-        cf.nu('a', {
+        const [link] = cf.nu('a', {
             attrs: {
                 download: 'playground.html',
                 href: 'data:text/html;charset=utf-8,' + encodeURIComponent(getIframeContents())
             }
-        }).click();
+        });
+        link.click();
     }
 
     clearBtn.onclick = (e) => {
