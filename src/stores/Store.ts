@@ -74,6 +74,13 @@ export class Store<T> {
         return this._subscriberCounts[type]++;
     }
 
+    any(fn: Subscriber) {
+        this.on('append', fn);
+        this.on('change', fn);
+        this.on('clear', fn);
+        this.on('deletion', fn);
+    }
+
     /**
      * Removes a specific event listener from the store.
      * @param type The type of event from which to unsubscribe.
