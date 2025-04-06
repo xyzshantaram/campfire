@@ -1,5 +1,8 @@
-import cf from 'https://esm.sh/campfire.js@2.2.0';
+import cf from 'https://esm.sh/campfire.js@4.0.0-alpha4';
+import { highlight } from 'https://esm.sh/macrolight';
 import toml from 'https://esm.sh/toml';
+
+import { CodeJar } from 'https://esm.sh/codejar@4.2.0';
 
 const iframeContentTemplate = cf.template(`\
 <html>
@@ -12,7 +15,7 @@ const iframeContentTemplate = cf.template(`\
 <body>
     {{ html }}
     <script type='module'>
-        import cf from 'https://esm.sh/campfire.js@2.2.0';
+        import cf from 'https://esm.sh/campfire.js@4.0.0-alpha4';
         window.onload = function() {
             {{ js }}
         }
@@ -21,6 +24,10 @@ const iframeContentTemplate = cf.template(`\
 </html>\
 `, false);
 
+const JS_KEYWORDS = ['break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'let', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
+const HTML_KEYWORDS = ['<!DOCTYPE', 'html', 'head', 'body', 'title', 'script', 'style', 'meta', 'link'];
+const CSS_KEYWORDS = ['@media', '@keyframes', 'animation', 'display', 'position', 'color', 'background', 'margin', 'padding', 'border', 'width', 'height'];
+
 const editorReady = () => {
     const examples = document.querySelector('.cf-site-div[data-heading="playground"]');
     if (!examples) return;
@@ -28,18 +35,21 @@ const editorReady = () => {
     const editorConfigs = {
         html: {
             elt: document.querySelector('.cf-editor-html'),
-            mode: 'ace/mode/html',
-            editor: null
+            jar: null,
+            keywords: HTML_KEYWORDS,
+            language: 'html'
         },
         css: {
             elt: document.querySelector('.cf-editor-css'),
-            mode: 'ace/mode/css',
-            editor: null
+            jar: null,
+            keywords: CSS_KEYWORDS,
+            language: 'css'
         },
         js: {
             elt: document.querySelector('.cf-editor-js'),
-            mode: 'ace/mode/javascript',
-            editor: null
+            jar: null,
+            keywords: JS_KEYWORDS,
+            language: 'javascript'
         },
         out: {
             elt: document.querySelector('.cf-editor-output')
@@ -57,6 +67,7 @@ const editorReady = () => {
         if (key === 'out') continue;
         const current = editorConfigs[key];
         if (!current.elt) continue;
+
         switcher.appendChild(cf.nu('button', {
             m: { type: 'button' },
             c: key,
@@ -68,20 +79,29 @@ const editorReady = () => {
                     currentEditorStore.update(key);
                 }
             }
-        }))
-        current.editor = ace.edit(current.elt, {
-            mode: current.mode,
-            theme: 'ace/theme/tomorrow_night_blue',
-            fontSize: '1rem',
-            copyWithEmptySelection: 'true',
-        });
+        }));
+
+        const config = {
+            keywords: current.keywords,
+            styles: {
+                unformatted: 'color: white;',
+                keyword: 'color: #ff9a00; font-weight: bold;',
+                punctuation: 'color: #7f7f7f;',
+                string: 'color: #3cb371;',
+                comment: 'color: #7f7f7f; font-style: italic;'
+            }
+        };
+
+        current.jar = CodeJar(current.elt, (editor) => {
+            editor.innerHTML = highlight(editor.textContent, config);
+        }, { tab: '    ' });
     }
 
     function getIframeContents() {
         return iframeContentTemplate({
-            html: editorConfigs.html.editor.getValue().trim(),
-            css: editorConfigs.css.editor.getValue().trim(),
-            js: editorConfigs.js.editor.getValue().trim()
+            html: editorConfigs.html.jar.toString(),
+            css: editorConfigs.css.jar.toString(),
+            js: editorConfigs.js.jar.toString()
         });
     }
 
@@ -96,7 +116,7 @@ const editorReady = () => {
                 currentEditorStore.update('out');
             }
         }
-    }))
+    }));
 
     function generateOutput() {
         const iframeContents = getIframeContents();
@@ -107,14 +127,13 @@ const editorReady = () => {
                 srcdoc: iframeContents,
                 sandbox: 'allow-modals allow-scripts'
             }
-        })
+        });
         editorConfigs.out.elt.appendChild(frame);
     }
 
-    currentEditorStore.on('update', (val) => {
+    currentEditorStore.on('change', (val) => {
         Array.from(document.querySelectorAll('.editor-wrapper > :not(.switcher)')).forEach(elem => elem.style.display = 'none');
         editorConfigs[val].elt.style.display = 'block';
-        editorConfigs[val].editor?.resize();
         document.querySelector(`.switcher>button.active`)?.classList.remove('active');
         document.querySelector(`button[data-editor-view="${val}"]`)?.classList.add('active');
         if (val === 'out') {
@@ -128,7 +147,7 @@ const editorReady = () => {
         obj.js = obj.js || "/* This demo has no JS! */";
 
         for (const str of ['html', 'js', 'css']) {
-            editorConfigs[str].editor.setValue(obj[str]);
+            editorConfigs[str].jar.updateCode(obj[str]);
         }
     }
 
@@ -151,7 +170,7 @@ const editorReady = () => {
         }
     }).catch(err => {
         list.appendChild(document.createTextNode(`Error loading demos: ${err}. The playground should still work, sorry for the inconvenience!`));
-    })
+    });
 
     const clearBtn = document.querySelector("#cf-editor-clear");
     const dlBtn = document.querySelector("#cf-editor-dl");
@@ -167,7 +186,7 @@ const editorReady = () => {
 
     clearBtn.onclick = (e) => {
         for (const str of ['html', 'js', 'css']) {
-            editorConfigs[str].editor.setValue("");
+            editorConfigs[str].jar.updateCode("");
         }
         generateOutput();
     }

@@ -1,6 +1,6 @@
-import cf from 'https://esm.sh/campfire.js@2.2.0/';
+import cf from 'https://esm.sh/campfire.js@4.0.0-alpha4';
 import { marked } from 'https://esm.sh/marked@15.0.7';
-import toml from 'https://esm.sh/toml';
+import toml from 'https://esm.sh/toml@3.0.0';
 
 window.cf = cf;
 
@@ -51,16 +51,16 @@ window.addEventListener("DOMContentLoaded", async (e) => {
         });
     }
 
-    siteData.on('push', (_item) => {
-        const { idx, value: item } = _item;
+    siteData.on('append', (item) => {
+        const value = item.value;
 
         app.insertBefore(cf.nu(
             'div.cf-site-div',
             {
                 attrs: {
-                    'data-heading': item.heading
+                    'data-heading': value.heading
                 },
-                contents: item.html,
+                contents: value.html,
                 raw: true
             }
         ), footer);
@@ -68,37 +68,37 @@ window.addEventListener("DOMContentLoaded", async (e) => {
         nav.appendChild(cf.nu(
             "button", {
             m: { type: 'button' },
-            contents: item.heading,
+            contents: value.heading,
             on: {
                 'click': function () {
                     document.querySelector('.active-tab')?.classList.remove('active-tab');
                     this.classList.add('active-tab');
-                    focusTab(item.heading);
+                    focusTab(value.heading);
                 }
             }
         }));
     })
 
-    fetch('site/data/main.toml').then(res => res.text()).then(text => {
-        const data = toml.parse(text);
+    await fetch('site/data/main.toml')
+        .then(res => res.text())
+        .then(text => {
+            const data = toml.parse(text);
 
-        for (let key of Object.keys(data)) {
-            siteData.push({
-                html: marked.parse(data[key].md),
-                heading: key,
-            })
-        }
+            for (let key of Object.keys(data)) {
+                siteData.push({
+                    html: marked.parse(data[key].md),
+                    heading: key,
+                })
+            }
 
-        const params = new URLSearchParams(window.location.search);
-        const tab = params.get('tab');
-        focusTab(tab || 'home');
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            focusTab(tab || 'home');
 
-        if (window.editorReady) window.editorReady();
-        if (window.microlight) window.microlight.reset();
+            if (window.editorReady) window.editorReady();
 
-        mask.style.display = 'none';
-    }).catch(err => {
-        mask.innerHTML = `Error loading site data: ${err}`;
-    })
-
+            mask.style.display = 'none';
+        }).catch(err => {
+            mask.innerHTML = `Error loading site data: ${err}`;
+        })
 })
