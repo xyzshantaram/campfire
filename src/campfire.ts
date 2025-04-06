@@ -1,4 +1,4 @@
-import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template } from './types';
+import { ElementProperties, ElementPosition, TagStringParseResult, Subscriber, Template, StoreEvent } from './types';
 
 interface RawHtml {
     raw: true,
@@ -198,7 +198,9 @@ class Store<T> {
      * The subscribers currently registered to the store. 
      * @internal
     */
-    _subscribers: Record<string, Record<number, Subscriber>> = {};
+    _subscribers: {
+        [K in StoreEvent['type']]?: Record<number, Subscriber>;
+    } = {};
     /** 
      * The subscribers currently registered to the store. 
      * @internal
@@ -226,13 +228,13 @@ class Store<T> {
      * The function will not be called for ListStore events "push", "remove", or "mutation".
      * @returns A number which can be passed to `Store.unsubscribe` to stop `fn` from being called from then on.
      */
-    on(type: string, fn: Subscriber, callNow: boolean = false): number {
+    on(type: StoreEvent['type'], fn: Subscriber, callNow: boolean = false): number {
         this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
         this._subscribers[type] = this._subscribers[type] || {};
 
         this._subscribers[type][this._subscriberCounts[type]] = fn;
         if (callNow && !["push", "remove", "mutation", "setAt"].includes(type)) {
-            fn(this.value);
+            fn({ type: 'change', value: this.value });
         }
         return this._subscriberCounts[type]++;
     }
@@ -241,8 +243,8 @@ class Store<T> {
      * @param type The type of event to unsubscribe from.
      * @param id The value returned by `Store.on` when the subscriber was registered.
      */
-    unsubscribe(type: string, id: number) {
-        delete this._subscribers[type][id];
+    unsubscribe(type: StoreEvent['type'], id: number) {
+        delete this._subscribers[type]?.[id];
     }
 
     /**
@@ -252,25 +254,20 @@ class Store<T> {
     update(value: T) {
         if (this._dead) return;
         this.value = value;
-        this._sendEvent("update", value);
-    }
-    /**
-     * Forces all subscribers to the "update" event to be called.
-     * @param value The new value to store.
-     */
-    refresh() {
-        this._sendEvent("refresh", this.value);
+        this._sendEvent({ type: 'change', value });
     }
 
     /**
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
     */
-    _sendEvent(type: string, value: T) {
+    _sendEvent(event: StoreEvent) {
         if (this._dead) return;
-        this._subscribers[type] = this._subscribers[type] || {};
-        for (const idx in Object.keys(this._subscribers[type])) {
-            this._subscribers[type][idx](value);
+        this._subscribers[event.type] = this._subscribers[event.type] || {};
+        const subs = this._subscribers[event.type];
+        if (!subs) return;
+        for (const idx in Object.keys(subs)) {
+            subs[idx](event);
         }
     }
 
@@ -316,10 +313,11 @@ class ListStore<T> extends Store<any> {
      */
     push(val: T) {
         this.value.push(val);
-        this._sendEvent("push", {
+        this._sendEvent({
+            type: "append",
             value: val,
             idx: this.value.length - 1
-        });
+        })
     }
 
     /**
@@ -331,10 +329,11 @@ class ListStore<T> extends Store<any> {
      */
     remove(idx: number) {
         if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
-        this._sendEvent("remove", {
-            value: this.value.splice(idx, 1)[0],
-            idx: idx
-        });
+        this._sendEvent({
+            type: 'deletion',
+            idx,
+            value: this.value.splice(idx, 1)[0]
+        })
     }
 
     /**
@@ -351,14 +350,15 @@ class ListStore<T> extends Store<any> {
      * Sets the element at the given index `idx` to the value `val`. Sends a mutation event
      * with the value being an object bearing the properties:
      * @param idx The index to mutate.
-     * @param val the new value at that index.
+     * @param value the new value at that index.
      */
-    setAt(idx: number, val: T) {
+    setAt(idx: number, value: T) {
         if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
-        this.value[idx] = val;
-        this._sendEvent("mutation", {
-            value: val,
-            idx: idx,
+        this.value[idx] = value;
+        this._sendEvent({
+            type: "mutation",
+            value,
+            idx,
         });
     }
 
@@ -403,9 +403,11 @@ class MapStore<T> extends Store<any> {
      */
     set(key: string, value: T) {
         this.value.set(key, value);
-        this._sendEvent('set', {
-            key, value
-        });
+        this._sendEvent({ key, value, type: 'change' });
+    }
+
+    update() {
+        // no-op for MapStore
     }
 
     /**
@@ -416,9 +418,7 @@ class MapStore<T> extends Store<any> {
      */
     remove(key: string) {
         this.value.delete(key);
-        this._sendEvent('remove', {
-            key, value: this.value
-        });
+        this._sendEvent({ key, value: this.value, type: 'deletion' });
     }
 
     /**
@@ -426,7 +426,7 @@ class MapStore<T> extends Store<any> {
      */
     clear() {
         this.value = new Map();
-        this._sendEvent('clear', undefined);
+        this._sendEvent({ type: 'clear' });
     }
 
     /**
