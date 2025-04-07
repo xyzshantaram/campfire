@@ -1,5 +1,5 @@
 import type { Store } from "../stores/mod.ts";
-import type { ElementProperties, InferElementType, RenderFunction } from "../types.ts";
+import type { ElementProperties, InferElementType, RenderFunction, UnwrapStore } from "../types.ts";
 import { escape, initMutationObserver } from "../utils.ts";
 import { NuBuilder } from "./NuBuilder.ts";
 
@@ -12,10 +12,8 @@ else {
 }
 
 const unwrapDeps = <D extends Record<string, Store<any>>>(
-    deps: D,
-): {
-        [K in keyof D]: D[K] extends Store<infer V> ? V : never;
-    } => {
+    deps: D
+): UnwrapStore<D> => {
     const result: any = {};
     for (const key in deps) {
         const value = deps[key].value;
@@ -84,7 +82,7 @@ export const extend = <
 
     Object.entries(on).forEach(([evt, listener]) => elt.addEventListener(evt, listener));
 
-    Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, value));
+    Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, String(value)));
 
     const extras: HTMLElement[] = [];
     for (const selector of gimme) {
@@ -125,12 +123,12 @@ export const extend = <
  * ```
  */
 export const nu = <
-    T extends string,
+    const T extends string,
     E extends InferElementType<T>,
     D extends Record<string, Store<any>> = {},
 >(
-    info: T,
-    args?: ElementProperties<E, D>,
+    info: T = 'div' as T,
+    args: ElementProperties<E, D> = {},
 ): NuBuilder<T, E, D> => {
-    return new NuBuilder(info, args);
+    return new NuBuilder<T, E, D>(info, args);
 };

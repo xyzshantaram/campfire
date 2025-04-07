@@ -21,8 +21,6 @@
         "./src/**/*"
     ],
     "exclude": [
-        "./src/**/*.test.ts",
-        "./src/**/*.test.js",
         "./test/setup.ts",
         "node_modules"
     ]

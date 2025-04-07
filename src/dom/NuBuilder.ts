@@ -131,7 +131,7 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @param value - An object containing attribute name-value pairs
      * @returns The builder instance for chaining
      */
-    attrs(value: Required<ElementProperties<E, D>['attrs']>) {
+    attrs(value: ElementProperties<E, D>['attrs']) {
         this.props.attrs = value;
         return this;
     }
@@ -182,8 +182,8 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @param value - An object containing style name-value pairs
      * @returns The builder instance for chaining
      */
-    styles(value: Required<ElementProperties<E, D>['style']>) {
-        this.props.style = value;
+    styles(value: ElementProperties<E, D>['style']) {
+        this.props.style = value ?? {};
         return this;
     }
 
@@ -213,8 +213,8 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
         return this;
     }
 
-    deps(obj: D) {
-        this.props.deps = obj;
-        return this;
+    deps<ND extends Record<string, Store<any>>>(obj: ND): NuBuilder<T, E, D & ND> {
+        this.props.deps = { ...(this.props.deps as D), ...obj };
+        return this as unknown as NuBuilder<T, E, D & ND>;
     }
 }
