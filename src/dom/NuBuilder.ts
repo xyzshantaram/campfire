@@ -212,4 +212,9 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
         else this.props.gimme.push(selectors);
         return this;
     }
+
+    deps(obj: D) {
+        this.props.deps = obj;
+        return this;
+    }
 }
