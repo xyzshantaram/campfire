@@ -104,7 +104,7 @@ const editorReady = () => {
     }
 
     const [outputButton] = cf.nu('button')
-        .misc('type', 'button')
+        .attr('type', 'button')
         .content('output')
         .attr('data-editor-view', 'out')
         .on('click', () => currentEditorStore.update('out'))

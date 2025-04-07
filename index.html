@@ -120,6 +120,229 @@
             for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
         </noscript>
 
+        <!-- Embedded content for SEO - will be hidden/shown by JavaScript -->
+        <div class="cf-site-div" data-heading="home" style="display: none;">
+            <h3>campfire: a cozy web framework</h3>
+            <p><strong>Campfire</strong> is a collection of small utilities to make developing with vanilla JS easy.</p>
+            <p>It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development
+                easier.</p>
+            <h4>Features</h4>
+            <ul>
+                <li>Small size</li>
+                <li>Easy to get started with - just <code>import</code> it into your project from
+                    <a href="https://unpkg.com/browse/campfire.js/">unpkg</a> or
+                    <a href="https://esm.sh/campfire.js/">esm.sh</a>.
+                    Campfire is on npm as well, so you can also add it into your existing application
+                    with <code>npm i campfire.js</code>!
+                </li>
+                <li>Uses vanilla JS wherever possible - no unnecessary DSLs or abstractions!</li>
+                <li>Provides an easy-to-understand API for implementing reactive data</li>
+                <li>Provides simple helpers for mustache templating</li>
+            </ul>
+            <h4>FAQs</h4>
+            <details>
+                <summary>
+                    How does it compare to $framework?
+                </summary>
+                <p>
+                    It doesn't. Campfire and $framework have entirely different goals. Campfire is a library
+                    to make writing vanilla JS applications easier, if you don't want the level of abstraction (or
+                    the associated overhead) that comes with $framework. You can build entire applications with it
+                    or add it quickly to an existing project. You are afforded complete control over your project.
+                </p>
+                <p>
+                    The learning curve is minuscule and the possibilities are endless.
+                </p>
+            </details>
+            <details>
+                <summary>
+                    What about WebComponents?
+                </summary>
+                <p>
+                    <a href='https://lit.dev'>lit.dev</a>
+                </p>
+            </details>
+            <details>
+                <summary>
+                    How do I create and share reusable components?
+                </summary>
+                <p>
+                    Campfire has no opinion on how you should do this.
+                    However, one option is to use a function that returns functions and stores to let you
+                    manipulate the element (and the created element itself).
+                </p>
+                <details>
+                    <summary>Component-ified reactive button</summary>
+                    <pre class='microlight'><code>// a component-ified version of the reactive button demo
+const ReactiveButton = () => {
+  const store = new cf.Store(0);
+  const btn = cf.nu('button.clicker', {
+    on: {
+      click: { store.update(store.value + 1) }
+    },
+    contents: "I have not been clicked."
+  })
+  store.on("update", (val) => {
+    btn.innerHTML = `I have been clicked ${val} time${val == 1 ? '' : 's'}.`;
+  })
+
+  return [btn, store];
+}
+const [btn, clickCount] = ReactiveButton();
+document.body.appendChild(btn);</code></pre>
+                </details>
+                <details>
+                    <summary>Name badge</summary>
+                    <pre class='microlight'><code>// a reactive representation of a name badge
+const NameBadge = () => {
+  const name = new cf.Store({});
+  const nameTemplate = cf.template("Hello! My name is {{ name }}");
+  const badge = cf.nu('div', {
+    contents: nameTemplate({ name: name.value })
+  })
+  name.on("update", (val) => {
+    cf.extend(badge, { contents: nameTemplate(val), raw: true })
+  })
+
+  return [badge, name];
+}
+</code></pre>
+                </details>
+            </details>
+            <details>
+                <summary>
+                    Why are escape and unescape so basic?
+                </summary>
+                <p>
+                    <code>escape</code> and <code>unescape</code> are intended as basic HTML sanitizers mainly for
+                    setting element contents, etc. You are encouraged to use a different HTML sanitizer if you
+                    need more functionality.
+                </p>
+                <ul>
+                    <li><a href='https://github.com/mathiasbynens/he'>he</a></li>
+                    <li><a href='https://github.com/apostrophecms/sanitize-html'>html-sanitize</a></li>
+                </ul>
+            </details>
+            <p><a href="?tab=get">Get campfire today!</a></p>
+        </div>
+
+        <div class="cf-site-div" data-heading="playground" style="display: none;">
+            <h3>try before you buy</h3>
+            <p>Try one of these demos, or do your own thing!</p>
+            <ul id='playground-demo-list'>
+            </ul>
+            <div id='cf-editor-controls'>
+                <a href='javascript:void(0)' id='cf-editor-clear'>Clear All</a>
+                <a href='javascript:void(0)' id='cf-editor-dl'>Download</a>
+            </div>
+            <div class='editor-wrapper'>
+                <div class='cf-editor-html'></div>
+                <div class='cf-editor-css'></div>
+                <div class='cf-editor-js'></div>
+                <div class='cf-editor-output'></div>
+            </div>
+        </div>
+
+        <div class="cf-site-div" data-heading="docs" style="display: none;">
+            <h3>using campfire</h3>
+            <p>View the <a href="site/docs/modules/campfire.html">full API reference</a> for detailed descriptions
+                of the methods and classes provided by Campfire.</p>
+            <h4>quick reference</h4>
+            <p>Campfire provides the following methods and classes:</p>
+            <ul>
+                <li><code>nu</code> - an element creation helper
+                    <h5>a heading</h5>
+                    <pre
+                        class="microlight"><code>cf.nu("h4", { contents: "A heading" }) // contents is escaped by default</code></pre>
+                    <h5>a button</h5>
+                    <pre class="microlight"><code>cf.nu("button#alert-btn", {
+  c: 'Click Me!', // same as contents
+  s: { border: "2px solid red" },
+  on: {
+    click: (e) => {
+      alert('Click!')
+    }
+  }
+});</code></pre>
+                    <h5>a div with some classes</h5>
+                    <pre class="microlight"><code>cf.nu('.class1.class2')</code></pre>
+                </li>
+                <li><code>extend</code> - an element manipulation helper
+                    <p>Same syntax as nu, except the first argument is an existing element instead of information
+                        about a new one.</p>
+                    <h5>Setting the innerHTML of an element</h5>
+                    <pre
+                        class="microlight"><code>cf.extend(elem, { contents: "<b>new contents</b>", raw: true }); // using raw means the contents aren't escaped</code></pre>
+                    <h5>adding styles</h5>
+                    <pre class="microlight"><code>cf.extend(document.body, {
+  style: {
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+  }
+});</code></pre>
+                </li>
+                <li><code>insert</code> - element insertion helper
+                    <p>Inserts an element into the DOM given a reference element and the relative position of the new
+                        element.</p>
+                    <pre class="microlight"><code>const insert = (elem: Element, where: ElementPosition)</code></pre>
+                    <p>if <code>where</code> looks like <code>{ after: reference }</code>, the element is inserted into
+                        <code>reference</code>'s parent, after <code>reference</code>.
+                    </p>
+                    <p>if <code>where</code> looks like <code>{ before: reference }</code>, the element is inserted into
+                        <code>reference</code>'s parent, before <code>reference</code>.
+                    </p>
+                    <p>if <code>where</code> looks like <code>{ prependTo: reference }</code>, the element is inserted
+                        into <code>reference</code>, before its first child.</p>
+                    <p>if <code>where</code> looks like <code>{ appendTo: reference }</code>, the element is inserted
+                        into <code>reference</code>, after its last child.</p>
+                </li>
+                <li><code>mustache</code> - a templating helper
+                    <p>Uses a minimal subset of mustache.js syntax. Escapes strings by default.</p>
+                    <pre
+                        class="microlight"><code>const result = cf.mustache("Welcome to Mars, {{ name }}.", { name: "John" }); // "Welcome to Mars, John."</code></pre>
+                    <p>You can disable escaping by passing <code>false</code> as the third argument to mustache.</p>
+                    <pre
+                        class="microlight"><code>const resultWithBoldName = cf.mustache("Welcome to Mars, {{ name }}.", { name: "<b>user</b>" }, false); // "Welcome to Mars, <b>user</b>."</code></pre>
+                </li>
+                <li><code>template</code> - wraps <code>mustache()</code> to return a partially applied function, for
+                    strings that need to be updated frequently:
+                    <pre class="microlight"><code>const marsTemplate = cf.template("Welcome to Mars, {{ name }}."); // returns a function
+const result = marsTemplate({ name: "user" }); // "Welcome to Mars, user."
+const result = marsTemplate({ name: "John" }); // "Welcome to Mars, John."</code></pre>
+                </li>
+                <li><code>escape</code> - Simple HTML escaper.
+                    <pre
+                        class="microlight"><code>escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;"</code></pre>
+                </li>
+                <li><code>unescape</code> - Unescapes the output of <code>escape()</code>.
+                    <pre
+                        class="microlight"><code>unescape("&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;") // "&lt;script&gt;alert('XSS')&lt;/script&gt;".</code></pre>
+                </li>
+                <li><code>Store</code> - Simple reactive data store. [see playground for example]</li>
+                <li><code>ListStore</code> - Reactive list store. [see playground for example]</li>
+            </ul>
+        </div>
+
+        <div class="cf-site-div" data-heading="get" style="display: none;">
+            <h3>turn your dumpster fire into a campfire today!</h3>
+            <p>You can include campfire into your site with an import statement, either from a location
+                where you are hosting it, or from esm.sh / unkpg.</p>
+            <pre class="microlight"><code>import cf from 'https://unpkg.com/campfire.js/';</code></pre>
+            <p>or</p>
+            <pre class="microlight"><code>import { nu, ListStore } from 'https://unpkg.com/campfire.js/';</code></pre>
+            <p>If you use npm and a module bundler, campfire provides both CommonJS and ESM versions that you can
+                <code>import</code> or <code>require()</code> to incorporate it into your existing workflow, complete
+                with TSDoc hints for
+                your editor and TypeScript declarations.
+            </p>
+            <p>To install:</p>
+            <pre class="microlight"><code>$ npm i --save campfire.js</code></pre>
+            <p>Then in your project:</p>
+            <pre class="microlight"><code>import cf from 'campfire.js';</code></pre>
+            <p>or (with CommonJS)</p>
+            <pre class="microlight"><code>const cf = require('campfire.js');</code></pre>
+            <p>Good luck, and thank you for choosing Campfire!</p>
+        </div>
+
         <div class='footer'>
             <a href='https://github.com/xyzshantaram/campfire'>Campfire on GitHub</a>
             <a href='https://github.com/xyzshantaram/campfire/blob/main/index.html'>This site on GitHub</a>
