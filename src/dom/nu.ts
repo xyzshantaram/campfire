@@ -1,12 +1,18 @@
-import type { Store } from '../stores/mod.ts';
-import type { ElementProperties, InferElementType, RenderFunction } from '../types.ts';
-import { escape, initMutationObserver } from '../utils.ts';
-import { NuBuilder } from './NuBuilder.ts';
+import type { Store } from "../stores/mod.ts";
+import type { ElementProperties, InferElementType, RenderFunction } from "../types.ts";
+import { escape, initMutationObserver } from "../utils.ts";
+import { NuBuilder } from "./NuBuilder.ts";
 
-initMutationObserver();
+if ("MutationObserver" in globalThis) initMutationObserver();
+else {
+    console.warn(
+        "MutationObserver was not found in your browser. Campfire will",
+        "not be able to warn you of destructive mutations!",
+    );
+}
 
 const unwrapDeps = <D extends Record<string, Store<any>>>(
-    deps: D
+    deps: D,
 ): {
         [K in keyof D]: D[K] extends Store<infer V> ? V : never;
     } => {
@@ -15,20 +21,20 @@ const unwrapDeps = <D extends Record<string, Store<any>>>(
         const value = deps[key].value;
         if (value instanceof Map) {
             result[key] = Object.fromEntries(value.entries());
-        }
-        else {
+        } else {
             result[key] = value.valueOf();
         }
     }
     return result;
 };
 
-
-const isValidRenderFn = <T extends HTMLElement>(fn: ElementProperties<T, any>['contents']): fn is RenderFunction<T, any> => {
+const isValidRenderFn = <T extends HTMLElement>(
+    fn: ElementProperties<T, any>["contents"],
+): fn is RenderFunction<T, any> => {
     if (!fn) return false;
-    if (typeof fn !== 'function') return false;
+    if (typeof fn !== "function") return false;
     return true;
-}
+};
 
 /**
  * Takes an existing element and modifies its properties.
@@ -39,29 +45,29 @@ const isValidRenderFn = <T extends HTMLElement>(fn: ElementProperties<T, any>['c
  */
 export const extend = <
     T extends HTMLElement,
-    D extends Record<string, Store<any>> = {}
+    D extends Record<string, Store<any>> = {},
 >(
     elt: T,
-    args: ElementProperties<T, D> = {}
+    args: ElementProperties<T, D> = {},
 ): [T, ...HTMLElement[]] => {
     let { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D) } = args;
 
-    let content = '';
+    let content = "";
     if (isValidRenderFn<T>(contents)) {
         Object.entries(deps).forEach(([name, dep]) => {
-            dep.any(evt => {
+            dep.any((evt) => {
                 const res = contents(unwrapDeps(deps), { event: { ...evt, triggeredBy: name }, elt });
                 if (res !== undefined) elt.innerHTML = res;
-            })
+            });
         });
 
         const result = contents(unwrapDeps(deps), { elt });
 
-        if (typeof result === 'undefined') elt.setAttribute('data-cf-fg-updates', 'true');
-        else elt.removeAttribute('data-cf-fg-updates');
+        if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
+        else elt.removeAttribute("data-cf-fg-updates");
 
-        content = result || '';
-    } else if (typeof contents === 'string') {
+        content = result || "";
+    } else if (typeof contents === "string") {
         content = contents;
     }
 
@@ -69,20 +75,16 @@ export const extend = <
         elt.innerHTML = raw ? content : escape(content);
     }
 
-    const depIds = Object.values(deps).map(dep => dep.id);
-    if (depIds.length) elt.setAttribute('data-cf-reactive', 'true');
-    else elt.removeAttribute('data-cf-reactive');
+    const depIds = Object.values(deps).map((dep) => dep.id);
+    if (depIds.length) elt.setAttribute("data-cf-reactive", "true");
+    else elt.removeAttribute("data-cf-reactive");
 
     if (misc) Object.assign(elt, misc);
     if (style) Object.assign(elt.style, style);
 
-    Object.entries(on).forEach(([evt, listener]) =>
-        elt.addEventListener(evt, listener)
-    );
+    Object.entries(on).forEach(([evt, listener]) => elt.addEventListener(evt, listener));
 
-    Object.entries(attrs).forEach(([attr, value]) =>
-        elt.setAttribute(attr, value)
-    );
+    Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, value));
 
     const extras: HTMLElement[] = [];
     for (const selector of gimme) {
@@ -95,7 +97,6 @@ export const extend = <
 
     return [elt, ...extras];
 };
-
 
 /**
  * An element creation helper.
@@ -126,10 +127,10 @@ export const extend = <
 export const nu = <
     T extends string,
     E extends InferElementType<T>,
-    D extends Record<string, Store<any>> = {}
+    D extends Record<string, Store<any>> = {},
 >(
     info: T,
-    args?: ElementProperties<E, D>
+    args?: ElementProperties<E, D>,
 ): NuBuilder<T, E, D> => {
-    return new NuBuilder(info, args)
+    return new NuBuilder(info, args);
 };
