@@ -1,5 +1,6 @@
 import { insert, empty, rm, select, onload } from "./dom/mod.ts"
 import { extend, nu } from "./dom/nu.ts"
+import { NuBuilder } from "./dom/NuBuilder.ts"
 import { ListStore, MapStore, Store, store } from "./stores/mod.ts"
 import { html, r } from "./templating/html.ts"
 import { mustache, template } from "./templating/mustache.ts"
@@ -15,5 +16,5 @@ export {
 }
 
 export type {
-    ElementPosition, ElementProperties, Subscriber, Template
+    ElementPosition, ElementProperties, Subscriber, Template, NuBuilder
 }

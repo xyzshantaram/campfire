@@ -17,7 +17,7 @@ import type { ElementPosition } from "../types.ts";
  * @throws an Error when there are either zero or more than one keys present in `where`.
  * @returns the element that was inserted, so you can do `const a = insert(nu(), _)`.
  */
-export const insert = (elem: Element, where: ElementPosition) => {
+export const insert = (elems: Element[], where: ElementPosition) => {
     const keys = Object.keys(where);
     if (keys.length !== 1) {
         throw new Error("Too many or too few positions specified.");
@@ -29,21 +29,31 @@ export const insert = (elem: Element, where: ElementPosition) => {
     if ('after' in where) {
         position = 'afterend';
         ref = where.after;
-    }
-    else if ('before' in where) {
+    } else if ('before' in where) {
         position = 'beforebegin';
         ref = where.before;
-    }
-    else if ('into' in where && where.at === 'start') {
+    } else if ('into' in where && where.at === 'start') {
         position = 'afterbegin';
         ref = where.into;
-    }
-    else {
+    } else {
         ref = where.into;
     }
-    ref.insertAdjacentElement(position, elem);
-    return elem;
-}
+
+    const frag = document.createDocumentFragment();
+    for (const item of elems) frag.appendChild(item);
+
+    if (position === 'beforebegin') {
+        ref.parentNode?.insertBefore(frag, ref);
+    } else if (position === 'afterend') {
+        ref.parentNode?.insertBefore(frag, ref.nextSibling);
+    } else if (position === 'afterbegin') {
+        ref.insertBefore(frag, ref.firstChild);
+    } else {
+        ref.appendChild(frag);
+    }
+
+    return elems;
+};
 
 /**
  * Fires a callback when the DOMContentLoaded event fires.
@@ -54,7 +64,7 @@ export const onload = (cb: (ev: Event) => void) => globalThis.addEventListener('
 
 export interface SelectParams {
     /** The selector to query for. */
-    selector: string;
+    s: string;
     /** The parent node to query. Defaults to `document`. */
     from?: ParentNode;
     /** Whether to return all elements matching the given selector or just the first. */
@@ -66,13 +76,13 @@ export interface SelectParams {
  * @param opts See SelectParams.
  * @returns Element(s) matching the given selector, or an empty list.
  */
-export const select = ({ selector, all, from }: SelectParams) => {
+export const select = ({ s, all, from }: SelectParams) => {
     from ??= document;
     if (all) {
-        return Array.from(from.querySelectorAll(selector));
+        return Array.from(from.querySelectorAll(s)) as HTMLElement[];
     }
     else {
-        return [from.querySelector(selector)];
+        return [from.querySelector(s)] as HTMLElement[];
     }
 }
 
