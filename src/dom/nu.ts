@@ -10,7 +10,13 @@ const unwrapDeps = <D extends Record<string, Store<any>>>(
     } => {
     const result: any = {};
     for (const key in deps) {
-        result[key] = deps[key].value;
+        const value = deps[key].value;
+        if (value instanceof Map) {
+            result[key] = Object.fromEntries(value.entries());
+        }
+        else {
+            result[key] = value.valueOf();
+        }
     }
     return result;
 };
