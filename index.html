@@ -228,7 +228,7 @@ const NameBadge = () => {
             <p>Campfire provides the following methods and classes:</p>
 
             <details>
-                <summary><code>nu()</code> - Element Creation with Fluent API</summary>
+                <summary><code>nu()</code> - element creation helper</summary>
                 <p>Creates a new DOM element with a fluent builder API.</p>
                 <pre class="microlight"><code>// Creating a simple element
 const [div] = cf.nu('div')
@@ -262,7 +262,7 @@ nameStore.update('Alice');</code></pre>
             </details>
 
             <details>
-                <summary><code>store()</code> - Reactive Data Stores</summary>
+                <summary><code>store()</code> - reactive data stores</summary>
                 <p>Creates reactive data stores to manage state with automatic UI updates.</p>
 
                 <pre class="microlight"><code>// Simple value store
@@ -297,76 +297,74 @@ todoList.any((event) => {
             </details>
 
             <details>
-                <summary><code>select()</code> - DOM Selection</summary>
+                <summary><code>select()</code> - element selection</summary>
                 <p>Selects elements from the DOM with a unified API.</p>
 
                 <pre class="microlight"><code>// Select a single element (returns an array with one item)
-const [header] = cf.select({ selector: '#page-header' });
+const [header] = cf.select({ s: '#page-header' });
 
 // Select from a specific parent element
 const [submitButton] = cf.select({
-  selector: 'button[type="submit"]',
+  s: 'button[type="submit"]',
   from: formElement
 });
 
 // Select multiple elements
 const paragraphs = cf.select({
-  selector: 'p',
+  s: 'p',
   all: true
 });
 
 // Combining with other operations
-cf.select({ selector: '.cards', all: true }).forEach(card => {
+cf.select({ s: '.cards', all: true }).forEach(card => {
   cf.extend(card, { style: { border: '1px solid black' } });
 });</code></pre>
             </details>
 
             <details>
-                <summary><code>insert()</code> - DOM Insertion</summary>
+                <summary><code>insert()</code> - element insertion</summary>
                 <p>Inserts elements into the DOM at specific positions.</p>
 
                 <pre class="microlight"><code>// Insert at the end of a container
-cf.insert(newElement, { into: container });
+cf.insert([elt], { into: container });
 
 // Insert at the start of a container
-cf.insert(newElement, { into: container, at: 'start' });
+cf.insert([elt], { into: container, at: 'start' });
 
-// Insert before another element
-cf.insert(newElement, { before: referenceElement });
+// Insert before (as siblings of) another element
+cf.insert([elt], { before: referenceElement });
 
-// Insert after another element
-cf.insert(newElement, { after: referenceElement });
+// Insert multiple elements after (as siblings of) another element
+cf.insert([elt1, elt2], { after: referenceElement });
 
 // Create and insert in one step
-const [div] = cf.nu('div')
-  .content('New content')
-  .done();
-cf.insert(div, { into: document.body });</code></pre>
+cf.insert(cf.nu().content('New content').done(), { into: document.body });</code></pre>
             </details>
 
             <details>
-                <summary><code>html()</code> - Template Literals with Auto-escaping</summary>
+                <summary><code>html()</code> - auto-escaping template literal</summary>
                 <p>Creates HTML strings with automatic escaping of interpolated values.</p>
 
                 <pre class="microlight"><code>// Basic usage with automatic escaping
-const userName = '&lt;script&gt;alert("XSS")&lt;/script&gt;';
-const greeting = cf.html`Hello, ${userName}!`;
+const username = '&lt;script&gt;alert("XSS")&lt;/script&gt;';
+const greeting = cf.html`Hello, ${username}!`;
 // Result: "Hello, &amp;lt;script&amp;gt;alert("XSS")&amp;lt;/script&amp;gt;!"
 
 // Use r() to disable escaping for trusted content
-const trustedHtml = cf.r('<b>Bold text</b>');
-const message = cf.html`Safe message: ${trustedHtml}`;
-// Result: "Safe message: <b>Bold text</b>"
+const trusted = cf.r('"&lt;b&gt;Bold text&lt;/b&gt;"');
+const message = cf.html`Safe message: ${trusted}`;
+// Result: "Safe message: "&lt;b&gt;Bold text&lt;/b&gt;""
 
 // Use with element creation
 const [div] = cf.nu('div')
-  .content(cf.html`<h1>Title</h1><p>${userName}</p>`)
-  .raw(true)  // Content is already escaped by html``
+    // .html() sets .raw(true) internally
+  .html(cf.html`<h1>Title</h1><p>${userName}</p>`)
   .done();</code></pre>
             </details>
 
             <details>
-                <summary><code>mustache()</code> and <code>template()</code> - String Templating</summary>
+                <summary><code>mustache()</code> and <code>template()</code> - reusable and composable string templates
+                </summary>
                 <p>Simple templating system for string interpolation.</p>
 
                 <pre class="microlight"><code>// Basic mustache templating (escaped by default)
@@ -374,28 +372,24 @@ const result = cf.mustache("Hello, {{ name }}!", { name: "John" });
 // Result: "Hello, John!"
 
 // With HTML content (escaped by default)
-const result2 = cf.mustache(
-  "Welcome, {{ userName }}!", 
-  { userName: "<b>Admin</b>" }
-);
-// Result: "Welcome, &lt;b&gt;Admin&lt;/b&gt;!"
+const result = cf.mustache("Welcome, {{ user }}!", { user: "&lt;b&gt;Admin&lt;/b&gt;" });
+// Result: "Welcome, &amp;lt;b&amp;gt;Admin&amp;lt;/b&amp;gt;!"
 
 // Disable escaping for trusted content
-const result3 = cf.mustache(
-  "Welcome, {{ userName }}!", 
-  { userName: "<b>Admin</b>" }, 
+const result = cf.mustache(
+  "Welcome, {{ userName }}!", { userName: "&lt;b&gt;Admin&lt;/b&gt;" }, 
   false // disable escaping
 );
-// Result: "Welcome, <b>Admin</b>!"
+// Result: "&lt;b&gt;Admin&lt;/b&gt;"
 
 // Create reusable template function
-const greetTemplate = cf.template("Hello, {{ name }}!");
-const greeting1 = greetTemplate({ name: "Alice" });  // "Hello, Alice!"
-const greeting2 = greetTemplate({ name: "Bob" });    // "Hello, Bob!"</code></pre>
+const greet = cf.template("Hello, {{ name }}!");
+const aliceGreeting = greet({ name: "Alice" });  // "Hello, Alice!"
+const bobGreeting = greet({ name: "Bob" });    // "Hello, Bob!"</code></pre>
             </details>
 
             <details>
-                <summary><code>extend()</code> - Element Modification</summary>
+                <summary><code>extend()</code> - element modification</summary>
                 <p>Modifies existing DOM elements with the same options as <code>nu()</code>.</p>
 
                 <pre class="microlight"><code>// Basic usage 
@@ -423,7 +417,7 @@ cf.extend(pageHeader, {
             </details>
 
             <details>
-                <summary><code>empty()</code> and <code>rm()</code> - Element Clean-up</summary>
+                <summary><code>empty()</code> and <code>rm()</code> - element cleanup</summary>
                 <p>Remove elements or their contents from the DOM.</p>
 
                 <pre class="microlight"><code>// Empty an element (removes all children)
@@ -434,8 +428,9 @@ cf.rm(element);</code></pre>
             </details>
 
             <details>
-                <summary><code>escape()</code> and <code>unescape()</code> - String Sanitization</summary>
-                <p>Simple HTML escaping and unescaping utilities.</p>
+                <summary><code>escape()</code> and <code>unescape()</code> - string sanitization</summary>
+                <p>Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text into the
+                    DOM - you should look to a different library for more complex needs.</p>
 
                 <pre class="microlight"><code>// Escape HTML characters
 escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;"
@@ -446,7 +441,7 @@ unescape("&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;") //
             </details>
 
             <details>
-                <summary><code>onload()</code> - DOM Ready Handler</summary>
+                <summary><code>onload()</code> - DOM ready handler</summary>
                 <p>Executes code when the DOM is fully loaded.</p>
 
                 <pre class="microlight"><code>cf.onload(() => {
@@ -457,7 +452,7 @@ unescape("&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;") //
             </details>
 
             <details>
-                <summary><code>seq()</code> - Sequence Generator</summary>
+                <summary><code>seq()</code> - sequence generator</summary>
                 <p>Generates numerical sequences for iteration.</p>
 
                 <pre class="microlight"><code>// Range from 0 to 5 (exclusive)

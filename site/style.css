@@ -181,8 +181,9 @@ details>p,
 details>pre,
 details>ul,
 details>details {
-    margin-left: 2rem;
+    margin-left: 1rem;
     margin-top: 1rem;
+    margin-right: 1rem;
 }
 
 @media screen and (max-aspect-ratio: 4/3) {
