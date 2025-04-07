@@ -14,7 +14,8 @@
         "declaration": true,
         "emitDeclarationOnly": true,
         "allowImportingTsExtensions": true,
-        "preserveSymlinks": true
+        "preserveSymlinks": true,
+        "types": []
     },
     "include": [
         "./src/**/*"

@@ -76,15 +76,15 @@ var fmtNode = (node) => {
 var initMutationObserver = () => {
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-      for (const node of mutation.addedNodes) {
-        if (!(node instanceof HTMLElement)) continue;
+      mutation.addedNodes.forEach((node) => {
+        if (!(node instanceof HTMLElement)) return;
         const parent = mutation.target;
-        if (!parent.hasAttribute("data-cf-deps")) continue;
-        if (parent.hasAttribute("data-cf-fg-updates")) continue;
+        if (!parent.hasAttribute("data-cf-deps")) return;
+        if (parent.hasAttribute("data-cf-fg-updates")) return;
         const reactiveChildren = node.querySelectorAll?.("[data-cf-deps]").length ?? 0;
-        if (!node.hasAttribute?.("data-cf-deps") && reactiveChildren === 0) continue;
+        if (!node.hasAttribute?.("data-cf-deps") && reactiveChildren === 0) return;
         console.warn(`[Campfire] \u26A0\uFE0F A reactive node ${fmtNode(node)} was inserted into a reactive container ${fmtNode(parent)} This may cause it to be wiped on re-render.`);
-      }
+      });
     }
   });
   if (!document.body.hasAttribute("cf-disable-mo"))
