@@ -47,7 +47,7 @@ export class Store<T> {
      * @param value - The initial value of the store.
      */
     constructor(value?: T) {
-        if (value) this.value = value;
+        if (typeof value !== 'undefined' && value !== null) this.value = value;
     }
 
     /**

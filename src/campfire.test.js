@@ -469,28 +469,24 @@ describe('Tests for Reactivity', () => {
     });
 
     it('Should handle complex nested reactivity', () => {
-        const countStore = cf.store({ value: 0 });
-        const messageStore = cf.store({ value: 'Click to increment' });
-        const colorStore = cf.store({ value: 'blue' });
-
-        const renderCounter = (data, opts) => {
-            // Add event info to demonstrate full reactive system capabilities
-            const eventDetail = opts.event ? ` (triggered by ${opts.event.triggeredBy})` : '';
-            return `
-                <div style="color: ${data.color}">
-                    <h3>${data.message}${eventDetail}</h3>
-                    <p>Count: ${data.count}</p>
-                </div>
-            `;
-        };
+        const count = cf.store({ value: 0 });
+        const message = cf.store({ value: 'Click to increment' });
+        const color = cf.store({ value: 'blue' });
 
         const [counter] = nu('div', {
-            contents: renderCounter,
+            contents: (data, opts) => {
+                // Add event info to demonstrate full reactive system capabilities
+                const eventDetail = opts.event ? ` (triggered by ${opts.event.triggeredBy})` : '';
+                return `<div style="color: ${data.color}">
+                    <h3>${data.message}${eventDetail}</h3>
+                    <p>Count: ${data.count}</p>
+                </div>`;
+            },
             raw: true,
             deps: {
-                count: countStore,
-                message: messageStore,
-                color: colorStore
+                count: count,
+                message: message,
+                color: color
             }
         }).done();
 
@@ -499,15 +495,15 @@ describe('Tests for Reactivity', () => {
         expect(counter.querySelector('div').style.color).to.equal('blue');
 
         // Update values and verify DOM updates
-        countStore.update(1);
+        count.update(1);
         expect(counter.querySelector('p').textContent).to.equal('Count: 1');
         expect(counter.querySelector('h3').textContent).to.contain('triggered by count');
 
-        messageStore.update('Counter was clicked');
+        message.update('Counter was clicked');
         expect(counter.querySelector('h3').textContent).to.contain('Counter was clicked');
         expect(counter.querySelector('h3').textContent).to.contain('triggered by message');
 
-        colorStore.update('red');
+        color.update('red');
         expect(counter.querySelector('div').style.color).to.equal('red');
         expect(counter.querySelector('h3').textContent).to.contain('triggered by color');
     });
