@@ -57,7 +57,7 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @param value - An object containing attribute name-value pairs
      * @returns The builder instance for chaining
      */
-    attrs(value: Required<ElementProperties<E, D>['attrs']>): this;
+    attrs(value: ElementProperties<E, D>['attrs']): this;
     /**
      * Sets whether the content value should be treated as raw HTML.
      *
@@ -88,7 +88,7 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @param value - An object containing style name-value pairs
      * @returns The builder instance for chaining
      */
-    styles(value: Required<ElementProperties<E, D>['style']>): this;
+    styles(value: ElementProperties<E, D>['style']): this;
     /**
      * Attaches an event handler to the element.
      *
@@ -104,4 +104,5 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @returns The builder instance for chaining
      */
     gimme(selectors: string | string[]): this;
+    deps<ND extends Record<string, Store<any>>>(obj: ND): NuBuilder<T, E, D & ND>;
 }

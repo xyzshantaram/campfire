@@ -81,4 +81,5 @@ export declare class Store<T> {
      * Close the store so it no longer sends events.
      */
     dispose(): void;
+    valueOf(): T;
 }

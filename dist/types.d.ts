@@ -22,9 +22,10 @@ export type StoreEvent = {
 export type Subscriber = (event: StoreEvent) => void;
 /** The function signature for a function returned by `template()`. */
 export type Template = (e: Record<string, any>) => string;
-export type RenderFunction<T extends HTMLElement, D> = (props: {
-    [K in keyof D]: D[K] extends Store<infer V> ? V : never;
-}, opts: {
+export type UnwrapStore<D> = {
+    [K in keyof D]: D[K] extends Store<infer V> ? V extends Map<any, any> ? Record<string, any> : V : never;
+};
+export type RenderFunction<T extends HTMLElement, D> = (props: UnwrapStore<D>, opts: {
     event?: StoreEvent & {
         triggeredBy: string;
     };
@@ -56,13 +57,13 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
      */
     misc?: Record<string, unknown>;
     /** Contains styles that will be applied to the new element. Property names must be the same as those in `CSSStyleDeclaration`. */
-    style?: Partial<Record<StringStyleProps, string>>;
+    style?: Partial<Record<StringStyleProps, string | number>>;
     /** An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
     on?: DOMEventHandlers;
     /** Attributes that will be set on the element using `Element.setAttribute`. */
-    attrs?: Record<string, string>;
+    attrs?: Record<string, string | number | boolean>;
     /** A list of elements to query from the element. Will be returned as subsequent members of the returned Array after the element itself. */
     gimme?: string[];
     deps?: D;

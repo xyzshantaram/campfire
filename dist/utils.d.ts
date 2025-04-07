@@ -20,3 +20,4 @@ export declare const escape: (str: string) => string;
  */
 export declare const unescape: (str: string) => string;
 export declare const seq: (...args: number[]) => number[];
+export declare const initMutationObserver: () => void;

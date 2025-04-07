@@ -1,5 +1,5 @@
 // src/dom/mod.ts
-var insert = (elem, where) => {
+var insert = (elems, where) => {
   const keys = Object.keys(where);
   if (keys.length !== 1) {
     throw new Error("Too many or too few positions specified.");
@@ -18,16 +18,26 @@ var insert = (elem, where) => {
   } else {
     ref = where.into;
   }
-  ref.insertAdjacentElement(position, elem);
-  return elem;
+  const frag = document.createDocumentFragment();
+  for (const item of elems) frag.appendChild(item);
+  if (position === "beforebegin") {
+    ref.parentNode?.insertBefore(frag, ref);
+  } else if (position === "afterend") {
+    ref.parentNode?.insertBefore(frag, ref.nextSibling);
+  } else if (position === "afterbegin") {
+    ref.insertBefore(frag, ref.firstChild);
+  } else {
+    ref.appendChild(frag);
+  }
+  return elems;
 };
 var onload = (cb) => globalThis.addEventListener("DOMContentLoaded", cb);
-var select = ({ selector, all, from }) => {
+var select = ({ s, all, from }) => {
   from ?? (from = document);
   if (all) {
-    return Array.from(from.querySelectorAll(selector));
+    return Array.from(from.querySelectorAll(s));
   } else {
-    return [from.querySelector(selector)];
+    return [from.querySelector(s)];
   }
 };
 var rm = (elt) => elt.remove();
@@ -207,7 +217,7 @@ var NuBuilder = class {
    * @returns The builder instance for chaining
    */
   styles(value) {
-    this.props.style = value;
+    this.props.style = value ?? {};
     return this;
   }
   /**
@@ -237,7 +247,7 @@ var NuBuilder = class {
     return this;
   }
   deps(obj) {
-    this.props.deps = obj;
+    this.props.deps = { ...this.props.deps, ...obj };
     return this;
   }
 };
@@ -293,7 +303,7 @@ var extend = (elt, args = {}) => {
   if (misc) Object.assign(elt, misc);
   if (style) Object.assign(elt.style, style);
   Object.entries(on).forEach(([evt, listener]) => elt.addEventListener(evt, listener));
-  Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, value));
+  Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, String(value)));
   const extras = [];
   for (const selector of gimme) {
     const found = elt.querySelector(selector);
@@ -301,7 +311,7 @@ var extend = (elt, args = {}) => {
   }
   return [elt, ...extras];
 };
-var nu = (info, args) => {
+var nu = (info = "div", args = {}) => {
   return new NuBuilder(info, args);
 };
 

@@ -23,7 +23,7 @@
   },
   "name": "campfire.js",
   "description": "a cozy web framework",
-  "version": "4.0.0-rc4",
+  "version": "4.0.0-rc5",
   "type": "module",
   "main": "dist/campfire.js",
   "module": "dist/campfire.js",
@@ -38,9 +38,10 @@
     "dist"
   ],
   "scripts": {
-    "test": "npx tsc --noEmit && npx mocha 'src/**/*.test.{js,ts}'",
+    "mocha": "npx mocha 'src/**/*.test.{js,ts}'",
+    "test": "npx tsc --noEmit && pnpm mocha",
     "mkdocs": "npx typedoc src/campfire.ts src/types.ts --cleanOutputDir --out site/docs/ --darkHighlightTheme monokai --customCss site/tsdoc_style.css && cp campfire.png site/docs/campfire.png",
-    "build": "pnpm test && node esbuild.config.js"
+    "build": "npx tsc && pnpm mocha && node esbuild.config.js && pnpm mkdocs"
   },
   "repository": {
     "type": "git",

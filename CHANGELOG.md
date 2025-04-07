@@ -1,5 +1,10 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc5
+
+`cf.insert()` now accepts `HTMLElement[]` instead of a single element, to make
+it easier to use with `cf.nu`.
+
 ## 4.0.0-rc4
 
 - Retire CJS versions of modules
