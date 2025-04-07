@@ -1,7 +1,9 @@
 import type { Store } from '../stores/mod.ts';
 import type { ElementProperties, InferElementType, RenderFunction } from '../types.ts';
-import { escape } from '../utils.ts';
+import { escape, initMutationObserver } from '../utils.ts';
 import { NuBuilder } from './NuBuilder.ts';
+
+initMutationObserver();
 
 const unwrapDeps = <D extends Record<string, Store<any>>>(
     deps: D
@@ -54,6 +56,10 @@ export const extend = <
         });
 
         const result = contents(unwrapDeps(deps), { elt });
+
+        if (typeof result === 'undefined') elt.setAttribute('data-cf-fg-updates', 'true');
+        else elt.removeAttribute('data-cf-fg-updates');
+
         content = result || '';
     } else if (typeof contents === 'string') {
         content = contents;
@@ -64,7 +70,8 @@ export const extend = <
     }
 
     const depIds = Object.values(deps).map(dep => dep.id);
-    if (depIds.length) elt.setAttribute('data-cf-deps', depIds.join(','));
+    if (depIds.length) elt.setAttribute('data-cf-reactive', 'true');
+    else elt.removeAttribute('data-cf-reactive');
 
     if (misc) Object.assign(elt, misc);
     if (style) Object.assign(elt.style, style);

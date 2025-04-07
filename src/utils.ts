@@ -57,3 +57,40 @@ export const seq = (...args: number[]) => {
 
     return result;
 }
+
+const fmtNode = (node: HTMLElement) => {
+    const result = ['<'];
+    result.push(node.tagName.toLowerCase());
+    if (node.id) result.push(`#${node.id}`);
+    if (node.className.trim()) result.push(`.${node.className.split(' ').join('.')}`);
+    result.push(...Array.from(node.attributes)
+        .map(attr => `${attr.name}="${attr.value}"`)
+        .slice(0, 3) // limit to 3 attributes
+        .join(' '));
+    return result.join('');
+}
+
+export const initMutationObserver = () => {
+    const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            for (const node of mutation.addedNodes) {
+                if (!(node instanceof HTMLElement)) continue;
+
+                // Check parent is reactive
+                const parent = mutation.target as HTMLElement;
+                if (!parent.hasAttribute('data-cf-deps')) continue;
+                if (parent.hasAttribute('data-cf-fg-updates')) continue;
+
+                // Check if added node (or its children) are also reactive
+                const reactiveChildren = node.querySelectorAll?.('[data-cf-deps]').length ?? 0;
+                if (!node.hasAttribute?.('data-cf-deps') && reactiveChildren === 0) continue;
+
+                console.warn(`[Campfire] ⚠️ A reactive node ${fmtNode(node)} was inserted into a reactive ` +
+                    `container ${fmtNode(parent)} This may cause it to be wiped on re-render.`);
+            }
+        }
+    });
+
+    if (!document.body.hasAttribute('cf-disable-mo'))
+        observer.observe(document.body, { childList: true, subtree: true });
+}
