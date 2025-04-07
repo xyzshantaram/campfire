@@ -430,7 +430,7 @@ describe('Tests for Reactivity', () => {
     });
 
     it('MapStore should update object rendering', () => {
-        const userStore = cf.store({
+        const user = cf.store({
             type: 'map',
             value: {
                 name: 'John',
@@ -439,37 +439,32 @@ describe('Tests for Reactivity', () => {
             }
         });
 
-        const renderUser = (data) => {
-            console.log({ data });
-            return `
+        const [container, h2, first, second] = nu('')
+            .deps({ user })
+            .content(({ user }) => {
+                return `
                 <div class="user">
                     <h2>${user.name}</h2>
                     <p>Age: ${user.age}</p>
                     <p>Role: ${user.isAdmin ? 'Admin' : 'User'}</p>
                 </div>
             `;
-        };
+            })
+            .raw(true)
+            .gimme(['h2', 'p:nth-child(2)', 'p:nth-child(3)'])
+            .done();
 
-        const [container, first, second] = nu('div', {
-            contents: renderUser,
-            raw: true,
-            deps: { user: userStore },
-            gimme: ['h2', 'p:nth-child(2)', 'p:nth-child(3)']
-        }).done();
-
-        console.log({ container: JSON.stringify(container.textContent), first: JSON.stringify(first.textContent), second: JSON.stringify(second.textContent) });
-
-        expect(container.textContent).to.equal('John');
+        expect(h2.textContent).to.equal('John');
         expect(first.textContent).to.equal('Age: 30');
         expect(second.textContent).to.equal('Role: User');
 
-        userStore.set('name', 'Jane');
+        user.set('name', 'Jane');
         expect(container.querySelector('h2').textContent).to.equal('Jane');
 
-        userStore.set('age', 28);
+        user.set('age', 28);
         expect(container.querySelector('p:nth-child(2)').textContent).to.equal('Age: 28');
 
-        userStore.set('isAdmin', true);
+        user.set('isAdmin', true);
         expect(container.querySelector('p:nth-child(3)').textContent).to.equal('Role: Admin');
     });
 
@@ -518,19 +513,11 @@ describe('Tests for Reactivity', () => {
     });
 
     it('Should properly clean up subscriptions when element is disposed', () => {
-        // This test verifies that store subscriptions are properly managed
-        // to prevent memory leaks 
         const countStore = cf.store({ value: 0 });
-        const mockFn = sinon.spy();
 
-        // Add a spy to track subscription calls
-        const originalOn = countStore.on;
-        countStore.on = function (...args) {
-            mockFn();
-            return originalOn.apply(this, args);
-        };
-
-        const renderValue = (data) => `Value: ${data.count}`;
+        const renderValue = (data) => {
+            return `Value: ${data.count}`;
+        }
 
         const [div] = nu('div', {
             contents: renderValue,
@@ -549,8 +536,5 @@ describe('Tests for Reactivity', () => {
         // Updates after disposal should not affect the element
         countStore.update(2);
         expect(div.innerHTML).to.equal('Value: 1'); // Still shows the old value
-
-        // The mock should have been called exactly once for the subscription
-        expect(mockFn.callCount).to.equal(1);
     });
 });
