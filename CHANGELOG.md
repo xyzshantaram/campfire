@@ -1,8 +1,12 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc4
+
+- Retire CJS versions of modules
+
 ## 4.0.0-rc3 (Release Candidate 3)
 
-Fix mis-exported module file
+- Fix mis-exported module file
 
 ## 4.0.0-rc2 (Release Candidate 2)
 
