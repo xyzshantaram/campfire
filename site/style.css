@@ -25,7 +25,10 @@
     border-top-left-radius: 6px;
 }
 
-a, a:link, a:visited, a:active {
+a,
+a:link,
+a:visited,
+a:active {
     color: #ff9a00;
 }
 
@@ -34,12 +37,17 @@ a, a:link, a:visited, a:active {
         border-bottom-style: solid;
         background: rgba(255, 255, 255, 0.2);
     }
-    a:hover, a:link:hover, a:visited:hover {
+
+    a:hover,
+    a:link:hover,
+    a:visited:hover {
         border-bottom-style: solid;
     }
+
     a.icon-link:hover {
         border: none;
     }
+
     .editor-wrapper>.switcher>button:hover {
         background: #ff9a00;
     }
@@ -49,6 +57,7 @@ a, a:link, a:visited, a:active {
     #app>nav>button {
         text-overflow: ellipsis;
     }
+
     body {
         font-size: 1rem;
     }
@@ -95,6 +104,11 @@ div[class^='cf-editor'] {
 .editor-wrapper {
     display: flex;
     flex-direction: column;
+    border: 2px solid gray;
+    padding: 0.4rem;
+    padding-bottom: 0;
+    margin-top: 1rem;
+    border-radius: 0.4rem;
 }
 
 .editor-wrapper>.switcher {
@@ -140,6 +154,8 @@ div[class^='cf-editor'] {
     border: none;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
+    width: 100%;
+    height: 100%;
 }
 
 #cf-editor-controls {
@@ -161,13 +177,20 @@ details {
     margin-bottom: 1rem;
 }
 
-details>p, details>pre, details>ul, details>details {
+details>p,
+details>pre,
+details>ul,
+details>details {
     margin-left: 2rem;
     margin-top: 1rem;
 }
 
 @media screen and (max-aspect-ratio: 4/3) {
-    details>p, details>pre, details>ul, details>details {
+
+    details>p,
+    details>pre,
+    details>ul,
+    details>details {
         margin-left: 1rem;
     }
 }
