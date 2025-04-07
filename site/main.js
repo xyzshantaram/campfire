@@ -1,7 +1,9 @@
-import * as cf from '../dist/campfire.esm.js';
+import cf from 'https://esm.sh/campfire.js@4.0.0-rc2';
 import { marked } from 'https://esm.sh/marked@15.0.7';
 import toml from 'https://esm.sh/toml@3.0.0';
 import { highlightAll, HL_KEYWORDS } from 'https://esm.sh/macrolight@1.5.0';
+
+console.log(cf);
 
 window.cf = cf;
 

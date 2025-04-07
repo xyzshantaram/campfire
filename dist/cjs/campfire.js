@@ -125,6 +125,32 @@ var seq = (...args) => {
   }
   return result;
 };
+var fmtNode = (node) => {
+  const result = ["<"];
+  result.push(node.tagName.toLowerCase());
+  if (node.id) result.push(`#${node.id}`);
+  if (node.className.trim()) result.push(`.${node.className.split(" ").join(".")}`);
+  result.push(...Array.from(node.attributes).map((attr) => `${attr.name}="${attr.value}"`).slice(0, 3).join(" "));
+  return result.join("");
+};
+var initMutationObserver = () => {
+  const observer = new MutationObserver((mutations) => {
+    var _a, _b, _c;
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (!(node instanceof HTMLElement)) continue;
+        const parent = mutation.target;
+        if (!parent.hasAttribute("data-cf-deps")) continue;
+        if (parent.hasAttribute("data-cf-fg-updates")) continue;
+        const reactiveChildren = (_b = (_a = node.querySelectorAll) == null ? void 0 : _a.call(node, "[data-cf-deps]").length) != null ? _b : 0;
+        if (!((_c = node.hasAttribute) == null ? void 0 : _c.call(node, "data-cf-deps")) && reactiveChildren === 0) continue;
+        console.warn(`[Campfire] \u26A0\uFE0F A reactive node ${fmtNode(node)} was inserted into a reactive container ${fmtNode(parent)} This may cause it to be wiped on re-render.`);
+      }
+    }
+  });
+  if (!document.body.hasAttribute("cf-disable-mo"))
+    observer.observe(document.body, { childList: true, subtree: true });
+};
 
 // src/dom/NuBuilder.ts
 var createTypedElement = (name) => {
@@ -272,13 +298,29 @@ var NuBuilder = class {
     else this.props.gimme.push(selectors);
     return this;
   }
+  deps(obj) {
+    this.props.deps = obj;
+    return this;
+  }
 };
 
 // src/dom/nu.ts
+if ("MutationObserver" in globalThis) initMutationObserver();
+else {
+  console.warn(
+    "MutationObserver was not found in your browser. Campfire will",
+    "not be able to warn you of destructive mutations!"
+  );
+}
 var unwrapDeps = (deps) => {
   const result = {};
   for (const key in deps) {
-    result[key] = deps[key].value;
+    const value = deps[key].value;
+    if (value instanceof Map) {
+      result[key] = Object.fromEntries(value.entries());
+    } else {
+      result[key] = value.valueOf();
+    }
   }
   return result;
 };
@@ -298,6 +340,8 @@ var extend = (elt, args = {}) => {
       });
     });
     const result = contents(unwrapDeps(deps), { elt });
+    if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
+    else elt.removeAttribute("data-cf-fg-updates");
     content = result || "";
   } else if (typeof contents === "string") {
     content = contents;
@@ -306,15 +350,12 @@ var extend = (elt, args = {}) => {
     elt.innerHTML = raw ? content : escape(content);
   }
   const depIds = Object.values(deps).map((dep) => dep.id);
-  if (depIds.length) elt.setAttribute("data-cf-deps", depIds.join(","));
+  if (depIds.length) elt.setAttribute("data-cf-reactive", "true");
+  else elt.removeAttribute("data-cf-reactive");
   if (misc) Object.assign(elt, misc);
   if (style) Object.assign(elt.style, style);
-  Object.entries(on).forEach(
-    ([evt, listener]) => elt.addEventListener(evt, listener)
-  );
-  Object.entries(attrs).forEach(
-    ([attr, value]) => elt.setAttribute(attr, value)
-  );
+  Object.entries(on).forEach(([evt, listener]) => elt.addEventListener(evt, listener));
+  Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, value));
   const extras = [];
   for (const selector of gimme) {
     const found = elt.querySelector(selector);
@@ -361,7 +402,7 @@ var Store = class {
      * @internal
      */
     this._dead = false;
-    if (value) this.value = value;
+    if (typeof value !== "undefined" && value !== null) this.value = value;
   }
   /**
   * Add an event listener to the store.
@@ -442,6 +483,9 @@ var Store = class {
     this._dead = true;
     this._subscribers = {};
     this._subscriberCounts = {};
+  }
+  valueOf() {
+    return structuredClone(this.value);
   }
 };
 
