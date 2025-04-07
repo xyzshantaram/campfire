@@ -1,4 +1,4 @@
-import cf from 'https://esm.sh/campfire.js@4.0.0-rc2';
+import cf from 'https://esm.sh/campfire.js@4.0.0-rc4';
 import { marked } from 'https://esm.sh/marked@15.0.7';
 import toml from 'https://esm.sh/toml@3.0.0';
 import { highlightAll, HL_KEYWORDS } from 'https://esm.sh/macrolight@1.5.0';
@@ -25,13 +25,13 @@ window.addEventListener("DOMContentLoaded", async (e) => {
 
     marked.use({ renderer: PageRenderer });
 
-    const [nav] = cf.nu('nav', {
-        style: {
+    const [nav] = cf.nu('nav')
+        .styles({
             display: 'flex',
             width: '100%',
             justifyContent: 'center'
-        }
-    });
+        })
+        .done();
 
     cf.insert(nav, { before: footer });
     const siteData = cf.store({ type: 'list', value: [] });
@@ -57,27 +57,23 @@ window.addEventListener("DOMContentLoaded", async (e) => {
     siteData.on('append', (item) => {
         const value = item.value;
 
-        const [siteDiv] = cf.nu('div.cf-site-div', {
-            attrs: {
-                'data-heading': value.heading
-            },
-            contents: value.html,
-            raw: true
-        });
+        const [siteDiv] = cf.nu('div.cf-site-div')
+            .attr('data-heading', value.heading)
+            .content(value.html)
+            .raw(true)
+            .done();
 
         cf.insert(siteDiv, { before: footer });
 
-        const [button] = cf.nu("button", {
-            m: { type: 'button' },
-            contents: value.heading,
-            on: {
-                'click': function () {
-                    document.querySelector('.active-tab')?.classList.remove('active-tab');
-                    this.classList.add('active-tab');
-                    focusTab(value.heading);
-                }
-            }
-        });
+        const [button] = cf.nu("button")
+            .misc("type", "button")
+            .content(value.heading)
+            .on("click", function () {
+                document.querySelector('.active-tab')?.classList.remove('active-tab');
+                this.classList.add('active-tab');
+                focusTab(value.heading);
+            })
+            .done();
 
         cf.insert(button, { into: nav });
     })

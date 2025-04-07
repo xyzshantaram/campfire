@@ -1,4 +1,4 @@
-import * as cf from 'https://esm.sh/campfire.js@4.0.0-alpha4';
+import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc4';
 import { highlight } from 'https://esm.sh/macrolight@1.5.0';
 import toml from 'https://esm.sh/toml';
 
@@ -15,7 +15,7 @@ const iframeContentTemplate = cf.template(`\
 <body>
     {{ html }}
     <script type='module'>
-        import cf from 'https://esm.sh/campfire.js@2.2.0';
+        import cf from 'https://esm.sh/campfire.js@4.0.0-rc4';
         window.onload = function() {
             {{ js }}
         }
@@ -57,7 +57,7 @@ const editorReady = () => {
     }
 
     const wrapper = examples.querySelector('.editor-wrapper');
-    const [switcher] = cf.nu('div.switcher');
+    const [switcher] = cf.nu('div.switcher').done();
 
     cf.insert(switcher, { into: wrapper });
 
@@ -68,18 +68,14 @@ const editorReady = () => {
         const current = editorConfigs[key];
         if (!current.elt) continue;
 
-        const [button] = cf.nu('button', {
-            m: { type: 'button' },
-            contents: key,
-            attrs: {
-                'data-editor-view': key
-            },
-            on: {
-                'click': () => {
-                    currentEditorStore.update(key);
-                }
-            }
-        });
+        const [button] = cf.nu('button')
+            .attr('type', 'button')
+            .content(key)
+            .attr('data-editor-view', key)
+            .on('click', () => {
+                currentEditorStore.update(key);
+            })
+            .done();
 
         cf.insert(button, { into: switcher });
 
@@ -107,30 +103,22 @@ const editorReady = () => {
         });
     }
 
-    const [outputButton] = cf.nu('button', {
-        m: { type: 'button' },
-        contents: 'output',
-        attrs: {
-            'data-editor-view': 'out'
-        },
-        on: {
-            'click': () => {
-                currentEditorStore.update('out');
-            }
-        }
-    });
+    const [outputButton] = cf.nu('button')
+        .misc('type', 'button')
+        .content('output')
+        .attr('data-editor-view', 'out')
+        .on('click', () => currentEditorStore.update('out'))
+        .done();
 
     cf.insert(outputButton, { into: switcher });
 
     function generateOutput() {
         cf.empty(editorConfigs.out.elt);
-        const [frame] = cf.nu('iframe.cf-editor-output-iframe', {
-            style: { width: '100%', height: '100%', background: 'white' },
-            m: {
-                srcdoc: getIframeContents(),
-                sandbox: 'allow-modals allow-scripts'
-            }
-        });
+        const [frame] = cf.nu('iframe.cf-editor-output-iframe')
+            .style({ width: '100%', height: '100%', background: 'white' })
+            .misc('srcdoc', getIframeContents())
+            .misc('sandbox', 'allow-modals allow-scripts')
+            .done();
         cf.insert(frame, { into: editorConfigs.out.elt });
     }
 
@@ -161,16 +149,14 @@ const editorReady = () => {
         const data = toml.parse(text);
         for (let key of Object.keys(data)) {
             const itm = data[key];
-            const [item] = cf.nu('li', {
-                contents: `<a href='javascript:void(0)'>${itm.title}</a>`,
-                on: {
-                    'click': function (e) {
-                        setActivePlaygroundDemo(itm);
-                        currentEditorStore.update('out');
-                    }
-                },
-                raw: true
-            });
+            const [item] = cf.nu('li')
+                .content(`<a href='javascript:void(0)'>${itm.title}</a>`)
+                .on('click', (e) => {
+                    setActivePlaygroundDemo(itm);
+                    currentEditorStore.update('out');
+                })
+                .raw(true)
+                .done();
             cf.insert(item, { into: list });
         }
     }).catch(err => {
@@ -181,12 +167,10 @@ const editorReady = () => {
     const dlBtn = document.querySelector("#cf-editor-dl");
 
     dlBtn.onclick = (e) => {
-        const [link] = cf.nu('a', {
-            attrs: {
-                download: 'playground.html',
-                href: 'data:text/html;charset=utf-8,' + encodeURIComponent(getIframeContents())
-            }
-        });
+        const [link] = cf.nu('a')
+            .attr('download', 'playground.html')
+            .attr('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(getIframeContents()))
+            .done();
         link.click();
     }
 
