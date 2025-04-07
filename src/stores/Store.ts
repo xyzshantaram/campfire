@@ -133,4 +133,8 @@ export class Store<T> {
         this._subscribers = {};
         this._subscriberCounts = {};
     }
+
+    valueOf() {
+        return structuredClone(this.value);
+    }
 }
