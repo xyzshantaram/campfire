@@ -250,15 +250,15 @@ const [card] = cf.nu('.card.shadow')  // Creates div by default
   .done();
 
 // Element with reactive content
-const nameStore = cf.store({ value: 'John' });
+const name = cf.store({ value: 'John' });
 
 const [greeting] = cf.nu('h1')
   .content(({ name }) => `Hello, ${name}!`)
-  .deps({ name: nameStore })
+  .deps({ name })
   .done();
 
 // Updates when store changes
-nameStore.update('Alice');</code></pre>
+name.update('Alice');</code></pre>
             </details>
 
             <details>
