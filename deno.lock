@@ -38,6 +38,7 @@
         "npm:@types/node@^22.14.0",
         "npm:@types/sinon@^17.0.3",
         "npm:@types/sinonjs__fake-timers@^8.1.5",
+        "npm:c8@^10.1.3",
         "npm:chai-dom@^1.12.0",
         "npm:chai@^5.1.0",
         "npm:esbuild-node-externals@^1.18.0",

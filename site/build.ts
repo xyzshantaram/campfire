@@ -18,7 +18,12 @@ const tpl = template(`<!DOCTYPE html>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
-    <style></style>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.min.js"></script>
+    <script src="https://ace.c9.io/build/src/theme-tomorrow_night_blue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-javascript.min.js"></script>
 </head>
 
 <body>
@@ -45,8 +50,8 @@ const tpl = template(`<!DOCTYPE html>
         <span>loading...</span>
     </div>
 
-    <script type='module' src='site/editor.js'></script>
-    <script type='module' src='site/main.js'></script>
+
+    <script defer type='module' src='site/main.js'></script>
 </body>
 
 </html>`, false);

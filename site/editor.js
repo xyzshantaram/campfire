@@ -1,7 +1,5 @@
 import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc8';
-import { highlight } from 'https://esm.sh/macrolight@1.5.0';
 import toml from 'https://esm.sh/toml@3.0.0';
-import { CodeJar } from 'https://esm.sh/codejar@4.2.0';
 
 const iframeContentTemplate = cf.template(cf.html`\
 <html>
@@ -53,35 +51,28 @@ const iframeContentTemplate = cf.template(cf.html`\
 </body>
 </html>`, false);
 
-const JS_KEYWORDS = ['break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'let', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
-const HTML_KEYWORDS = ['<!DOCTYPE', 'html', 'head', 'body', 'title', 'script', 'style', 'meta', 'link'];
-const CSS_KEYWORDS = ['@media', '@keyframes', 'animation', 'display', 'position', 'color', 'background', 'margin', 'padding', 'border', 'width', 'height'];
-
 export const editorReady = () => {
-    const examples = document.querySelector('.cf-site-div[data-heading="playground"]');
+    const [examples] = cf.select({ s: '.cf-site-div[data-heading="playground"]' });
     if (!examples) return;
 
     const editorConfigs = {
         html: {
-            elt: document.querySelector('.cf-editor-html'),
-            jar: null,
-            keywords: HTML_KEYWORDS,
-            language: 'html'
+            elt: cf.select({ s: '.cf-editor-html' })[0],
+            mode: 'ace/mode/html',
+            editor: null
         },
         css: {
-            elt: document.querySelector('.cf-editor-css'),
-            jar: null,
-            keywords: CSS_KEYWORDS,
-            language: 'css'
+            elt: cf.select({ s: '.cf-editor-css' })[0],
+            mode: 'ace/mode/css',
+            editor: null
         },
         js: {
-            elt: document.querySelector('.cf-editor-js'),
-            jar: null,
-            keywords: JS_KEYWORDS,
-            language: 'javascript'
+            elt: cf.select({ s: '.cf-editor-js' })[0],
+            mode: 'ace/mode/javascript',
+            editor: null
         },
         out: {
-            elt: document.querySelector('.cf-editor-output')
+            elt: cf.select({ s: '.cf-editor-output' })[0]
         }
     }
 
@@ -108,27 +99,22 @@ export const editorReady = () => {
 
         cf.insert(button, { into: switcher });
 
-        const config = {
-            keywords: current.keywords,
-            styles: {
-                unformatted: 'color: white;',
-                keyword: 'color: #ff9a00; font-weight: bold;',
-                punctuation: 'color: #7f7f7f;',
-                string: 'color: #3cb371;',
-                comment: 'color: #7f7f7f; font-style: italic;'
-            }
-        };
-
-        current.jar = CodeJar(current.elt, (editor) => {
-            editor.innerHTML = highlight(editor.textContent, config);
-        }, { tab: '    ' });
+        // Set up Ace Editor
+        current.editor = ace.edit(current.elt, {
+            mode: current.mode,
+            theme: 'ace/theme/tomorrow_night_blue',
+            fontSize: '1rem',
+            copyWithEmptySelection: 'true',
+            highlightActiveLine: true,
+            wrap: true
+        });
     }
 
     function getIframeContents() {
         return iframeContentTemplate({
-            html: editorConfigs.html.jar.toString(),
-            css: editorConfigs.css.jar.toString(),
-            js: editorConfigs.js.jar.toString()
+            html: editorConfigs.html.editor.getValue().trim(),
+            css: editorConfigs.css.editor.getValue().trim(),
+            js: editorConfigs.js.editor.getValue().trim()
         });
     }
 
@@ -155,6 +141,7 @@ export const editorReady = () => {
         const val = event.value;
         Array.from(document.querySelectorAll('.editor-wrapper > :not(.switcher)')).forEach(elem => elem.style.display = 'none');
         editorConfigs[val].elt.style.display = 'block';
+        editorConfigs[val].editor?.resize();
         document.querySelector(`.switcher>button.active`)?.classList.remove('active');
         document.querySelector(`button[data-editor-view="${val}"]`)?.classList.add('active');
         if (val === 'out') {
@@ -168,7 +155,7 @@ export const editorReady = () => {
         obj.js = obj.js || "/* This demo has no JS! */";
 
         for (const str of ['html', 'js', 'css']) {
-            editorConfigs[str].jar.updateCode(obj[str]);
+            editorConfigs[str].editor.setValue(obj[str]);
         }
     }
 
@@ -205,7 +192,7 @@ export const editorReady = () => {
 
     clearBtn.onclick = (e) => {
         for (const str of ['html', 'js', 'css']) {
-            editorConfigs[str].jar.updateCode("");
+            editorConfigs[str].editor.setValue("");
         }
         generateOutput();
     }
