@@ -14,15 +14,15 @@ import type { ElementPosition } from "../types.ts";
  * after its last child.
  * @param els The element(s) to insert.
  * @param where An object specifying where to insert `elem` relative to another element.
- * @throws an Error when there are either zero or more than one keys present in `where`.
+ * @throws an Error when there are no valid keys ('into', 'after', or 'before') present in `where`.
  * @returns the element that was inserted, so you can do `const a = insert(nu(), _)`.
  */
 export const insert = (els: Element | Element[], where: ElementPosition) => {
-    const keys = Object.keys(where);
-    if (keys.length !== 1) {
-        throw new Error("Too many or too few positions specified.");
+    // Check we have at least one valid key
+    if (!('into' in where) && !('after' in where) && !('before' in where)) {
+        throw new Error("No valid position specified. Use 'into', 'after', or 'before'.");
     }
-
+    
     let position: InsertPosition = 'beforeend';
     let ref: Element;
 
