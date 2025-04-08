@@ -11,105 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body>#app {
-            width: 60%;
-            max-width: 80ch;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-family: 'Inconsolata', 'SF Mono', monospace;
-            background: #001d3a;
-            color: #f5f4f0;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            width: 100%;
-            color: #ff9a00;
-        }
-
-        @media screen and (max-aspect-ratio: 1/1) {
-            body>#app {
-                width: 80%;
-            }
-        }
-
-        @media screen and (max-aspect-ratio: 9/14) {
-            body>#app {
-                width: 100%;
-            }
-        }
-
-        noscript {
-            text-align: center;
-            font-size: 1.4rem;
-        }
-
-        a,
-        a:link,
-        a:visited {
-            text-decoration: none;
-            border-bottom: 2px dashed;
-            padding-bottom: 0.1rem;
-        }
-
-        .cf-site-div {
-            display: none;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            width: 100%;
-        }
-
-        code {
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 0.2rem;
-            font-family: 'Inconsolata', monospace;
-            border-radius: 4px;
-        }
-
-        #app>h1>code {
-            background-color: inherit;
-        }
-
-        .footer {
-            width: 100%;
-            text-align: center;
-            font-size: 0.8rem;
-            margin-top: 2rem;
-            border-top: 2px solid rgba(255, 255, 255, 0.2);
-            padding-top: 1rem;
-            line-height: 1;
-        }
-
-        .footer a {
-            margin: 0.2rem;
-        }
-
-        #mask {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: rgba(0, 29, 58, 0.8);
-            backdrop-filter: blur(4px);
-            color: white;
-            align-items: center;
-            justify-content: center;
-            display: flex;
-            font-weight: bold;
-        }
-    </style>
+    <style></style>
 </head>
 
 <body>
@@ -127,14 +29,46 @@ JS easy.</p>
 to make development easier.</p>
 <h4>Features</h4>
 <ul>
-<li>Small size</li>
-<li>Easy to get started with - just <code>import</code> it into your project from
-<a href="https://unpkg.com/browse/campfire.js/">unpkg</a> or
-<a href="https://esm.sh/campfire.js/">esm.sh</a>. Campfire is on npm as well, so you can
-also add it into your existing application with <code>npm i campfire.js</code>!</li>
-<li>Uses vanilla JS wherever possible - no unnecessary DSLs or abstractions!</li>
-<li>Provides an easy-to-understand API for implementing reactive data</li>
-<li>Provides simple helpers for mustache templating</li>
+<li><strong>Small size, zero dependencies</strong>: 5kb compressed, no external dependencies</li>
+<li><strong>Fluent Builder API</strong>: Create and configure DOM elements with a chainable
+syntax:<pre class="microlight"><code>const [button] = cf.nu(&quot;button#submit&quot;)
+  .content(&quot;Click me&quot;)
+  .attr(&quot;type&quot;, &quot;submit&quot;)
+  .on(&quot;click&quot;, handleClick)
+  .done();
+</code></pre>
+</li>
+<li><strong>Reactive Data System</strong>: Create reactive stores with automatic UI updates:<pre class="microlight"><code>// Create different types of stores
+const name = cf.store({ value: &quot;John&quot; });
+const reactiveList = cf.store({ type: &quot;list&quot;, value: [1, 2, 3] });
+const reactiveMap = cf.store({ type: &quot;map&quot;, value: { key: &quot;value&quot; } });
+
+// Use stores with reactive elements
+const [div] = cf.nu(&quot;div&quot;)
+  .content(({ name }) =&gt;
+    `Hello, ${name}! My favourite numbers are ${reactiveList.join(&quot;,&quot;)}`
+  )
+  .deps({ name, reactiveList })
+  .done();
+
+// Or do your own thing!
+name.on(&quot;change&quot;, ({ value }) =&gt; {
+  greet(value);
+});
+</code></pre>
+</li>
+<li><strong>Enhanced DOM Helpers</strong>: Easy-to-use DOM manipulation utilities:<pre class="microlight"><code>// Select elements (always returns an array)
+const [button] = cf.select({ s: &quot;#submit-button&quot; });
+const allButtons = cf.select({ s: &quot;button&quot;, all: true });
+
+// Insert elements
+cf.insert([elt], { into: container });
+cf.insert([elt], { into: container, at: &quot;start&quot; });
+cf.insert([elt], { before: sibling });
+</code></pre>
+</li>
+<li><strong>TypeScript Support</strong>: First-class TypeScript integration with type inference
+for HTML elements</li>
 </ul>
 <h4>FAQs</h4>
 <details>
@@ -171,6 +105,26 @@ const NameBadge = () =&gt; {
 
   return [badge, name];
 };
+</code></pre>
+<p>With the new children API in v4, you can also use cf-slot elements to create
+composable components:</p>
+<pre class="microlight"><code>const Card = (title) =&gt; {
+  const [card] = cf.nu(&quot;div.card&quot;)
+    .html(`
+      &lt;h2&gt;${title}&lt;/h2&gt;
+      &lt;cf-slot name=&quot;content&quot;&gt;&lt;/cf-slot&gt;
+    `)
+    .done();
+
+  return card;
+};
+
+// Usage
+const [content] = cf.nu(&quot;p&quot;).content(&quot;Card content&quot;).done();
+const [wrapper] = cf.nu(&quot;div&quot;)
+  .html(`&lt;cf-slot name=&quot;card&quot;&gt;&lt;/cf-slot&gt;`)
+  .children({ card: [Card(&quot;My Card&quot;)] })
+  .done();
 </code></pre>
 </details>
 

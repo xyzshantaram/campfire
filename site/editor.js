@@ -28,7 +28,7 @@ const JS_KEYWORDS = ['break', 'case', 'catch', 'class', 'const', 'continue', 'de
 const HTML_KEYWORDS = ['<!DOCTYPE', 'html', 'head', 'body', 'title', 'script', 'style', 'meta', 'link'];
 const CSS_KEYWORDS = ['@media', '@keyframes', 'animation', 'display', 'position', 'color', 'background', 'margin', 'padding', 'border', 'width', 'height'];
 
-const editorReady = () => {
+export const editorReady = () => {
     const examples = document.querySelector('.cf-site-div[data-heading="playground"]');
     if (!examples) return;
 
@@ -181,5 +181,3 @@ const editorReady = () => {
         generateOutput();
     }
 }
-
-window.editorReady = editorReady;

@@ -1,5 +1,6 @@
 import cf from 'https://esm.sh/campfire.js@4.0.0-rc6';
 import { highlightAll, HL_KEYWORDS } from 'https://esm.sh/macrolight@1.5.0';
+import { editorReady } from "./editor.js";
 
 window.cf = cf;
 
@@ -57,9 +58,6 @@ window.addEventListener("DOMContentLoaded", (e) => {
     const tab = params.get('tab');
     focusTab(tab || 'home');
 
-    if (window.editorReady) window.editorReady();
-    mask.style.display = 'none';
-
     // Highlight all code blocks
     highlightAll({
         keywords: HL_KEYWORDS.javascript,
@@ -71,4 +69,7 @@ window.addEventListener("DOMContentLoaded", (e) => {
             comment: 'color: #7f7f7f; font-style: italic;'
         }
     }, '.microlight');
+
+    editorReady();
+    mask.style.display = 'none';
 });

@@ -1,3 +1,101 @@
+body>#app {
+    width: 60%;
+    max-width: 80ch;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Inconsolata', 'SF Mono', monospace;
+    background: #001d3a;
+    color: #f5f4f0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    width: 100%;
+    color: #ff9a00;
+}
+
+@media screen and (max-aspect-ratio: 1/1) {
+    body>#app {
+        width: 80%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 9/14) {
+    body>#app {
+        width: 100%;
+    }
+}
+
+noscript {
+    text-align: center;
+    font-size: 1.4rem;
+}
+
+a,
+a:link,
+a:visited {
+    text-decoration: none;
+    border-bottom: 2px dashed;
+    padding-bottom: 0.1rem;
+}
+
+.cf-site-div {
+    display: none;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+code {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 0.2rem;
+    font-family: 'Inconsolata', monospace;
+    border-radius: 4px;
+}
+
+#app>h1>code {
+    background-color: inherit;
+}
+
+.footer {
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    margin-top: 2rem;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+    padding-top: 1rem;
+    line-height: 1;
+}
+
+.footer a {
+    margin: 0.2rem;
+}
+
+#mask {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 29, 58, 0.8);
+    backdrop-filter: blur(4px);
+    color: white;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    font-weight: bold;
+}
+
 #app>nav>button {
     padding: 0.4rem;
     padding-top: 0.6rem;

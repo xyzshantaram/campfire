@@ -14,6 +14,17 @@ to make development easier.
 
 ### Features
 
+- **Fluent builder API**: Create and configure DOM elements with a chainable,
+  intuitive API
+- **Reactive data stores**: Implement reactive data and elements with Campfire's
+  store APIs
+- **Templating Helpers**: Simple utilities for HTML templating and content
+  rendering
+- **Minimal footprint**: 5kb compressed
+- **TypeScript support**: First-class TypeScript integration with type inference
+- **Composable elements**: Preserve reactive children across re-renders
+- **DOM Helpers**: Streamlined APIs for DOM manipulation and event handling
+
 ### Building
 
 ```sh

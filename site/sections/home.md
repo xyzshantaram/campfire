@@ -8,14 +8,49 @@ to make development easier.
 
 #### Features
 
-- Small size
-- Easy to get started with - just `import` it into your project from
-  [unpkg](https://unpkg.com/browse/campfire.js/) or
-  [esm.sh](https://esm.sh/campfire.js/). Campfire is on npm as well, so you can
-  also add it into your existing application with `npm i campfire.js`!
-- Uses vanilla JS wherever possible - no unnecessary DSLs or abstractions!
-- Provides an easy-to-understand API for implementing reactive data
-- Provides simple helpers for mustache templating
+- **Small size, zero dependencies**: 5kb compressed, no external dependencies
+- **Fluent Builder API**: Create and configure DOM elements with a chainable
+  syntax:
+  ```js
+  const [button] = cf.nu("button#submit")
+    .content("Click me")
+    .attr("type", "submit")
+    .on("click", handleClick)
+    .done();
+  ```
+- **Reactive Data System**: Create reactive stores with automatic UI updates:
+  ```js
+  // Create different types of stores
+  const name = cf.store({ value: "John" });
+  const reactiveList = cf.store({ type: "list", value: [1, 2, 3] });
+  const reactiveMap = cf.store({ type: "map", value: { key: "value" } });
+
+  // Use stores with reactive elements
+  const [div] = cf.nu("div")
+    .content(({ name }) =>
+      `Hello, ${name}! My favourite numbers are ${reactiveList.join(",")}`
+    )
+    .deps({ name, reactiveList })
+    .done();
+
+  // Or do your own thing!
+  name.on("change", ({ value }) => {
+    greet(value);
+  });
+  ```
+- **Enhanced DOM Helpers**: Easy-to-use DOM manipulation utilities:
+  ```js
+  // Select elements (always returns an array)
+  const [button] = cf.select({ s: "#submit-button" });
+  const allButtons = cf.select({ s: "button", all: true });
+
+  // Insert elements
+  cf.insert([elt], { into: container });
+  cf.insert([elt], { into: container, at: "start" });
+  cf.insert([elt], { before: sibling });
+  ```
+- **TypeScript Support**: First-class TypeScript integration with type inference
+  for HTML elements
 
 #### FAQs
 
@@ -58,6 +93,29 @@ const NameBadge = () => {
 
   return [badge, name];
 };
+```
+
+With the new children API in v4, you can also use cf-slot elements to create
+composable components:
+
+```js
+const Card = (title) => {
+  const [card] = cf.nu("div.card")
+    .html(`
+      <h2>${title}</h2>
+      <cf-slot name="content"></cf-slot>
+    `)
+    .done();
+
+  return card;
+};
+
+// Usage
+const [content] = cf.nu("p").content("Card content").done();
+const [wrapper] = cf.nu("div")
+  .html(`<cf-slot name="card"></cf-slot>`)
+  .children({ card: [Card("My Card")] })
+  .done();
 ```
 
 </details>
