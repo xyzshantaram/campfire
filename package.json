@@ -9,6 +9,7 @@
     "@types/node": "^22.14.0",
     "@types/sinon": "^17.0.3",
     "@types/sinonjs__fake-timers": "^8.1.5",
+    "c8": "^10.1.3",
     "chai": "^5.1.0",
     "chai-dom": "^1.12.0",
     "esbuild": "^0.25.2",
@@ -39,7 +40,8 @@
   ],
   "scripts": {
     "mocha": "npx mocha 'src/**/*.test.{js,ts}'",
-    "test": "npx tsc --noEmit && pnpm mocha",
+    "coverage": "c8 node --loader ts-node/esm node_modules/mocha/bin/mocha 'src/**/*.test.ts'",
+    "test": "npx tsc --noEmit && pnpm coverage",
     "mkdocs": "npx typedoc src/campfire.ts src/types.ts --cleanOutputDir --out site/docs/ --darkHighlightTheme monokai --customCss site/tsdoc_style.css && cp campfire.png site/docs/campfire.png",
     "build": "npx tsc && pnpm mocha && node esbuild.config.js && pnpm mkdocs",
     "build-site": "deno run -A site/build.ts ./site/sections ./index.html"

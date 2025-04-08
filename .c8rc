@@ -1,0 +1,12 @@
+{
+  "all": true,
+  "include": ["src"],
+  "exclude": [
+    "src/types.ts",
+    "test/",
+    "**/*.test.ts"
+  ],
+  "extension": [".ts"],
+  "reporter": ["text"],
+  "report-dir": "coverage"
+}

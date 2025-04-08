@@ -2,7 +2,7 @@
   "include": [
     "site/build.ts"
   ],
-  "exclude": ["src/**", "site/*.js"],
+  "exclude": ["src/**", "site/*.js", "test/setup.ts"],
   "compilerOptions": {
     "noImplicitAny": true,
     "strictNullChecks": true,
