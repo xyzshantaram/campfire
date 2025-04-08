@@ -257,6 +257,35 @@ const [greeting] = cf.nu('h1')
   .deps({ name })
   .done();
 
+// Multiple element selection with gimme
+const [card, title, desc] = cf.nu('div.card')
+  .html(`
+    <h2 class="title">Card Title</h2>
+    <p class="desc">Description</p>
+  `)
+  .gimme('.title', '.desc')  // Variadic - pass any number of selectors
+  .done();
+
+// Composing elements with reactive children
+const parentData = cf.store({ value: 'Parent content' });
+const childData = cf.store({ value: 'Child content' });
+
+// Create a parent with slots for child components
+const [parent] = cf.nu('section')
+  .deps({ data: parentData })
+  .html(({ data }) => `
+    <h3>${data}</h3>
+    <cf-slot name="child"></cf-slot>
+  `)
+  .children({
+    // Child components maintain independent reactivity
+    child: cf.nu('div')
+      .deps({ data: childData })
+      .content(({ data }) => data)
+      .done()
+  })
+  .done();
+
 // Updates when store changes
 name.update('Alice');</code></pre>
             </details>
@@ -342,7 +371,7 @@ cf.insert(cf.nu().content('New content').done(), { into: document.body });</code
             </details>
 
             <details>
-                <summary><code>html()</code> - auto-escaping template literal</summary>
+                <summary><code>html()</code> - auto-escaping template literal and element builder method</summary>
                 <p>Creates HTML strings with automatic escaping of interpolated values.</p>
 
                 <pre class="microlight"><code>// Basic usage with automatic escaping
@@ -357,7 +386,7 @@ const message = cf.html`Safe message: ${trusted}`;
 
 // Use with element creation
 const [div] = cf.nu('div')
-    // .html() sets .raw(true) internally
+  // .html() is equivalent to .content().raw(true)
   .html(cf.html`<h1>Title</h1><p>${userName}</p>`)
   .done();</code></pre>
             </details>
@@ -413,6 +442,21 @@ const titleStore = cf.store({ value: 'Initial Title' });
 cf.extend(pageHeader, {
   contents: ({ title }) => `Page: ${title}`,
   deps: { title: titleStore }
+});
+
+// Composing elements with extend
+const childContent = cf.store({ value: 'Child text' });
+
+cf.extend(container, {
+  contents: `<h2>Container</h2>
+             <cf-slot name="childSlot"></cf-slot>`,
+  raw: true,
+  children: {
+    childSlot: cf.nu('span')
+      .deps({ childContent })
+      .content(({ childContent }) => childContent)
+      .done()[0]
+  }
 });</code></pre>
             </details>
 
