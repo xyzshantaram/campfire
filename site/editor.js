@@ -1,4 +1,4 @@
-import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc4';
+import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc8';
 import { highlight } from 'https://esm.sh/macrolight@1.5.0';
 import toml from 'https://esm.sh/toml@3.0.0';
 import { CodeJar } from 'https://esm.sh/codejar@4.2.0';
@@ -45,7 +45,7 @@ const iframeContentTemplate = cf.template(cf.html`\
 <body>
     {{ html }}
     <script type='module'>
-        import cf from 'https://esm.sh/campfire.js@4.0.0-rc7';
+        import cf from 'https://esm.sh/campfire.js@4.0.0-rc8';
         window.onload = function() {
             {{ js }}
         }
