@@ -84,7 +84,8 @@ export const extend = <
             const name = itm.getAttribute('name');
             if (!name) return;
             if (name in children) {
-                const [child] = children[name];
+                let val = children[name];
+                const [child] = Array.isArray(val) ? val : [val];
                 if (!child) return;
                 itm.replaceWith(child);
                 child.setAttribute('data-cf-slot', name);

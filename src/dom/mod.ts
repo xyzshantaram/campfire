@@ -12,12 +12,12 @@ import type { ElementPosition } from "../types.ts";
  * `reference`, before its first child.
  * * if `where` looks like `{ into: reference }`, the element is inserted into `reference`,
  * after its last child.
- * @param elems The elements to insert.
+ * @param els The element(s) to insert.
  * @param where An object specifying where to insert `elem` relative to another element.
  * @throws an Error when there are either zero or more than one keys present in `where`.
  * @returns the element that was inserted, so you can do `const a = insert(nu(), _)`.
  */
-export const insert = (elems: Element[], where: ElementPosition) => {
+export const insert = (els: Element | Element[], where: ElementPosition) => {
     const keys = Object.keys(where);
     if (keys.length !== 1) {
         throw new Error("Too many or too few positions specified.");
@@ -40,7 +40,12 @@ export const insert = (elems: Element[], where: ElementPosition) => {
     }
 
     const frag = document.createDocumentFragment();
-    for (const item of elems) frag.appendChild(item);
+    if (Array.isArray(els)) {
+        for (const item of els) frag.appendChild(item);
+    }
+    else {
+        frag.appendChild(els);
+    }
 
     if (position === 'beforebegin') {
         ref.parentNode?.insertBefore(frag, ref);
@@ -52,7 +57,7 @@ export const insert = (elems: Element[], where: ElementPosition) => {
         ref.appendChild(frag);
     }
 
-    return elems;
+    return els;
 };
 
 /**
