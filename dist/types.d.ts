@@ -83,9 +83,9 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
     /**
      *  Children of the element to mount. They will be mounted into `cf-slot`s
      * corresponding to the Record's keys and preserved between re-renders of
-     * the parent.
+     * the parent. Only the first element returned by nu() will be appended.
      */
-    children?: Record<string, HTMLElement>;
+    children?: Record<string, HTMLElement[]>;
 }
 /**
  * An interface to store data parsed from an element descriptor string passed to `nu`.

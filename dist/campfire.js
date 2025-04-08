@@ -264,6 +264,7 @@ var NuBuilder = class {
    * across re-renders and can be independently reactive.
    * @param children An object whose keys correspond to the `name` attributes 
    * of cf-slot elements in the parent's innerHTML.
+   * Only the first child for each key will be appended.
    * @returns The builder object for chaining.
    */
   children(children) {
@@ -322,12 +323,14 @@ var extend = (elt, args = {}) => {
   }
   if (content?.trim()) {
     elt.innerHTML = raw ? content : escape(content);
-    elt.querySelectorAll("cf-slot").forEach((itm) => {
+    elt.querySelectorAll("cf-slot[name]").forEach((itm) => {
       const name = itm.getAttribute("name");
       if (!name) return;
       if (name in children) {
-        itm.replaceWith(children[name]);
-        children[name].setAttribute("data-cf-slot", name);
+        const [child] = children[name];
+        if (!child) return;
+        itm.replaceWith(child);
+        child.setAttribute("data-cf-slot", name);
       }
     });
   }

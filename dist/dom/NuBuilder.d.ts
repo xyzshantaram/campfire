@@ -118,7 +118,8 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * across re-renders and can be independently reactive.
      * @param children An object whose keys correspond to the `name` attributes
      * of cf-slot elements in the parent's innerHTML.
+     * Only the first child for each key will be appended.
      * @returns The builder object for chaining.
      */
-    children(children: Record<string, HTMLElement>): this;
+    children(children: Record<string, HTMLElement[]>): this;
 }
