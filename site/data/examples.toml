@@ -1,173 +1,185 @@
-[answer]
-title = "What do you get when you multiply six by nine?"
-
-html = """\
-<div id='last'></div>
-<div id='result'></div>
-"""
-
-js = """\
-const result = document.querySelector("#result");
-const store = new cf.Store(0); // initial value
-const question = store.on("update", (val) => { // this function is called every time the value is changed
-    if (val == 54) {
-        result.textContent = "The correct answer.";
-    }
-    else if (val == 42) {
-        result.textContent = "Ah, I see you're a man of culture as well.";
-    } else {
-        result.textContent = "Hmm. Try again.";
-    }
-}, false);
-
-store.on("update", (val) => {
-    document.querySelector("#last").innerHTML = `Your response: ${val}`;
-})
-/* The last argument specifies whether or not the callback should be called right now with the current value of the store. */
-
-const input = cf.nu("input", {
-    m: { type: 'text', placeholder: 'What is six by nine?' },
-})
-
-document.body.prepend(input,
-    cf.nu("button", {
-        m: { type: 'button' },
-        c: 'Answer',
-        on: {
-            'click': function (e) {
-                const val = input.value.trim();
-                if (val) store.update(val);
-                else result.innerHTML = 'Type something first, ya numpty!';
-            }
-        }
-    })
-)
-"""
-
 [button]
 title = "Reactive button"
 
 js = """\
 // A button that keeps track of how many times it's been clicked
-let count = new cf.Store(0);
+let count = cf.store({ value: 0 });
 
-const btn = cf.nu("button#id.class1.class2", {
-    contents: "I have not been clicked.",
-    attrs: {
-        // DOM attributes
-        "data-an-attribute": 42,
-    },
-    on: {
-        // event handlers, assigned using addEventListener
-        "click": function (e) {
-            count.update(count.value + 1);
-        },
-    },
-    style: {
+const btn = cf.nu("button#id.some-class.other-class")
+    .deps({ count })
+    .content(({ count }) => count === 0 ? "I have not been clicked." :
+        `I have been clicked ${count} times.`)
+    .attr('data-some-attribute', 42)
+    .on('click', () => count.update(count.value + 1))
+    .styles({
         // Uses property names as specified in CSSStyleDeclaration.
         background: "#007cdf",
-        borderRadius: "0.25em",
-        margin: "0.5rem",
         color: "#f5f4f0",
-        transitionDuration: "0.2s",
-        border: "2px solid black",
-    }, // styles
-    misc: {
-        // miscellaneous properties
-        type: "button",
-    },
-});
+        fontWeight: "bold",
+        cursor: "pointer",
+        border: "2px solid white",
+    })
+    .misc('type', 'button')
+    .done()
 
-count.on("update", (val) => {
-    btn.innerHTML = `I have been clicked ${val} times.`;
-});
-document.body.appendChild(btn);
+cf.insert(btn, { into: document.body })
+"""
+
+[answer]
+title = "What do you get when you multiply six by nine?"
+
+html = """\
+<div id=container>
+</div>
+"""
+
+css = """\
+
+"""
+
+js = """\
+const value = cf.store({ value: 0 }); // initial value
+
+const [result] = cf.nu() // defaults to div
+    .deps({ value })
+    .content(({ value }) => {
+        switch(Number(value)) {
+            case 54:
+                return "The correct answer.";
+            case 42:
+                return "Ah, I see you're a man of culture as well.";
+            default:
+                return `Hmm. ${value} isn't quite right.`;
+        }
+    })
+    .done();
+
+const [last] = cf.nu('#last')
+    .deps({ value })
+    .content(({ value }) => `Current value: ${value}`)
+    .done();
+
+const [container] = cf.select({ s: '#container' });
+cf.insert([last, result], { into: container });
+
+const [input] = cf.nu('input')
+    .misc('type', 'text')
+    .misc('placeholder', 'What is six by nine?')
+    .done();
+
+const [btn] = cf.nu('button')
+    .misc('type', 'button')
+    .content("Answer")
+    .on('click', () => {
+        const val = input.value.trim();
+        if (val) value.update(val);
+        else result.innerHTML = 'Type something first, ya numpty!';
+    })
+    .done()
+
+cf.insert([input, btn], { before: result });
 """
 
 [todo]
 title = "To-do list app"
 
+css = """\
+.deleted {
+    text-decoration: line-through;
+}
+"""
+
 js = """\
-    const items = new cf.ListStore([]);
+const store = new cf.store({ type: "list", value: [] });
 
-    const root = cf.nu("#app", {
-        contents: '<h1>Todo App</h1>',
-        style: { fontFamily: 'sans-serif' },
-        raw: true
+const [input] = cf.nu('input')
+    .style('min-width', '20ch')
+    .misc('type', 'text')
+    .done();
+    
+const button = cf.nu("button")
+    .misc('type', 'button')
+    .on('click', () => {
+        const value = input.value.trim();
+        if (value) store.push({ done: false, name: value });
+        input.value = '';
     })
+    .content("Add")
+    .done();
 
-    document.body.appendChild(root);
+const form = cf.nu('div')
+    .html(cf.html`
+        <cf-slot name="input"></cf-slot>
+        <cf-slot name="button"></cf-slot>
+    `)
+    .children({ input, button })
+    .done();
 
-    const field = cf.nu("input", {
-        style: { minWidth: '25%' },
-        misc: { type: 'text' },
-    });
+const TodoItem = (store, event) => cf.nu('li.todo-item')
+    .html(() => cf.html`
+        <span>${event.value.name}</span>
+        <cf-slot name='remove'></cf-slot>
+    `)
+    .attr('data-idx', event.idx)
+    .children({
+        remove: cf.nu('button')
+            .content("Mark done")
+            .on('click',
+                function() {
+                    const idx = +this.parentElement.getAttribute('data-idx');
+                    store.set(idx, { done: true, name: event.value.name })
+                }
+            )
+            .done()
+    })
+    .done()
 
-    const button = cf.nu("button", {
-        style: { minWidth: '5%' },
-        misc: { type: 'button' },
-        on: {
-            'click': function(e) {
-                const value = field.value.trim();
-                if (value) items.push({ done: false, name: value })
+const todos = cf.nu('ul')
+    .deps({ items: store })
+    .content(({ items }, { event, elt }) => {
+        if (!event) return;
+        // fine-grained update
+        switch (event.type) {
+            case "append": {
+                cf.insert(TodoItem(store, event), { into: elt });
+                break;
             }
-        },
-        contents: 'Add'
-    });
+            case "change": {
+                const [li] = cf.select({ s: `li[data-idx="${event.idx}"]`, from: elt });
+                li.classList.add('deleted');
+                const [btn] = cf.select({ s: 'button', from: li });
+                cf.extend(btn, { 
+                    contents: "Delete", 
+                    on: { click: () => store.remove(Number(li.getAttribute('data-idx'))) } 
+                });
+                break;
+            }
+            case "deletion": {
+                const [li] = cf.select({ s: `li.todo-item[data-idx="${event.idx}"]`, from: elt });
+                if (li) li.remove();
 
-    const list = cf.nu("ul#items", {
-        style: {
-            display: 'flex',
-            flexDirection: 'column',
-            minWidth: '30%'
+                cf.select({ s: 'li.todo-item', from: elt, all: true }).forEach((elem, idx) => {
+                    elem.setAttribute('data-idx', idx);
+                });
+            }
+            default:
+                console.log(event);
+                break;
         }
     })
+    .done();
 
-    root.append(field, button, list);
+const app = cf.nu("#app")
+    .deps({ store })
+    .html(({ store }) => cf.html`
+        <h1>To-do list</h1>
+        <div><em>${store.length.toString()} items</em></div>
+        <cf-slot name='form'></cf-slot>
+        <cf-slot name='todos'></cf-slot>
+    `)
+    .style('fontFamily', 'sans-serif')
+    .children({ form, todos })
+    .done();
 
-    function createTodo(val, idx) {
-        const elt = cf.nu("li.todo-item", {
-            contents: val.name,
-            style: { cursor: 'pointer' },
-            on: { 'click': function(e) {
-                if (e.target !== this) return;
-                const cIdx = parseInt(this.getAttribute("data-todo-idx"));
-                const current = items.get(cIdx);
-                current.done = !current.done;
-                items.setAt(cIdx, current);
-            }},
-            attrs: {
-                "data-todo-idx": idx
-            },
-        })
-
-        elt.appendChild(cf.nu("button", {
-            contents: 'remove',
-            style: { marginLeft: '0.5rem' },
-            on: { 'click': function(e) {
-                const idx = parseInt(this.parentNode.getAttribute('data-todo-idx'));
-                items.remove(idx);
-            }}
-        }));
-
-        return elt;
-    }
-
-    items.on("update", (val) => {
-        val.forEach(createTodo);
-    })
-
-    items.on("remove", (val) => {
-        list.removeChild(list.querySelector(`.todo-item:nth-child(${val.idx + 1})`));
-        const elems = list.getElementsByClassName('todo-item');
-        for (let i = val.idx; i < elems.length; i++) elems[i].setAttribute("data-todo-idx", i);
-    })
-
-    items.on("push", (val) => {
-        list.appendChild(createTodo(val.value, val.idx));
-    })
-
-    items.on("mutation", (val) => {
-        list.querySelector(`.todo-item:nth-child(${val.idx + 1})`).style.textDecoration = val.value.done ? 'line-through' : 'initial';
-    })
+cf.insert(app, { into: document.body });
 """
