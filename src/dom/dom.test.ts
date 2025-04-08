@@ -6,7 +6,7 @@ import * as chai from 'chai';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import { describe, it } from 'mocha';
-import { nu, extend, store } from '../campfire.ts';
+import { nu, extend, store, insert, seq, rm } from '../campfire.ts';
 
 // Setup chai
 chai.use(chaiDom);
@@ -203,5 +203,107 @@ describe('Tests for NuBuilder', () => {
         expect(parent.innerHTML).to.equal(
             `<div>Parent: Hi</div><span data-cf-reactive="true" data-cf-slot="to">Child: Universe</span>`
         );
+    });
+
+    it('should support a single element as a child', () => {
+        const value = store({ value: 'Child Content' });
+
+        // Get a single element - with the change to children parameter, this is now supported
+        const [singleChild] = nu('span')
+            .deps({ value })
+            .html(({ value }) => `${value}`)
+            .done();
+
+        const [parent] = nu('div')
+            .html(() => `<div>Parent Content</div><cf-slot name="child"></cf-slot>`)
+            .children({ child: singleChild })
+            .done();
+
+        expect(parent.innerHTML).to.contain('<span data-cf-reactive="true" data-cf-slot="child">Child Content</span>');
+
+        value.update('New Content');
+        expect(parent.innerHTML).to.contain('<span data-cf-reactive="true" data-cf-slot="child">New Content</span>');
+    });
+});
+
+describe('Tests for insert()', () => {
+    it('should insert a single element', () => {
+        const [container] = nu().done();
+        insert(container, { into: document.body });
+
+        const [element] = nu('p').content('Test paragraph').done();
+        const result = insert(element, { into: container });
+
+        expect(container.children.length).to.equal(1);
+        expect(container.firstChild).to.equal(element);
+        expect(result).to.equal(element);
+
+        rm(container);
+    });
+
+    it('should insert an array of elements', () => {
+        const [container] = nu().done();
+        insert(container, { into: document.body });
+
+        const paragraphs = seq(3).map(i => nu('p').content(`Paragraph ${i}`).done()).flat();
+        const result = insert(paragraphs, { into: container });
+
+        expect(container.children.length).to.equal(3);
+        expect(Array.from(container.children)).to.deep.equal(paragraphs);
+        expect(result).to.deep.equal(paragraphs);
+
+        rm(container);
+    });
+
+    it('should insert a single element before another element', () => {
+        const [container] = nu().done();
+        insert(container, { into: document.body });
+
+        const [existing] = nu('#existing').done();
+        insert(existing, { into: container });
+
+        const [created] = nu('span').content("Before").done();
+
+        insert(created, { before: existing });
+
+        expect(container.firstChild).to.equal(created);
+        expect(container.children.length).to.equal(2);
+
+        rm(container);
+    });
+
+    it('should insert a single element after another element', () => {
+        const [container] = nu().done();
+        insert(container, { into: document.body });
+
+        const [existing] = nu('#existing').done();
+        insert(existing, { into: container });
+
+        const [created] = nu('span').content("After").done();
+
+        insert(created, { after: existing });
+
+        expect(container.lastChild).to.equal(created);
+        expect(container.children.length).to.equal(2);
+
+        rm(container);
+    });
+
+    it('should insert a single element at the start of a container', () => {
+        const [container] = nu().done();
+        insert(container, { into: document.body });
+
+        const [existing] = nu('#existing').done();
+        insert(existing, { into: container });
+
+        const [created] = nu('span').content("Start").done();
+
+        // The correct format for 'into' with 'at' is a single object
+        insert(created, { into: container, at: 'start' });
+
+        expect(container.firstChild).to.equal(created);
+        expect(container.children.length).to.equal(2);
+
+        rm(container);
     });
 });

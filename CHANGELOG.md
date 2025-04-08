@@ -1,5 +1,12 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc8
+
+- Both insert() and children() now accept either a single HTMLElement or
+  HTMLElement[], providing greater flexibility when working with DOM elements.
+- Fixed insert() validation to properly handle { into: element, at: 'start' }
+  case.
+
 ## 4.0.0-rc7
 
 - Make .children() accept HTMLElement[] instead of HTMLElement so you can
