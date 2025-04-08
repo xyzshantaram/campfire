@@ -121,5 +121,5 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * Only the first child for each key will be appended.
      * @returns The builder object for chaining.
      */
-    children(children: Record<string, HTMLElement[]>): this;
+    children(children: Record<string, HTMLElement | HTMLElement[]>): this;
 }

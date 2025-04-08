@@ -19,7 +19,7 @@ declare const _default: {
     escape: (str: string) => string;
     unescape: (str: string) => string;
     extend: <T extends HTMLElement, D extends Record<string, Store<any>> = {}>(elt: T, args?: ElementProperties<T, D>) => [T, ...HTMLElement[]];
-    insert: (elems: Element[], where: ElementPosition) => Element[];
+    insert: (els: Element | Element[], where: ElementPosition) => Element | Element[];
     empty: (elt: Element) => void;
     rm: (elt: Element) => void;
     select: ({ s, all, from }: SelectParams) => HTMLElement[];

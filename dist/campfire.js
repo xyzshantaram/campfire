@@ -1,8 +1,7 @@
 // src/dom/mod.ts
-var insert = (elems, where) => {
-  const keys = Object.keys(where);
-  if (keys.length !== 1) {
-    throw new Error("Too many or too few positions specified.");
+var insert = (els, where) => {
+  if (!("into" in where) && !("after" in where) && !("before" in where)) {
+    throw new Error("No valid position specified. Use 'into', 'after', or 'before'.");
   }
   let position = "beforeend";
   let ref;
@@ -19,7 +18,11 @@ var insert = (elems, where) => {
     ref = where.into;
   }
   const frag = document.createDocumentFragment();
-  for (const item of elems) frag.appendChild(item);
+  if (Array.isArray(els)) {
+    for (const item of els) frag.appendChild(item);
+  } else {
+    frag.appendChild(els);
+  }
   if (position === "beforebegin") {
     ref.parentNode?.insertBefore(frag, ref);
   } else if (position === "afterend") {
@@ -29,7 +32,7 @@ var insert = (elems, where) => {
   } else {
     ref.appendChild(frag);
   }
-  return elems;
+  return els;
 };
 var onload = (cb) => globalThis.addEventListener("DOMContentLoaded", cb);
 var select = ({ s, all, from }) => {
@@ -327,7 +330,8 @@ var extend = (elt, args = {}) => {
       const name = itm.getAttribute("name");
       if (!name) return;
       if (name in children) {
-        const [child] = children[name];
+        let val = children[name];
+        const [child] = Array.isArray(val) ? val : [val];
         if (!child) return;
         itm.replaceWith(child);
         child.setAttribute("data-cf-slot", name);

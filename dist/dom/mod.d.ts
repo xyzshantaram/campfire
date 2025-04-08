@@ -11,12 +11,12 @@ import type { ElementPosition } from "../types.ts";
  * `reference`, before its first child.
  * * if `where` looks like `{ into: reference }`, the element is inserted into `reference`,
  * after its last child.
- * @param elems The elements to insert.
+ * @param els The element(s) to insert.
  * @param where An object specifying where to insert `elem` relative to another element.
- * @throws an Error when there are either zero or more than one keys present in `where`.
+ * @throws an Error when there are no valid keys ('into', 'after', or 'before') present in `where`.
  * @returns the element that was inserted, so you can do `const a = insert(nu(), _)`.
  */
-export declare const insert: (elems: Element[], where: ElementPosition) => Element[];
+export declare const insert: (els: Element | Element[], where: ElementPosition) => Element | Element[];
 /**
  * Fires a callback when the DOMContentLoaded event fires.
  * @param cb The callback to run.
