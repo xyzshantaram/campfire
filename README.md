@@ -14,11 +14,6 @@ to make development easier.
 
 ### Features
 
-- Small size (~2kb gzipped!)
-- Easy to get started with (just one import statement away!)
-- Reactive data using a publish-subscribe model
-- String templating functionality using mustaches
-
 ### Building
 
 ```sh
@@ -39,20 +34,10 @@ import cf from "https://esm.sh/campfire.js";
 ```
 
 or install it with npm (`npm i campfire.js`) and use it in your existing
-workflow:
-
-```js
-const cf = require("campfire.js");
-```
+workflow.
 
 All the methods and classes are also exported, so you can do named imports as
 usual:
-
-```js
-const { nu, ListStore } = require("campfire.js");
-```
-
-or
 
 ```js
 import { ListStore, nu } from "https://esm.sh/campfire.js";
@@ -93,11 +78,12 @@ The Campfire website uses the [toml](https://www.npmjs.com/package/toml) and
 its content.
 
 Syntax highlighting on the Campfire website is achieved with
-[Microlight](https://asvd.github.io/microlight/). Microlight is a copyright of
+[`macrolight`](https://github.com/xyzshantaram/macrolight). `macrolight` is a
+fork of [`microlight`](https://asvd.github.io/microlight) by
 [asvd](https://github.com/asvd) and is used under the
 [MIT License](https://github.com/asvd/microlight/blob/master/LICENSE).
 
-The Campfire playground uses the [Ace editor](https://github.com/ajaxorg/ace/)
-as an embedded editor. The Ace editor is a copyright of Ajax.org B.V. and is
+The Campfire playground uses the [CodeJar editor](https://medv.io/codejar/) by
+[Anton Medvedev](https://medv.io/) as an embedded editor. The CodeJar editor is
 used under the
-[3-clause BSD license](https://github.com/ajaxorg/ace/blob/master/LICENSE).
+[MIT license](https://github.com/antonmedv/codejar/blob/master/LICENSE).

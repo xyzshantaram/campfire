@@ -1,5 +1,10 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc7
+
+- Make .children() accept HTMLElement[] instead of HTMLElement so you can
+  directly pass the output of nu() into .children().
+
 ## 4.0.0-rc6
 
 - Added `.html()` method to NuBuilder to make building elements slightly more

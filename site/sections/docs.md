@@ -15,39 +15,39 @@ Creates a new DOM element with a fluent builder API.
 ```js
 // Creating a simple element
 const [div] = cf.nu("div")
-    .content("Hello World")
-    .attr("id", "greeting")
-    .done();
+  .content("Hello World")
+  .attr("id", "greeting")
+  .done();
 
 // Creating a button with click handler
 const [button] = cf.nu("button#submit.primary")
-    .content("Submit")
-    .attr("type", "submit")
-    .on("click", () => console.log("Clicked!"))
-    .style("backgroundColor", "blue")
-    .done();
+  .content("Submit")
+  .attr("type", "submit")
+  .on("click", () => console.log("Clicked!"))
+  .style("backgroundColor", "blue")
+  .done();
 
 // Element with classes
 const [card] = cf.nu(".card.shadow") // Creates div by default
-    .content("Card content")
-    .done();
+  .content("Card content")
+  .done();
 
 // Element with reactive content
 const name = cf.store({ value: "John" });
 
 const [greeting] = cf.nu("h1")
-    .content(({ name }) => `Hello, ${name}!`)
-    .deps({ name })
-    .done();
+  .content(({ name }) => `Hello, ${name}!`)
+  .deps({ name })
+  .done();
 
 // Multiple element selection with gimme
 const [card, title, desc] = cf.nu("div.card")
-    .html(`
+  .html(`
     <h2 class="title">Card Title</h2>
     <p class="desc">Description</p>
   `)
-    .gimme(".title", ".desc") // Variadic - pass any number of selectors
-    .done();
+  .gimme(".title", ".desc") // Variadic - pass any number of selectors
+  .done();
 
 // Composing elements with reactive children
 const parentData = cf.store({ value: "Parent content" });
@@ -55,19 +55,19 @@ const childData = cf.store({ value: "Child content" });
 
 // Create a parent with slots for child components
 const [parent] = cf.nu("section")
-    .deps({ data: parentData })
-    .html(({ data }) => `
+  .deps({ data: parentData })
+  .html(({ data }) => `
     <h3>${data}</h3>
     <cf-slot name="child"></cf-slot>
   `)
-    .children({
-        // Child components maintain independent reactivity
-        child: cf.nu("div")
-            .deps({ data: childData })
-            .content(({ data }) => data)
-            .done(),
-    })
-    .done();
+  .children({
+    // Child components maintain independent reactivity
+    child: cf.nu("div")
+      .deps({ data: childData })
+      .content(({ data }) => data)
+      .done(),
+  })
+  .done();
 
 // Updates when store changes
 name.update("Alice");
@@ -88,7 +88,7 @@ counter.value; // Gets current value (5)
 
 // Subscribe to changes
 counter.subscribe((event) => {
-    console.log(`Value changed to ${event.value}`);
+  console.log(`Value changed to ${event.value}`);
 });
 
 // List store for arrays
@@ -99,8 +99,8 @@ todoList.clear(); // Empties the list
 
 // Map store for key-value data
 const user = cf.store({
-    type: "map",
-    value: { name: "John", age: 30 },
+  type: "map",
+  value: { name: "John", age: 30 },
 });
 user.set("location", "New York"); // Add/update a property
 user.delete("age"); // Remove a property
@@ -108,7 +108,7 @@ user.clear(); // Empty the map
 
 // Subscribe to all events with any()
 todoList.any((event) => {
-    console.log(`Event type: ${event.type}`);
+  console.log(`Event type: ${event.type}`);
 });
 ```
 
@@ -125,19 +125,19 @@ const [header] = cf.select({ s: "#page-header" });
 
 // Select from a specific parent element
 const [submitButton] = cf.select({
-    s: 'button[type="submit"]',
-    from: formElement,
+  s: 'button[type="submit"]',
+  from: formElement,
 });
 
 // Select multiple elements
 const paragraphs = cf.select({
-    s: "p",
-    all: true,
+  s: "p",
+  all: true,
 });
 
 // Combining with other operations
 cf.select({ s: ".cards", all: true }).forEach((card) => {
-    cf.extend(card, { style: { border: "1px solid black" } });
+  cf.extend(card, { style: { border: "1px solid black" } });
 });
 ```
 
@@ -185,9 +185,9 @@ const message = cf.html`Safe message: ${trusted}`;
 
 // Use with element creation
 const [div] = cf.nu("div")
-    // .html() is equivalent to .content().raw(true)
-    .html(cf.html`<h1>Title</h1><p>${userName}</p>`)
-    .done();
+  // .html() is equivalent to .content().raw(true)
+  .html(cf.html`<h1>Title</h1><p>${userName}</p>`)
+  .done();
 ```
 
 </details>
@@ -208,9 +208,9 @@ const result = cf.mustache("Welcome, {{ user }}!", { user: "<b>Admin</b>" });
 
 // Disable escaping for trusted content
 const result = cf.mustache(
-    "Welcome, {{ userName }}!",
-    { userName: "<b>Admin</b>" },
-    false, // disable escaping
+  "Welcome, {{ userName }}!",
+  { userName: "<b>Admin</b>" },
+  false, // disable escaping
 );
 // Result: "<b>Admin</b>"
 
@@ -231,39 +231,39 @@ Modifies existing DOM elements with the same options as <code>nu()</code>.
 // Basic usage
 const element = document.querySelector("#my-element");
 cf.extend(element, {
-    contents: "New content",
-    style: { color: "red", fontSize: "16px" },
+  contents: "New content",
+  style: { color: "red", fontSize: "16px" },
 });
 
 // Add event handlers
 cf.extend(element, {
-    on: {
-        click: () => console.log("Clicked!"),
-        mouseover: () => element.style.opacity = "0.8",
-    },
+  on: {
+    click: () => console.log("Clicked!"),
+    mouseover: () => element.style.opacity = "0.8",
+  },
 });
 
 // With reactive data
 const titleStore = cf.store({ value: "Initial Title" });
 
 cf.extend(pageHeader, {
-    contents: ({ title }) => `Page: ${title}`,
-    deps: { title: titleStore },
+  contents: ({ title }) => `Page: ${title}`,
+  deps: { title: titleStore },
 });
 
 // Composing elements with extend
 const childContent = cf.store({ value: "Child text" });
 
 cf.extend(container, {
-    contents: `<h2>Container</h2>
+  contents: `<h2>Container</h2>
 <cf-slot name="childSlot"></cf-slot>`,
-    raw: true,
-    children: {
-        childSlot: cf.nu("span")
-            .deps({ childContent })
-            .content(({ childContent }) => childContent)
-            .done(),
-    },
+  raw: true,
+  children: {
+    childSlot: cf.nu("span")
+      .deps({ childContent })
+      .content(({ childContent }) => childContent)
+      .done(),
+  },
 });
 ```
 
@@ -290,10 +290,10 @@ Simple HTML escaping and unescaping utilities. These are the bare minimum for in
 
 ```js
 // Escape HTML characters
-escape("<script>alert('XSS')</script>"); // "&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;"
+escape("<script>alert('XSS')</script>"); // "&lt;script&gt;alert('XSS')&lt;/script&gt;"
 
 // Unescape previously escaped strings
-unescape("&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;"); // "<script>alert('XSS')</script>"
+unescape("&lt;script&gt;alert('XSS')&lt;/script&gt;"); // "<script>alert('XSS')</script>"
 ```
 
 </details>
@@ -304,9 +304,9 @@ Executes code when the DOM is fully loaded.
 
 ```js
 cf.onload(() => {
-    // Initialize application
-    const [app] = cf.nu("div#app").done();
-    cf.insert(app, { into: document.body });
+  // Initialize application
+  const [app] = cf.nu("div#app").done();
+  cf.insert(app, { into: document.body });
 });
 ```
 
@@ -329,10 +329,10 @@ cf.seq(1, 10, 2); // [1, 3, 5, 7, 9]
 
 // Creating multiple elements with seq
 cf.seq(5).forEach((i) => {
-    const [item] = cf.nu("li")
-        .content(`Item ${i + 1}`)
-        .done();
-    cf.insert(item, { into: listElement });
+  const [item] = cf.nu("li")
+    .content(`Item ${i + 1}`)
+    .done();
+  cf.insert(item, { into: listElement });
 });
 ```
 

@@ -120,7 +120,7 @@
             for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
         </noscript>
 
-        <div class="cf-site-div" data-heading="home" style="display: none;"><h3>campfire: a cozy web framework</h3>
+        <div class="cf-site-div" data-heading="home"><h3>campfire: a cozy web framework</h3>
 <p><strong>Campfire</strong> is a collection of small utilities to make developing with vanilla
 JS easy.</p>
 <p>It is kept lightweight on purpose, aiming to provide the bare minimum necessary
@@ -188,7 +188,7 @@ you need more functionality.</p>
 
 <p><a href="/?tab=get">Get campfire today!</a></p>
 </div>
-<div class="cf-site-div" data-heading="get" style="display: none;"><h3>turn your dumpster fire into a campfire today!</h3>
+<div class="cf-site-div" data-heading="get"><h3>turn your dumpster fire into a campfire today!</h3>
 <p>You can include campfire into your site with just an import statement, either
 from a location where you are hosting it, or from esm.sh / unkpg.</p>
 <pre class="microlight"><code>import cf from &quot;https://esm.sh/campfire.js@4&quot;;
@@ -206,7 +206,7 @@ from npm. This gives you full TypeScript support as well as TSDoc comments.</p>
 </code></pre>
 <p>Good luck, and thank you for choosing Campfire!</p>
 </div>
-<div class="cf-site-div" data-heading="docs" style="display: none;"><h3>using campfire 4.0.0</h3>
+<div class="cf-site-div" data-heading="docs"><h3>using campfire 4.0.0</h3>
 <p>View the <a href="/site/docs/modules/campfire.html">full API reference</a> for detailed
 descriptions of the methods and classes provided by Campfire.</p>
 <h4>quick reference</h4>
@@ -217,39 +217,39 @@ descriptions of the methods and classes provided by Campfire.</p>
 <p>Creates a new DOM element with a fluent builder API.</p>
 <pre class="microlight"><code>// Creating a simple element
 const [div] = cf.nu(&quot;div&quot;)
-    .content(&quot;Hello World&quot;)
-    .attr(&quot;id&quot;, &quot;greeting&quot;)
-    .done();
+  .content(&quot;Hello World&quot;)
+  .attr(&quot;id&quot;, &quot;greeting&quot;)
+  .done();
 
 // Creating a button with click handler
 const [button] = cf.nu(&quot;button#submit.primary&quot;)
-    .content(&quot;Submit&quot;)
-    .attr(&quot;type&quot;, &quot;submit&quot;)
-    .on(&quot;click&quot;, () =&gt; console.log(&quot;Clicked!&quot;))
-    .style(&quot;backgroundColor&quot;, &quot;blue&quot;)
-    .done();
+  .content(&quot;Submit&quot;)
+  .attr(&quot;type&quot;, &quot;submit&quot;)
+  .on(&quot;click&quot;, () =&gt; console.log(&quot;Clicked!&quot;))
+  .style(&quot;backgroundColor&quot;, &quot;blue&quot;)
+  .done();
 
 // Element with classes
 const [card] = cf.nu(&quot;.card.shadow&quot;) // Creates div by default
-    .content(&quot;Card content&quot;)
-    .done();
+  .content(&quot;Card content&quot;)
+  .done();
 
 // Element with reactive content
 const name = cf.store({ value: &quot;John&quot; });
 
 const [greeting] = cf.nu(&quot;h1&quot;)
-    .content(({ name }) =&gt; `Hello, ${name}!`)
-    .deps({ name })
-    .done();
+  .content(({ name }) =&gt; `Hello, ${name}!`)
+  .deps({ name })
+  .done();
 
 // Multiple element selection with gimme
 const [card, title, desc] = cf.nu(&quot;div.card&quot;)
-    .html(`
+  .html(`
     &lt;h2 class=&quot;title&quot;&gt;Card Title&lt;/h2&gt;
     &lt;p class=&quot;desc&quot;&gt;Description&lt;/p&gt;
   `)
-    .gimme(&quot;.title&quot;, &quot;.desc&quot;) // Variadic - pass any number of selectors
-    .done();
+  .gimme(&quot;.title&quot;, &quot;.desc&quot;) // Variadic - pass any number of selectors
+  .done();
 
 // Composing elements with reactive children
 const parentData = cf.store({ value: &quot;Parent content&quot; });
@@ -257,19 +257,19 @@ const childData = cf.store({ value: &quot;Child content&quot; });
 
 // Create a parent with slots for child components
 const [parent] = cf.nu(&quot;section&quot;)
-    .deps({ data: parentData })
-    .html(({ data }) =&gt; `
+  .deps({ data: parentData })
+  .html(({ data }) =&gt; `
     &lt;h3&gt;${data}&lt;/h3&gt;
     &lt;cf-slot name=&quot;child&quot;&gt;&lt;/cf-slot&gt;
   `)
-    .children({
-        // Child components maintain independent reactivity
-        child: cf.nu(&quot;div&quot;)
-            .deps({ data: childData })
-            .content(({ data }) =&gt; data)
-            .done(),
-    })
-    .done();
+  .children({
+    // Child components maintain independent reactivity
+    child: cf.nu(&quot;div&quot;)
+      .deps({ data: childData })
+      .content(({ data }) =&gt; data)
+      .done(),
+  })
+  .done();
 
 // Updates when store changes
 name.update(&quot;Alice&quot;);
@@ -287,7 +287,7 @@ counter.value; // Gets current value (5)
 
 // Subscribe to changes
 counter.subscribe((event) =&gt; {
-    console.log(`Value changed to ${event.value}`);
+  console.log(`Value changed to ${event.value}`);
 });
 
 // List store for arrays
@@ -298,8 +298,8 @@ todoList.clear(); // Empties the list
 
 // Map store for key-value data
 const user = cf.store({
-    type: &quot;map&quot;,
-    value: { name: &quot;John&quot;, age: 30 },
+  type: &quot;map&quot;,
+  value: { name: &quot;John&quot;, age: 30 },
 });
 user.set(&quot;location&quot;, &quot;New York&quot;); // Add/update a property
 user.delete(&quot;age&quot;); // Remove a property
@@ -307,7 +307,7 @@ user.clear(); // Empty the map
 
 // Subscribe to all events with any()
 todoList.any((event) =&gt; {
-    console.log(`Event type: ${event.type}`);
+  console.log(`Event type: ${event.type}`);
 });
 </code></pre>
 </details>
@@ -321,19 +321,19 @@ const [header] = cf.select({ s: &quot;#page-header&quot; });
 
 // Select from a specific parent element
 const [submitButton] = cf.select({
-    s: &#39;button[type=&quot;submit&quot;]&#39;,
-    from: formElement,
+  s: &#39;button[type=&quot;submit&quot;]&#39;,
+  from: formElement,
 });
 
 // Select multiple elements
 const paragraphs = cf.select({
-    s: &quot;p&quot;,
-    all: true,
+  s: &quot;p&quot;,
+  all: true,
 });
 
 // Combining with other operations
 cf.select({ s: &quot;.cards&quot;, all: true }).forEach((card) =&gt; {
-    cf.extend(card, { style: { border: &quot;1px solid black&quot; } });
+  cf.extend(card, { style: { border: &quot;1px solid black&quot; } });
 });
 </code></pre>
 </details>
@@ -375,9 +375,9 @@ const message = cf.html`Safe message: ${trusted}`;
 
 // Use with element creation
 const [div] = cf.nu(&quot;div&quot;)
-    // .html() is equivalent to .content().raw(true)
-    .html(cf.html`&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;${userName}&lt;/p&gt;`)
-    .done();
+  // .html() is equivalent to .content().raw(true)
+  .html(cf.html`&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;${userName}&lt;/p&gt;`)
+  .done();
 </code></pre>
 </details>
 
@@ -395,9 +395,9 @@ const result = cf.mustache(&quot;Welcome, {{ user }}!&quot;, { user: &quot;&lt;b
 
 // Disable escaping for trusted content
 const result = cf.mustache(
-    &quot;Welcome, {{ userName }}!&quot;,
-    { userName: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot; },
-    false, // disable escaping
+  &quot;Welcome, {{ userName }}!&quot;,
+  { userName: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot; },
+  false, // disable escaping
 );
 // Result: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot;
 
@@ -415,39 +415,39 @@ const bobGreeting = greet({ name: &quot;Bob&quot; }); // &quot;Hello, Bob!&quot;
 <pre class="microlight"><code>// Basic usage
 const element = document.querySelector(&quot;#my-element&quot;);
 cf.extend(element, {
-    contents: &quot;New content&quot;,
-    style: { color: &quot;red&quot;, fontSize: &quot;16px&quot; },
+  contents: &quot;New content&quot;,
+  style: { color: &quot;red&quot;, fontSize: &quot;16px&quot; },
 });
 
 // Add event handlers
 cf.extend(element, {
-    on: {
-        click: () =&gt; console.log(&quot;Clicked!&quot;),
-        mouseover: () =&gt; element.style.opacity = &quot;0.8&quot;,
-    },
+  on: {
+    click: () =&gt; console.log(&quot;Clicked!&quot;),
+    mouseover: () =&gt; element.style.opacity = &quot;0.8&quot;,
+  },
 });
 
 // With reactive data
 const titleStore = cf.store({ value: &quot;Initial Title&quot; });
 
 cf.extend(pageHeader, {
-    contents: ({ title }) =&gt; `Page: ${title}`,
-    deps: { title: titleStore },
+  contents: ({ title }) =&gt; `Page: ${title}`,
+  deps: { title: titleStore },
 });
 
 // Composing elements with extend
 const childContent = cf.store({ value: &quot;Child text&quot; });
 
 cf.extend(container, {
-    contents: `&lt;h2&gt;Container&lt;/h2&gt;
+  contents: `&lt;h2&gt;Container&lt;/h2&gt;
 &lt;cf-slot name=&quot;childSlot&quot;&gt;&lt;/cf-slot&gt;`,
-    raw: true,
-    children: {
-        childSlot: cf.nu(&quot;span&quot;)
-            .deps({ childContent })
-            .content(({ childContent }) =&gt; childContent)
-            .done(),
-    },
+  raw: true,
+  children: {
+    childSlot: cf.nu(&quot;span&quot;)
+      .deps({ childContent })
+      .content(({ childContent }) =&gt; childContent)
+      .done(),
+  },
 });
 </code></pre>
 </details>
@@ -469,10 +469,10 @@ cf.rm(element);
 Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text into the DOM - you should look to a different library for more complex needs.
 
 <pre class="microlight"><code>// Escape HTML characters
-escape(&quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;); // &quot;&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;&quot;
+escape(&quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;); // &quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;&quot;
 
 // Unescape previously escaped strings
-unescape(&quot;&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;&quot;); // &quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;
+unescape(&quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;&quot;); // &quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;
 </code></pre>
 </details>
 
@@ -481,9 +481,9 @@ unescape(&quot;&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script
 Executes code when the DOM is fully loaded.
 
 <pre class="microlight"><code>cf.onload(() =&gt; {
-    // Initialize application
-    const [app] = cf.nu(&quot;div#app&quot;).done();
-    cf.insert(app, { into: document.body });
+  // Initialize application
+  const [app] = cf.nu(&quot;div#app&quot;).done();
+  cf.insert(app, { into: document.body });
 });
 </code></pre>
 </details>
@@ -503,15 +503,15 @@ cf.seq(1, 10, 2); // [1, 3, 5, 7, 9]
 
 // Creating multiple elements with seq
 cf.seq(5).forEach((i) =&gt; {
-    const [item] = cf.nu(&quot;li&quot;)
-        .content(`Item ${i + 1}`)
-        .done();
-    cf.insert(item, { into: listElement });
+  const [item] = cf.nu(&quot;li&quot;)
+    .content(`Item ${i + 1}`)
+    .done();
+  cf.insert(item, { into: listElement });
 });
 </code></pre>
 </details>
 </div>
-<div class="cf-site-div" data-heading="playground" style="display: none;"><h3>try before you buy</h3>
+<div class="cf-site-div" data-heading="playground"><h3>try before you buy</h3>
 <p>Try one of these demos, or do your own thing!</p>
 <ul id='playground-demo-list'>
 </ul>
