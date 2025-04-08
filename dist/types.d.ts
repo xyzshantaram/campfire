@@ -56,17 +56,36 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
      * for example, `type: "button"` or `checked: true`
      */
     misc?: Record<string, unknown>;
-    /** Contains styles that will be applied to the new element. Property names must be the same as those in `CSSStyleDeclaration`. */
+    /**
+     * Contains styles that will be applied to the new element. Property names
+     * must be the same as those in `CSSStyleDeclaration`.
+     */
     style?: Partial<Record<StringStyleProps, string | number>>;
-    /** An object containing event handlers that will be applied using addEventListener.
+    /**
+     * An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
     on?: DOMEventHandlers;
     /** Attributes that will be set on the element using `Element.setAttribute`. */
     attrs?: Record<string, string | number | boolean>;
-    /** A list of elements to query from the element. Will be returned as subsequent members of the returned Array after the element itself. */
+    /**
+     * A list of elements to query from the element. Will be returned as
+     * subsequent members of the returned Array after the element itself.
+     * Returns null when a selector isn't found to preserve order of returned
+     * elements.
+     */
     gimme?: string[];
+    /**
+     * A Record<string, Store> of the element's dependencies. The element's
+     * content function will be called every time any of the deps change.
+     */
     deps?: D;
+    /**
+     *  Children of the element to mount. They will be mounted into `cf-slot`s
+     * corresponding to the Record's keys and preserved between re-renders of
+     * the parent.
+     */
+    children?: Record<string, HTMLElement>;
 }
 /**
  * An interface to store data parsed from an element descriptor string passed to `nu`.

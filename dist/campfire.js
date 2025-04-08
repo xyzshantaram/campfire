@@ -239,15 +239,35 @@ var NuBuilder = class {
    * @param selectors - A single selector string or an array of selector strings
    * @returns The builder instance for chaining
    */
-  gimme(selectors) {
+  gimme(...selectors) {
     var _a;
     (_a = this.props).gimme || (_a.gimme = []);
-    if (Array.isArray(selectors)) this.props.gimme = selectors;
-    else this.props.gimme.push(selectors);
+    this.props.gimme = selectors;
     return this;
   }
   deps(obj) {
     this.props.deps = { ...this.props.deps, ...obj };
+    return this;
+  }
+  /**
+   * Unsafely set the html of the object. This is equivalent to calling
+   * .content(...).raw(true) and is meant to be used with a templating function
+   * like `cf.html`.
+   * @param value The content function / string to set.
+   * @returns The builder for chaining.
+   */
+  html(value) {
+    return this.content(value).raw(true);
+  }
+  /**
+   * Mount reactive children into a parent element. The children are preserved
+   * across re-renders and can be independently reactive.
+   * @param children An object whose keys correspond to the `name` attributes 
+   * of cf-slot elements in the parent's innerHTML.
+   * @returns The builder object for chaining.
+   */
+  children(children) {
+    this.props.children = children;
     return this;
   }
 };
@@ -278,13 +298,19 @@ var isValidRenderFn = (fn) => {
   return true;
 };
 var extend = (elt, args = {}) => {
-  let { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = {} } = args;
+  let { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = {}, children = {} } = args;
   let content = "";
   if (isValidRenderFn(contents)) {
     Object.entries(deps).forEach(([name, dep]) => {
       dep.any((evt) => {
         const res = contents(unwrapDeps(deps), { event: { ...evt, triggeredBy: name }, elt });
-        if (res !== void 0) elt.innerHTML = res;
+        if (res !== void 0) {
+          const reactiveChildren = select({ s: "[data-cf-slot]", all: true, from: elt }).map((elt2) => [elt2.getAttribute("data-cf-slot"), elt2]);
+          elt.innerHTML = res;
+          reactiveChildren.forEach(([slot, ref]) => {
+            elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
+          });
+        }
       });
     });
     const result = contents(unwrapDeps(deps), { elt });
@@ -296,6 +322,14 @@ var extend = (elt, args = {}) => {
   }
   if (content?.trim()) {
     elt.innerHTML = raw ? content : escape(content);
+    elt.querySelectorAll("cf-slot").forEach((itm) => {
+      const name = itm.getAttribute("name");
+      if (!name) return;
+      if (name in children) {
+        itm.replaceWith(children[name]);
+        children[name].setAttribute("data-cf-slot", name);
+      }
+    });
   }
   const depIds = Object.values(deps).map((dep) => dep.id);
   if (depIds.length) elt.setAttribute("data-cf-reactive", "true");
