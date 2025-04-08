@@ -1,0 +1,14 @@
+{
+  "include": [
+    "site/build.ts"
+  ],
+  "exclude": ["src/**", "site/*.js"],
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "types": []
+  },
+  "unstable": [
+    "sloppy-imports"
+  ]
+}

@@ -120,245 +120,233 @@
             for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
         </noscript>
 
-        <!-- Embedded content for SEO - will be hidden/shown by JavaScript -->
-        <div class="cf-site-div" data-heading="home" style="display: none;">
-            <h3>campfire: a cozy web framework</h3>
-            <p><strong>Campfire</strong> is a collection of small utilities to make developing with vanilla JS easy.</p>
-            <p>It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development
-                easier.</p>
-            <h4>Features</h4>
-            <ul>
-                <li>Small size</li>
-                <li>Easy to get started with - just <code>import</code> it into your project from
-                    <a href="https://unpkg.com/browse/campfire.js/">unpkg</a> or
-                    <a href="https://esm.sh/campfire.js/">esm.sh</a>.
-                    Campfire is on npm as well, so you can also add it into your existing application
-                    with <code>npm i campfire.js</code>!
-                </li>
-                <li>Uses vanilla JS wherever possible - no unnecessary DSLs or abstractions!</li>
-                <li>Provides an easy-to-understand API for implementing reactive data</li>
-                <li>Provides simple helpers for mustache templating</li>
-            </ul>
-            <h4>FAQs</h4>
-            <details>
-                <summary>
-                    How does it compare to $framework?
-                </summary>
-                <p>
-                    It doesn't. Campfire and $framework have entirely different goals. Campfire is a library
-                    to make writing vanilla JS applications easier, if you don't want the level of abstraction (or
-                    the associated overhead) that comes with $framework. You can build entire applications with it
-                    or add it quickly to an existing project. You are afforded complete control over your project.
-                </p>
-                <p>
-                    The learning curve is minuscule and the possibilities are endless.
-                </p>
-            </details>
-            <details>
-                <summary>
-                    What about WebComponents?
-                </summary>
-                <p>
-                    <a href='https://lit.dev'>lit.dev</a>
-                </p>
-            </details>
-            <details>
-                <summary>
-                    How do I create and share reusable components?
-                </summary>
-                <p>
-                    Campfire has no opinion on how you should do this.
-                    However, one option is to use a function that returns functions and stores to let you
-                    manipulate the element (and the created element itself).
-                </p>
+        <div class="cf-site-div" data-heading="home" style="display: none;"><h3>campfire: a cozy web framework</h3>
+<p><strong>Campfire</strong> is a collection of small utilities to make developing with vanilla
+JS easy.</p>
+<p>It is kept lightweight on purpose, aiming to provide the bare minimum necessary
+to make development easier.</p>
+<h4>Features</h4>
+<ul>
+<li>Small size</li>
+<li>Easy to get started with - just <code>import</code> it into your project from
+<a href="https://unpkg.com/browse/campfire.js/">unpkg</a> or
+<a href="https://esm.sh/campfire.js/">esm.sh</a>. Campfire is on npm as well, so you can
+also add it into your existing application with <code>npm i campfire.js</code>!</li>
+<li>Uses vanilla JS wherever possible - no unnecessary DSLs or abstractions!</li>
+<li>Provides an easy-to-understand API for implementing reactive data</li>
+<li>Provides simple helpers for mustache templating</li>
+</ul>
+<h4>FAQs</h4>
+<details>
+<summary>How does it compare to $framework?</summary>
 
-                <pre class='microlight'><code>// a reactive representation of a name badge
-const NameBadge = () => {
-  const name = cf.store({ value: "" });
-  
-  const [badge] = cf.nu('div')
-    .content(({ name }) => `Hello! My name is ${name}`)
+<p>It doesn&#39;t. Campfire and $framework have entirely different goals. Campfire is a
+library to make writing vanilla JS applications easier, if you don&#39;t want the
+level of abstraction (or the associated overhead) that comes with $framework.
+You can build entire applications with it or add it quickly to an existing
+project. You are afforded complete control over your project.</p>
+<p>The learning curve is minuscule and the possibilities are endless.</p>
+</details>
+
+<details>
+<summary>What about WebComponents?</summary>
+
+<p><a href="https://lit.dev">lit.dev</a></p>
+</details>
+
+<details>
+<summary>How do I create and share reusable components?</summary>
+
+<p>Campfire has no opinion on how you should do this. However, one option is to use
+a function that returns functions and stores to let you manipulate the element
+(and the created element itself).</p>
+<pre class="microlight"><code>// a reactive representation of a name badge
+const NameBadge = () =&gt; {
+  const name = cf.store({ value: &quot;&quot; });
+
+  const [badge] = cf.nu(&quot;div&quot;)
+    .content(({ name }) =&gt; `Hello! My name is ${name}`)
     .deps({ name })
     .done();
 
   return [badge, name];
-}
+};
 </code></pre>
-            </details>
-            <details>
-                <summary>
-                    Why are escape and unescape so basic?
-                </summary>
-                <p>
-                    <code>escape</code> and <code>unescape</code> are intended as basic HTML sanitizers mainly for
-                    setting element contents, etc. You are encouraged to use a different HTML sanitizer if you
-                    need more functionality.
-                </p>
-                <ul>
-                    <li><a href='https://github.com/mathiasbynens/he'>he</a></li>
-                    <li><a href='https://github.com/apostrophecms/sanitize-html'>html-sanitize</a></li>
-                </ul>
-            </details>
-            <p><a href="?tab=get">Get campfire today!</a></p>
-        </div>
+</details>
 
-        <div class="cf-site-div" data-heading="playground" style="display: none;">
-            <h3>try before you buy</h3>
-            <p>Try one of these demos, or do your own thing!</p>
-            <ul id='playground-demo-list'>
-            </ul>
-            <div id='cf-editor-controls'>
-                <a href='javascript:void(0)' id='cf-editor-clear'>Clear All</a>
-                <a href='javascript:void(0)' id='cf-editor-dl'>Download</a>
-            </div>
-            <div class='editor-wrapper'>
-                <div class='cf-editor-html'></div>
-                <div class='cf-editor-css'></div>
-                <div class='cf-editor-js'></div>
-                <div class='cf-editor-output'></div>
-            </div>
-        </div>
+<details>
+<summary>Why are escape and unescape so basic?</summary>
 
-        <div class="cf-site-div" data-heading="docs" style="display: none;">
-            <h3>using campfire 4.0.0</h3>
-            <p>View the <a href="site/docs/modules/campfire.html">full API reference</a> for detailed descriptions
-                of the methods and classes provided by Campfire.</p>
+<p><code>escape</code> and <code>unescape</code> are intended as basic HTML sanitizers mainly for setting
+element contents, etc. You are encouraged to use a different HTML sanitizer if
+you need more functionality.</p>
+<ul>
+<li><a href="https://github.com/mathiasbynens/he">he</a></li>
+<li><a href="https://github.com/apostrophecms/sanitize-html">html-sanitize</a></li>
+</ul>
+</details>
 
-            <h4>quick reference</h4>
-            <p>Campfire provides the following methods and classes:</p>
+<p><a href="/?tab=get">Get campfire today!</a></p>
+</div>
+<div class="cf-site-div" data-heading="get" style="display: none;"><h3>turn your dumpster fire into a campfire today!</h3>
+<p>You can include campfire into your site with just an import statement, either
+from a location where you are hosting it, or from esm.sh / unkpg.</p>
+<pre class="microlight"><code>import cf from &quot;https://esm.sh/campfire.js@4&quot;;
+</code></pre>
+<p>or</p>
+<pre class="microlight"><code>import { ListStore, nu } from &quot;https://esm.sh/campfire.js@4&quot;;
+</code></pre>
+<p>If you use a bundler or want to write in TypeScript, you can install Campfire
+from npm. This gives you full TypeScript support as well as TSDoc comments.</p>
+<p>To install:</p>
+<pre class="microlight"><code>npm install --save-dev campfire.js
+</code></pre>
+<p>Then in your code:</p>
+<pre class="microlight"><code>import cf from &quot;campfire.js&quot;;
+</code></pre>
+<p>Good luck, and thank you for choosing Campfire!</p>
+</div>
+<div class="cf-site-div" data-heading="docs" style="display: none;"><h3>using campfire 4.0.0</h3>
+<p>View the <a href="/site/docs/modules/campfire.html">full API reference</a> for detailed
+descriptions of the methods and classes provided by Campfire.</p>
+<h4>quick reference</h4>
+<p>Campfire provides the following methods and classes:</p>
+<details>
+<summary><code>nu()</code> - element creation helper</summary>
 
-            <details>
-                <summary><code>nu()</code> - element creation helper</summary>
-                <p>Creates a new DOM element with a fluent builder API.</p>
-                <pre class="microlight"><code>// Creating a simple element
-const [div] = cf.nu('div')
-  .content('Hello World')
-  .attr('id', 'greeting')
-  .done();
+<p>Creates a new DOM element with a fluent builder API.</p>
+<pre class="microlight"><code>// Creating a simple element
+const [div] = cf.nu(&quot;div&quot;)
+    .content(&quot;Hello World&quot;)
+    .attr(&quot;id&quot;, &quot;greeting&quot;)
+    .done();
 
 // Creating a button with click handler
-const [button] = cf.nu('button#submit.primary')
-  .content('Submit')
-  .attr('type', 'submit')
-  .on('click', () => console.log('Clicked!'))
-  .style('backgroundColor', 'blue')
-  .done();
+const [button] = cf.nu(&quot;button#submit.primary&quot;)
+    .content(&quot;Submit&quot;)
+    .attr(&quot;type&quot;, &quot;submit&quot;)
+    .on(&quot;click&quot;, () =&gt; console.log(&quot;Clicked!&quot;))
+    .style(&quot;backgroundColor&quot;, &quot;blue&quot;)
+    .done();
 
 // Element with classes
-const [card] = cf.nu('.card.shadow')  // Creates div by default
-  .content('Card content')
-  .done();
+const [card] = cf.nu(&quot;.card.shadow&quot;) // Creates div by default
+    .content(&quot;Card content&quot;)
+    .done();
 
 // Element with reactive content
-const name = cf.store({ value: 'John' });
+const name = cf.store({ value: &quot;John&quot; });
 
-const [greeting] = cf.nu('h1')
-  .content(({ name }) => `Hello, ${name}!`)
-  .deps({ name })
-  .done();
+const [greeting] = cf.nu(&quot;h1&quot;)
+    .content(({ name }) =&gt; `Hello, ${name}!`)
+    .deps({ name })
+    .done();
 
 // Multiple element selection with gimme
-const [card, title, desc] = cf.nu('div.card')
-  .html(`
-    <h2 class="title">Card Title</h2>
-    <p class="desc">Description</p>
+const [card, title, desc] = cf.nu(&quot;div.card&quot;)
+    .html(`
+    &lt;h2 class=&quot;title&quot;&gt;Card Title&lt;/h2&gt;
+    &lt;p class=&quot;desc&quot;&gt;Description&lt;/p&gt;
   `)
-  .gimme('.title', '.desc')  // Variadic - pass any number of selectors
-  .done();
+    .gimme(&quot;.title&quot;, &quot;.desc&quot;) // Variadic - pass any number of selectors
+    .done();
 
 // Composing elements with reactive children
-const parentData = cf.store({ value: 'Parent content' });
-const childData = cf.store({ value: 'Child content' });
+const parentData = cf.store({ value: &quot;Parent content&quot; });
+const childData = cf.store({ value: &quot;Child content&quot; });
 
 // Create a parent with slots for child components
-const [parent] = cf.nu('section')
-  .deps({ data: parentData })
-  .html(({ data }) => `
-    <h3>${data}</h3>
-    <cf-slot name="child"></cf-slot>
+const [parent] = cf.nu(&quot;section&quot;)
+    .deps({ data: parentData })
+    .html(({ data }) =&gt; `
+    &lt;h3&gt;${data}&lt;/h3&gt;
+    &lt;cf-slot name=&quot;child&quot;&gt;&lt;/cf-slot&gt;
   `)
-  .children({
-    // Child components maintain independent reactivity
-    child: cf.nu('div')
-      .deps({ data: childData })
-      .content(({ data }) => data)
-      .done()
-  })
-  .done();
+    .children({
+        // Child components maintain independent reactivity
+        child: cf.nu(&quot;div&quot;)
+            .deps({ data: childData })
+            .content(({ data }) =&gt; data)
+            .done(),
+    })
+    .done();
 
 // Updates when store changes
-name.update('Alice');</code></pre>
-            </details>
+name.update(&quot;Alice&quot;);
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>store()</code> - reactive data stores</summary>
-                <p>Creates reactive data stores to manage state with automatic UI updates.</p>
+<details>
+<summary><code>store()</code> - reactive data stores</summary>
 
-                <pre class="microlight"><code>// Simple value store
+<p>Creates reactive data stores to manage state with automatic UI updates.</p>
+<pre class="microlight"><code>// Simple value store
 const counter = cf.store({ value: 0 });
-counter.update(5);  // Sets value to 5
-counter.value;      // Gets current value (5)
+counter.update(5); // Sets value to 5
+counter.value; // Gets current value (5)
 
 // Subscribe to changes
-counter.subscribe((event) => {
-  console.log(`Value changed to ${event.value}`);
+counter.subscribe((event) =&gt; {
+    console.log(`Value changed to ${event.value}`);
 });
 
 // List store for arrays
-const todoList = cf.store({ type: 'list', value: ['Buy milk'] });
-todoList.push('Walk dog');  // Adds to the end
-todoList.remove(0);         // Removes first item
-todoList.clear();           // Empties the list
+const todoList = cf.store({ type: &quot;list&quot;, value: [&quot;Buy milk&quot;] });
+todoList.push(&quot;Walk dog&quot;); // Adds to the end
+todoList.remove(0); // Removes first item
+todoList.clear(); // Empties the list
 
 // Map store for key-value data
-const user = cf.store({ 
-  type: 'map', 
-  value: { name: 'John', age: 30 } 
+const user = cf.store({
+    type: &quot;map&quot;,
+    value: { name: &quot;John&quot;, age: 30 },
 });
-user.set('location', 'New York');  // Add/update a property
-user.delete('age');                // Remove a property
-user.clear();                      // Empty the map
+user.set(&quot;location&quot;, &quot;New York&quot;); // Add/update a property
+user.delete(&quot;age&quot;); // Remove a property
+user.clear(); // Empty the map
 
 // Subscribe to all events with any()
-todoList.any((event) => {
-  console.log(`Event type: ${event.type}`);
-});</code></pre>
-            </details>
+todoList.any((event) =&gt; {
+    console.log(`Event type: ${event.type}`);
+});
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>select()</code> - element selection</summary>
-                <p>Selects elements from the DOM with a unified API.</p>
+<details>
+<summary><code>select()</code> - element selection</summary>
 
-                <pre class="microlight"><code>// Select a single element (returns an array with one item)
-const [header] = cf.select({ s: '#page-header' });
+<p>Selects elements from the DOM with a unified API.</p>
+<pre class="microlight"><code>// Select a single element (returns an array with one item)
+const [header] = cf.select({ s: &quot;#page-header&quot; });
 
 // Select from a specific parent element
 const [submitButton] = cf.select({
-  s: 'button[type="submit"]',
-  from: formElement
+    s: &#39;button[type=&quot;submit&quot;]&#39;,
+    from: formElement,
 });
 
 // Select multiple elements
 const paragraphs = cf.select({
-  s: 'p',
-  all: true
+    s: &quot;p&quot;,
+    all: true,
 });
 
 // Combining with other operations
-cf.select({ s: '.cards', all: true }).forEach(card => {
-  cf.extend(card, { style: { border: '1px solid black' } });
-});</code></pre>
-            </details>
+cf.select({ s: &quot;.cards&quot;, all: true }).forEach((card) =&gt; {
+    cf.extend(card, { style: { border: &quot;1px solid black&quot; } });
+});
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>insert()</code> - element insertion</summary>
-                <p>Inserts elements into the DOM at specific positions.</p>
+<details>
+<summary><code>insert()</code> - element insertion</summary>
 
-                <pre class="microlight"><code>// Insert at the end of a container
+<p>Inserts elements into the DOM at specific positions.</p>
+<pre class="microlight"><code>// Insert at the end of a container
 cf.insert([elt], { into: container });
 
 // Insert at the start of a container
-cf.insert([elt], { into: container, at: 'start' });
+cf.insert([elt], { into: container, at: &quot;start&quot; });
 
 // Insert before (as siblings of) another element
 cf.insert([elt], { before: referenceElement });
@@ -367,177 +355,178 @@ cf.insert([elt], { before: referenceElement });
 cf.insert([elt1, elt2], { after: referenceElement });
 
 // Create and insert in one step
-cf.insert(cf.nu().content('New content').done(), { into: document.body });</code></pre>
-            </details>
+cf.insert(cf.nu().content(&quot;New content&quot;).done(), { into: document.body });
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>html()</code> - auto-escaping template literal and element builder method</summary>
-                <p>Creates HTML strings with automatic escaping of interpolated values.</p>
+<details>
+<summary><code>html()</code> - auto-escaping template literal and element builder method</summary>
 
-                <pre class="microlight"><code>// Basic usage with automatic escaping
-const username = '&lt;script&gt;alert("XSS")&lt;/script&gt;';
+<p>Creates HTML strings with automatic escaping of interpolated values.</p>
+<pre class="microlight"><code>// Basic usage with automatic escaping
+const username = &#39;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;&#39;;
 const greeting = cf.html`Hello, ${username}!`;
-// Result: "Hello, &amp;lt;script&amp;gt;alert("XSS")&amp;lt;/script&amp;gt;!"
+// Result: &quot;Hello, &amp;lt;script&amp;gt;alert(&quot;XSS&quot;)&amp;lt;/script&amp;gt;!&quot;
 
 // Use r() to disable escaping for trusted content
-const trusted = cf.r('"&lt;b&gt;Bold text&lt;/b&gt;"');
+const trusted = cf.r(&#39;&quot;&lt;b&gt;Bold text&lt;/b&gt;&quot;&#39;);
 const message = cf.html`Safe message: ${trusted}`;
-// Result: "Safe message: "&lt;b&gt;Bold text&lt;/b&gt;""
+// Result: &quot;Safe message: &quot;&lt;b&gt;Bold text&lt;/b&gt;&quot;&quot;
 
 // Use with element creation
-const [div] = cf.nu('div')
-  // .html() is equivalent to .content().raw(true)
-  .html(cf.html`<h1>Title</h1><p>${userName}</p>`)
-  .done();</code></pre>
-            </details>
+const [div] = cf.nu(&quot;div&quot;)
+    // .html() is equivalent to .content().raw(true)
+    .html(cf.html`&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;${userName}&lt;/p&gt;`)
+    .done();
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>mustache()</code> and <code>template()</code> - reusable and composable string templates
-                </summary>
-                <p>Simple templating system for string interpolation.</p>
+<details>
+<summary><code>mustache()</code> and <code>template()</code> - reusable and composable string templates</summary>
 
-                <pre class="microlight"><code>// Basic mustache templating (escaped by default)
-const result = cf.mustache("Hello, {{ name }}!", { name: "John" });
-// Result: "Hello, John!"
+<p>Simple templating system for string interpolation.</p>
+<pre class="microlight"><code>// Basic mustache templating (escaped by default)
+const result = cf.mustache(&quot;Hello, {{ name }}!&quot;, { name: &quot;John&quot; });
+// Result: &quot;Hello, John!&quot;
 
 // With HTML content (escaped by default)
-const result = cf.mustache("Welcome, {{ user }}!", { user: "&lt;b&gt;Admin&lt;/b&gt;" });
-// Result: "Welcome, &amp;lt;b&amp;gt;Admin&amp;lt;/b&amp;gt;!"
+const result = cf.mustache(&quot;Welcome, {{ user }}!&quot;, { user: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot; });
+// Result: &quot;Welcome, &amp;lt;b&amp;gt;Admin&amp;lt;/b&amp;gt;!&quot;
 
 // Disable escaping for trusted content
 const result = cf.mustache(
-  "Welcome, {{ userName }}!", { userName: "&lt;b&gt;Admin&lt;/b&gt;" }, 
-  false // disable escaping
+    &quot;Welcome, {{ userName }}!&quot;,
+    { userName: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot; },
+    false, // disable escaping
 );
-// Result: "&lt;b&gt;Admin&lt;/b&gt;"
+// Result: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot;
 
 // Create reusable template function
-const greet = cf.template("Hello, {{ name }}!");
-const aliceGreeting = greet({ name: "Alice" });  // "Hello, Alice!"
-const bobGreeting = greet({ name: "Bob" });    // "Hello, Bob!"</code></pre>
-            </details>
+const greet = cf.template(&quot;Hello, {{ name }}!&quot;);
+const aliceGreeting = greet({ name: &quot;Alice&quot; }); // &quot;Hello, Alice!&quot;
+const bobGreeting = greet({ name: &quot;Bob&quot; }); // &quot;Hello, Bob!&quot;
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>extend()</code> - element modification</summary>
-                <p>Modifies existing DOM elements with the same options as <code>nu()</code>.</p>
+<details>
+<summary><code>extend()</code> - element modification</summary>
 
-                <pre class="microlight"><code>// Basic usage 
-const element = document.querySelector('#my-element');
+<p>Modifies existing DOM elements with the same options as <code>nu()</code>.</p>
+<pre class="microlight"><code>// Basic usage
+const element = document.querySelector(&quot;#my-element&quot;);
 cf.extend(element, {
-  contents: 'New content',
-  style: { color: 'red', fontSize: '16px' }
+    contents: &quot;New content&quot;,
+    style: { color: &quot;red&quot;, fontSize: &quot;16px&quot; },
 });
 
 // Add event handlers
 cf.extend(element, {
-  on: {
-    click: () => console.log('Clicked!'),
-    mouseover: () => element.style.opacity = '0.8'
-  }
+    on: {
+        click: () =&gt; console.log(&quot;Clicked!&quot;),
+        mouseover: () =&gt; element.style.opacity = &quot;0.8&quot;,
+    },
 });
 
 // With reactive data
-const titleStore = cf.store({ value: 'Initial Title' });
+const titleStore = cf.store({ value: &quot;Initial Title&quot; });
 
 cf.extend(pageHeader, {
-  contents: ({ title }) => `Page: ${title}`,
-  deps: { title: titleStore }
+    contents: ({ title }) =&gt; `Page: ${title}`,
+    deps: { title: titleStore },
 });
 
 // Composing elements with extend
-const childContent = cf.store({ value: 'Child text' });
+const childContent = cf.store({ value: &quot;Child text&quot; });
 
 cf.extend(container, {
-  contents: `<h2>Container</h2>
-             <cf-slot name="childSlot"></cf-slot>`,
-  raw: true,
-  children: {
-    childSlot: cf.nu('span')
-      .deps({ childContent })
-      .content(({ childContent }) => childContent)
-      .done()[0]
-  }
-});</code></pre>
-            </details>
+    contents: `&lt;h2&gt;Container&lt;/h2&gt;
+&lt;cf-slot name=&quot;childSlot&quot;&gt;&lt;/cf-slot&gt;`,
+    raw: true,
+    children: {
+        childSlot: cf.nu(&quot;span&quot;)
+            .deps({ childContent })
+            .content(({ childContent }) =&gt; childContent)
+            .done(),
+    },
+});
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>empty()</code> and <code>rm()</code> - element cleanup</summary>
-                <p>Remove elements or their contents from the DOM.</p>
+<details>
+<summary><code>empty()</code> and <code>rm()</code> - element cleanup</summary>
 
-                <pre class="microlight"><code>// Empty an element (removes all children)
+<p>Remove elements or their contents from the DOM.</p>
+<pre class="microlight"><code>// Empty an element (removes all children)
 cf.empty(container);
 
 // Remove element entirely
-cf.rm(element);</code></pre>
-            </details>
+cf.rm(element);
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>escape()</code> and <code>unescape()</code> - string sanitization</summary>
-                <p>Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text into the
-                    DOM - you should look to a different library for more complex needs.</p>
+<details>
+<summary><code>escape()</code> and <code>unescape()</code> - string sanitization</summary>
+Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text into the DOM - you should look to a different library for more complex needs.
 
-                <pre class="microlight"><code>// Escape HTML characters
-escape("&lt;script&gt;alert('XSS')&lt;/script&gt;") // "&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;"
+<pre class="microlight"><code>// Escape HTML characters
+escape(&quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;); // &quot;&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;&quot;
 
 // Unescape previously escaped strings
-unescape("&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;") // "&lt;script&gt;alert('XSS')&lt;/script&gt;".
+unescape(&quot;&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;&quot;); // &quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;
 </code></pre>
-            </details>
+</details>
 
-            <details>
-                <summary><code>onload()</code> - DOM ready handler</summary>
-                <p>Executes code when the DOM is fully loaded.</p>
+<details>
+<summary><code>onload()</code> - DOM ready handler</summary>
+Executes code when the DOM is fully loaded.
 
-                <pre class="microlight"><code>cf.onload(() => {
-  // Initialize application
-  const [app] = cf.nu('div#app').done();
-  cf.insert(app, { into: document.body });
-});</code></pre>
-            </details>
+<pre class="microlight"><code>cf.onload(() =&gt; {
+    // Initialize application
+    const [app] = cf.nu(&quot;div#app&quot;).done();
+    cf.insert(app, { into: document.body });
+});
+</code></pre>
+</details>
 
-            <details>
-                <summary><code>seq()</code> - sequence generator</summary>
-                <p>Generates numerical sequences for iteration.</p>
+<details>
+<summary><code>seq()</code> - sequence generator</summary>
 
-                <pre class="microlight"><code>// Range from 0 to 5 (exclusive)
-cf.seq(5);  // [0, 1, 2, 3, 4]
+<p>Generates numerical sequences for iteration.</p>
+<pre class="microlight"><code>// Range from 0 to 5 (exclusive)
+cf.seq(5); // [0, 1, 2, 3, 4]
 
 // Range from 2 to 7 (exclusive)
-cf.seq(2, 7);  // [2, 3, 4, 5, 6]
+cf.seq(2, 7); // [2, 3, 4, 5, 6]
 
 // Range with custom step
-cf.seq(1, 10, 2);  // [1, 3, 5, 7, 9]
+cf.seq(1, 10, 2); // [1, 3, 5, 7, 9]
 
 // Creating multiple elements with seq
-cf.seq(5).forEach(i => {
-  const [item] = cf.nu('li')
-    .content(`Item ${i + 1}`)
-    .done();
-  cf.insert(item, { into: listElement });
-});</code></pre>
-            </details>
-        </div>
+cf.seq(5).forEach((i) =&gt; {
+    const [item] = cf.nu(&quot;li&quot;)
+        .content(`Item ${i + 1}`)
+        .done();
+    cf.insert(item, { into: listElement });
+});
+</code></pre>
+</details>
+</div>
+<div class="cf-site-div" data-heading="playground" style="display: none;"><h3>try before you buy</h3>
+<p>Try one of these demos, or do your own thing!</p>
+<ul id='playground-demo-list'>
+</ul>
 
-        <div class="cf-site-div" data-heading="get" style="display: none;">
-            <h3>turn your dumpster fire into a campfire today!</h3>
-            <p>You can include campfire into your site with an import statement, either from a location
-                where you are hosting it, or from esm.sh / unkpg.</p>
-            <pre class="microlight"><code>import cf from 'https://unpkg.com/campfire.js/';</code></pre>
-            <p>or</p>
-            <pre class="microlight"><code>import { nu, ListStore } from 'https://unpkg.com/campfire.js/';</code></pre>
-            <p>If you use npm and a module bundler, campfire provides both CommonJS and ESM versions that you can
-                <code>import</code> or <code>require()</code> to incorporate it into your existing workflow, complete
-                with TSDoc hints for
-                your editor and TypeScript declarations.
-            </p>
-            <p>To install:</p>
-            <pre class="microlight"><code>$ npm i --save campfire.js</code></pre>
-            <p>Then in your project:</p>
-            <pre class="microlight"><code>import cf from 'campfire.js';</code></pre>
-            <p>or (with CommonJS)</p>
-            <pre class="microlight"><code>const cf = require('campfire.js');</code></pre>
-            <p>Good luck, and thank you for choosing Campfire!</p>
-        </div>
+<div id='cf-editor-controls'>
+  <a href='javascript:void(0)' id='cf-editor-clear'>Clear All</a>
+  <a href='javascript:void(0)' id='cf-editor-dl'>Download</a>
+</div>
+
+<div class='editor-wrapper'>
+  <div class='cf-editor-html'></div>
+  <div class='cf-editor-css'></div>
+  <div class='cf-editor-js'></div>
+  <div class='cf-editor-output'></div>
+</div></div>
 
         <div class='footer'>
             <a href='https://github.com/xyzshantaram/campfire'>Campfire on GitHub</a>

@@ -22,6 +22,7 @@
     ],
     "exclude": [
         "./test/setup.ts",
-        "node_modules"
+        "node_modules",
+        "./site/build.ts"
     ]
 }

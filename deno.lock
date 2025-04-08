@@ -1,0 +1,55 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@std/cli@*": "1.0.15",
+    "jsr:@std/cli@1.0.15": "1.0.15",
+    "jsr:@std/fs@*": "1.0.15",
+    "jsr:@std/fs@1.0.15": "1.0.15",
+    "jsr:@std/path@1.0.8": "1.0.8",
+    "jsr:@std/path@^1.0.8": "1.0.8"
+  },
+  "jsr": {
+    "@std/cli@1.0.15": {
+      "integrity": "e79ba3272ec710ca44d8342a7688e6288b0b88802703f3264184b52893d5e93f"
+    },
+    "@std/fs@1.0.15": {
+      "integrity": "c083fb479889d6440d768e498195c3fc499d426fbf9a6592f98f53884d1d3f41",
+      "dependencies": [
+        "jsr:@std/path@^1.0.8"
+      ]
+    },
+    "@std/path@1.0.8": {
+      "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
+    }
+  },
+  "remote": {
+    "https://esm.sh/marked@15.0.7": "ef80f69d22751f86de68c04793a0755000b5a6db6297575c60d8bb7e5b1c9263",
+    "https://esm.sh/marked@15.0.7/denonext/marked.mjs": "ea38f723598408458f5345bec4a87384dc57615f9f18fc1e12659144062cde91"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@asamuzakjp/dom-selector@^6.4.7",
+        "npm:@testing-library/dom@^9.3.4",
+        "npm:@types/chai-dom@^1.11.3",
+        "npm:@types/chai@^4.3.11",
+        "npm:@types/jsdom@^21.1.6",
+        "npm:@types/mocha@^10.0.6",
+        "npm:@types/node@^22.14.0",
+        "npm:@types/sinon@^17.0.3",
+        "npm:@types/sinonjs__fake-timers@^8.1.5",
+        "npm:chai-dom@^1.12.0",
+        "npm:chai@^5.1.0",
+        "npm:esbuild-node-externals@^1.18.0",
+        "npm:esbuild@~0.25.2",
+        "npm:jsdom-global@^3.0.2",
+        "npm:jsdom@24",
+        "npm:mocha@^10.3.0",
+        "npm:sinon@^17.0.1",
+        "npm:ts-node@^10.9.2",
+        "npm:typedoc@~0.28.1",
+        "npm:typescript@^5.7.3"
+      ]
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import cf from 'https://esm.sh/campfire.js@4.0.0-rc4';
+import cf from 'https://esm.sh/campfire.js@4.0.0-rc6';
 import { highlightAll, HL_KEYWORDS } from 'https://esm.sh/macrolight@1.5.0';
 
 window.cf = cf;
@@ -15,7 +15,7 @@ window.addEventListener("DOMContentLoaded", (e) => {
         })
         .done();
 
-    cf.insert(nav, { after: h1 });
+    cf.insert([nav], { after: h1 });
 
     // Tab navigation URLs
     const getTabURL = (name) => {
@@ -26,7 +26,7 @@ window.addEventListener("DOMContentLoaded", (e) => {
 
     // Tab visibility function
     const focusTab = (name) => {
-        Array.from(document.querySelectorAll('.cf-site-div')).forEach((elt) => {
+        cf.select({ s: '.cf-site-div', all: true }).forEach((elt) => {
             elt.style.display = elt.getAttribute('data-heading') === name ? 'block' : 'none';
         });
 
@@ -49,7 +49,7 @@ window.addEventListener("DOMContentLoaded", (e) => {
             })
             .done();
 
-        cf.insert(button, { into: nav });
+        cf.insert([button], { into: nav });
     });
 
     // Initialize the page
