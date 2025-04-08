@@ -80,12 +80,14 @@ export const extend = <
 
     if (content?.trim()) {
         elt.innerHTML = raw ? content : escape(content);
-        elt.querySelectorAll('cf-slot').forEach(itm => {
+        elt.querySelectorAll('cf-slot[name]').forEach(itm => {
             const name = itm.getAttribute('name');
             if (!name) return;
             if (name in children) {
-                itm.replaceWith(children[name]);
-                children[name].setAttribute('data-cf-slot', name);
+                const [child] = children[name];
+                if (!child) return;
+                itm.replaceWith(child);
+                child.setAttribute('data-cf-slot', name);
             }
         })
     }
