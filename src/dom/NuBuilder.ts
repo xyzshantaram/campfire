@@ -206,15 +206,37 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @param selectors - A single selector string or an array of selector strings
      * @returns The builder instance for chaining
      */
-    gimme(selectors: string | string[]) {
+    gimme(...selectors: string[]) {
         this.props.gimme ||= [];
-        if (Array.isArray(selectors)) this.props.gimme = selectors;
-        else this.props.gimme.push(selectors);
+        this.props.gimme = selectors;
         return this;
     }
 
     deps<ND extends Record<string, Store<any>>>(obj: ND): NuBuilder<T, E, D & ND> {
         this.props.deps = { ...(this.props.deps as D), ...obj };
         return this as unknown as NuBuilder<T, E, D & ND>;
+    }
+
+    /**
+     * Unsafely set the html of the object. This is equivalent to calling
+     * .content(...).raw(true) and is meant to be used with a templating function
+     * like `cf.html`.
+     * @param value The content function / string to set.
+     * @returns The builder for chaining.
+     */
+    html(value: string | RenderFunction<E, D>) {
+        return this.content(value).raw(true);
+    }
+
+    /**
+     * Mount reactive children into a parent element. The children are preserved
+     * across re-renders and can be independently reactive.
+     * @param children An object whose keys correspond to the `name` attributes 
+     * of cf-slot elements in the parent's innerHTML.
+     * @returns The builder object for chaining.
+     */
+    children(children: Record<string, HTMLElement>) {
+        this.props.children = children;
+        return this;
     }
 }

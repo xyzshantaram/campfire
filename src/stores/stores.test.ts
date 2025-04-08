@@ -72,10 +72,10 @@ describe('Tests for Reactivity', () => {
         const first = cf.store({ value: 'John' });
         const last = cf.store({ value: 'Doe' });
 
-        const [span] = nu('span', {
-            contents: ({ first, last }) => `${first} ${last}`,
-            deps: { first, last }
-        }).done();
+        const [span] = nu('span')
+            .deps({ first, last })
+            .content(({ first, last }) => `${first} ${last}`)
+            .done();
 
         expect(span.innerHTML).to.equal('John Doe');
 
@@ -131,7 +131,7 @@ describe('Tests for Reactivity', () => {
     `;
             })
             .raw(true)
-            .gimme(['h2', 'p:nth-child(2)', 'p:nth-child(3)'])
+            .gimme('h2', 'p:nth-child(2)', 'p:nth-child(3)')
             .done();
 
         expect(h2.textContent).to.equal('John');

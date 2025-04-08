@@ -6,7 +6,7 @@ import * as chai from 'chai';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import { describe, it } from 'mocha';
-import { nu, extend } from '../campfire.ts';
+import { nu, extend, store } from '../campfire.ts';
 
 // Setup chai
 chai.use(chaiDom);
@@ -154,7 +154,7 @@ describe('Tests for NuBuilder', () => {
         const [container, title, firstContent, secondContent] = nu('div')
             .content(html)
             .raw(true)
-            .gimme(['.title', '.content:first-of-type', '.content:last-child'])
+            .gimme('.title', '.content:first-of-type', '.content:last-child')
             .done();
 
         expect(title.innerHTML).to.equal('Hello');
@@ -172,5 +172,36 @@ describe('Tests for NuBuilder', () => {
         expect(checkbox.type).to.equal('checkbox');
         expect(checkbox.checked).to.be.true;
         expect(checkbox.disabled).to.be.false;
+    });
+
+    it('Slotted children should be preserved across parent updates', () => {
+        const greeting = store({ value: 'Hello' });
+        const to = store({ value: 'World' });
+
+        const [parent] = nu('div')
+            .deps({ greeting })
+            .html(({ greeting }) => `<div>Parent: ${greeting}</div><cf-slot name="to"></cf-slot>`)
+            .children({
+                to: nu('span')
+                    .deps({ to })
+                    .html(({ to }) => `Child: ${to}`)
+                    .done()[0]
+            })
+            .done();
+
+        expect(parent.innerHTML).to.equal(
+            `<div>Parent: Hello</div><span data-cf-reactive="true" data-cf-slot="to">Child: World</span>`
+        );
+
+        // Update parent store – child should stay untouched
+        greeting.update('Hi');
+        expect(parent.innerHTML).to.equal(
+            `<div>Parent: Hi</div><span data-cf-reactive="true" data-cf-slot="to">Child: World</span>`
+        );
+
+        to.update('Universe');
+        expect(parent.innerHTML).to.equal(
+            `<div>Parent: Hi</div><span data-cf-reactive="true" data-cf-slot="to">Child: Universe</span>`
+        );
     });
 });

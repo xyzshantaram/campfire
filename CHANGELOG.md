@@ -1,5 +1,13 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc6
+
+- Added `.html()` method to NuBuilder to make building elements slightly more
+  ergonomic
+- Made `.gimme()` be a variadic function
+- Added functionality to preserve reactive children to extend() / NuBuilder.
+  This should greatly improve composability of elements.
+
 ## 4.0.0-rc5
 
 `cf.insert()` now accepts `HTMLElement[]` instead of a single element, to make

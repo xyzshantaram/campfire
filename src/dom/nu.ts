@@ -1,6 +1,7 @@
 import type { Store } from "../stores/mod.ts";
 import type { ElementProperties, InferElementType, RenderFunction, UnwrapStore } from "../types.ts";
 import { escape, initMutationObserver } from "../utils.ts";
+import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
 
 if ("MutationObserver" in globalThis) initMutationObserver();
@@ -48,14 +49,22 @@ export const extend = <
     elt: T,
     args: ElementProperties<T, D> = {},
 ): [T, ...HTMLElement[]] => {
-    let { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D) } = args;
+    let { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D), children = {} } = args;
 
     let content = "";
     if (isValidRenderFn<T>(contents)) {
         Object.entries(deps).forEach(([name, dep]) => {
             dep.any((evt) => {
                 const res = contents(unwrapDeps(deps), { event: { ...evt, triggeredBy: name }, elt });
-                if (res !== undefined) elt.innerHTML = res;
+
+                if (res !== undefined) {
+                    const reactiveChildren = select({ s: '[data-cf-slot]', all: true, from: elt })
+                        .map(elt => [elt.getAttribute('data-cf-slot'), elt]) as [string, HTMLElement][];
+                    elt.innerHTML = res;
+                    reactiveChildren.forEach(([slot, ref]) => {
+                        elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
+                    })
+                }
             });
         });
 
@@ -71,6 +80,14 @@ export const extend = <
 
     if (content?.trim()) {
         elt.innerHTML = raw ? content : escape(content);
+        elt.querySelectorAll('cf-slot').forEach(itm => {
+            const name = itm.getAttribute('name');
+            if (!name) return;
+            if (name in children) {
+                itm.replaceWith(children[name]);
+                children[name].setAttribute('data-cf-slot', name);
+            }
+        })
     }
 
     const depIds = Object.values(deps).map((dep) => dep.id);
