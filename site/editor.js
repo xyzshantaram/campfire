@@ -56,7 +56,7 @@ export const editorReady = () => {
     if (!examples) return;
 
     const editorConfigs = Object.fromEntries(
-        ['html', 'css', 'js', 'output']
+        ['html', 'css', 'javascript', 'output']
             .map(itm => [itm, {
                 elt: cf.select({ s: '.cf-editor-' + itm, single: true }),
                 mode: itm === 'output' ? null : 'ace/mode/' + itm,

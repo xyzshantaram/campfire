@@ -13,6 +13,6 @@ Try one of these demos, or do your own thing!
 <div class='editor-wrapper'>
   <div class='cf-editor-html'></div>
   <div class='cf-editor-css'></div>
-  <div class='cf-editor-js'></div>
+  <div class='cf-editor-javascript'></div>
   <div class='cf-editor-output'></div>
 </div>
