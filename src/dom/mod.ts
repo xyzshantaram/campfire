@@ -22,7 +22,7 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
     if (!('into' in where) && !('after' in where) && !('before' in where)) {
         throw new Error("No valid position specified. Use 'into', 'after', or 'before'.");
     }
-    
+
     let position: InsertPosition = 'beforeend';
     let ref: Element;
 
@@ -67,7 +67,7 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
  */
 export const onload = (cb: (ev: Event) => void) => globalThis.addEventListener('DOMContentLoaded', cb);
 
-export interface SelectParams {
+type SelectParams = {
     /** The selector to query for. */
     s: string;
     /** The parent node to query. Defaults to `document`. */
@@ -81,14 +81,16 @@ export interface SelectParams {
  * @param opts See SelectParams.
  * @returns Element(s) matching the given selector, or an empty list.
  */
-export const select = ({ s, all, from }: SelectParams) => {
+export function select(params: SelectParams & { single: true }): HTMLElement | null;
+export function select(params: SelectParams & { single?: false }): HTMLElement[];
+export function select({ s, all, from, single }: SelectParams & { single?: boolean }) {
     from ??= document;
     if (all) {
         return Array.from(from.querySelectorAll(s)) as HTMLElement[];
     }
-    else {
-        return [from.querySelector(s)] as HTMLElement[];
-    }
+
+    const elt = from.querySelector(s);
+    return single ? elt : [elt];
 }
 
 /**
