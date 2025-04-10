@@ -2,38 +2,43 @@ import { Store } from "./stores/mod.ts";
 
 type StoreValue<ST> =
     ST extends Store<infer T> ?
-    (T extends Map<string, infer M> ? M : (T extends (infer L)[] ? L : T)) :
-    never;
-
-type test = StoreValue<Store<any>>;
+    (T extends Map<string, infer M> ? M
+        : (T extends (infer L)[] ? L : T))
+    : never;
 
 export interface UpdateEvent<ST> {
     type: "update";
     value: ST extends Store<infer T> ? T : never;
 }
 
-export interface ChangeEvent<ST> {
-    type: "change";
-    value: StoreValue<ST>;
-    key?: ST extends Store<Map<string, StoreValue<ST>>> ? string : undefined;
-    idx?: ST extends Store<StoreValue<ST>[]> ? number : undefined;
-}
+export type AppendEvent<ST> =
+    ST extends Store<infer T> ?
+    (T extends Array<infer L> ? { type: "append"; value: L; idx: number }
+        : { type: "append"; value: T })
+    : never;
 
-export interface DeletionEvent<ST> {
-    type: "deletion";
-    value: StoreValue<ST>;
-    key?: ST extends Store<Map<string, StoreValue<ST>>> ? string : undefined;
-    idx?: ST extends Store<StoreValue<ST>[]> ? number : undefined;
-}
+export type ChangeEvent<ST> =
+    ST extends Store<infer T> ? (
+        T extends Map<string, infer M> ?
+        { type: "change"; value: M; key: string }
+        : (
+            T extends Array<infer L> ?
+            { type: "change"; value: L; idx: number }
+            : { type: "change"; value: T }
+        )
+    ) : never;
+
+export type DeletionEvent<ST> =
+    ST extends Store<infer T>
+    ? T extends Map<string, infer M>
+    ? { type: "deletion"; value: M; key: string }
+    : T extends Array<infer L>
+    ? { type: "deletion"; value: L; idx: number }
+    : { type: "deletion"; value: T }
+    : never;
 
 export interface ClearEvent {
     type: "clear";
-}
-
-export interface AppendEvent<ST> {
-    type: "append";
-    value: StoreValue<ST>;
-    idx?: ST extends Store<StoreValue<ST>[]> ? number : undefined;
 }
 
 export type StoreEvent<ST> =

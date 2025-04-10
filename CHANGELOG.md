@@ -1,5 +1,12 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc10
+
+- 'change' events are now fired only for MapStore and ListStore - this is so
+  whole-value replacements are possible for these types. Store&lt;T&gt; now
+  therefore fires a 'update' event when .update() is called.
+- Store .on() and related functionality is now strongly typed.
+
 ## 4.0.0-rc9
 
 - select now optionally accepts a `single: true` arg to only return a single
