@@ -67,7 +67,7 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
  */
 export const onload = (cb: (ev: Event) => void) => globalThis.addEventListener('DOMContentLoaded', cb);
 
-type SelectParams = {
+export type SelectParams = {
     /** The selector to query for. */
     s: string;
     /** The parent node to query. Defaults to `document`. */
