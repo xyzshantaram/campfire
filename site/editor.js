@@ -43,9 +43,9 @@ const iframeContentTemplate = cf.template(cf.html`\
 <body>
     {{ html }}
     <script type='module'>
-        import cf from 'https://esm.sh/campfire.js@4.0.0-rc8';
+        import cf from 'https://esm.sh/campfire.js@4.0.0-rc9';
         window.onload = function() {
-            {{ js }}
+            {{ javascript }}
         }
     </script>
 </body>
@@ -71,7 +71,7 @@ export const editorReady = () => {
     const currentEditorStore = cf.store({ value: 'html' });
 
     for (const key in editorConfigs) {
-        if (key === 'out') continue;
+        if (key === 'output') continue;
         const current = editorConfigs[key];
         if (!current.elt) continue;
 
@@ -86,7 +86,6 @@ export const editorReady = () => {
 
         cf.insert(button, { into: switcher });
 
-        console.log(current)
         // Set up Ace Editor
         current.editor = ace.edit(current.elt, {
             mode: current.mode,
@@ -102,27 +101,27 @@ export const editorReady = () => {
         return iframeContentTemplate({
             html: editorConfigs.html.editor.getValue().trim(),
             css: editorConfigs.css.editor.getValue().trim(),
-            js: editorConfigs.js.editor.getValue().trim()
+            javascript: editorConfigs.javascript.editor.getValue().trim()
         });
     }
 
     const [outputButton] = cf.nu('button')
         .attr('type', 'button')
         .content('output')
-        .attr('data-editor-view', 'out')
-        .on('click', () => currentEditorStore.update('out'))
+        .attr('data-editor-view', 'output')
+        .on('click', () => currentEditorStore.update('output'))
         .done();
 
     cf.insert(outputButton, { into: switcher });
 
     function generateOutput() {
-        cf.empty(editorConfigs.out.elt);
+        cf.empty(editorConfigs.output.elt);
         const [frame] = cf.nu('iframe.cf-editor-output-iframe')
             .style({ width: '100%', height: '100%', background: 'white' })
             .misc('srcdoc', getIframeContents())
             .misc('sandbox', 'allow-modals allow-scripts')
             .done();
-        cf.insert(frame, { into: editorConfigs.out.elt });
+        cf.insert(frame, { into: editorConfigs.output.elt });
     }
 
     currentEditorStore.on('change', (event) => {
@@ -132,7 +131,7 @@ export const editorReady = () => {
         editorConfigs[val].editor?.resize();
         document.querySelector(`.switcher>button.active`)?.classList.remove('active');
         document.querySelector(`button[data-editor-view="${val}"]`)?.classList.add('active');
-        if (val === 'out') {
+        if (val === 'output') {
             generateOutput();
         }
     }, true);
@@ -140,9 +139,9 @@ export const editorReady = () => {
     const setActivePlaygroundDemo = (obj) => {
         obj.html = obj.html || "<!-- This demo has no HTML! -->";
         obj.css = obj.css || "/* This demo has no CSS! */";
-        obj.js = obj.js || "/* This demo has no JS! */";
+        obj.javascript = obj.javascript || "/* This demo has no JavaScript! */";
 
-        for (const str of ['html', 'js', 'css']) {
+        for (const str of ['html', 'javascript', 'css']) {
             editorConfigs[str].editor.setValue(obj[str]);
         }
     }
@@ -157,7 +156,7 @@ export const editorReady = () => {
                 .content(`<a href='javascript:void(0)'>${itm.title}</a>`)
                 .on('click', _ => {
                     setActivePlaygroundDemo(itm);
-                    currentEditorStore.update('out');
+                    currentEditorStore.update('output');
                 })
                 .raw(true)
                 .done();
@@ -179,7 +178,7 @@ export const editorReady = () => {
     }
 
     clearBtn.onclick = _ => {
-        for (const str of ['html', 'js', 'css']) {
+        for (const str of ['html', 'javascript', 'css']) {
             editorConfigs[str].editor.setValue("");
         }
         generateOutput();

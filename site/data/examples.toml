@@ -1,7 +1,7 @@
 [button]
 title = "Reactive button"
 
-js = """\
+javascript = """\
 // A button that keeps track of how many times it's been clicked
 let count = cf.store({ value: 0 });
 
@@ -37,7 +37,7 @@ css = """\
 
 """
 
-js = """\
+javascript = """\
 const value = cf.store({ value: 0 }); // initial value
 
 const [result] = cf.nu() // defaults to div
@@ -89,7 +89,7 @@ css = """\
 }
 """
 
-js = """\
+javascript = """\
 const store = new cf.store({ type: "list", value: [] });
 
 const [input] = cf.nu('input')
