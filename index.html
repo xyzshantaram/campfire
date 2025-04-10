@@ -174,47 +174,47 @@ descriptions of the methods and classes provided by Campfire.</p>
 <summary><code>nu()</code> - element creation helper</summary>
 
 <p>Creates a new DOM element with a fluent builder API.</p>
-<pre class="microlight"><code>// Creating a simple element
-const [div] = cf.nu(&quot;div&quot;)
+<p>Create a simple element:</p>
+<pre class="microlight"><code>const [div] = cf.nu(&quot;div&quot;)
   .content(&quot;Hello World&quot;)
   .attr(&quot;id&quot;, &quot;greeting&quot;)
   .done();
-
-// Creating a button with click handler
-const [button] = cf.nu(&quot;button#submit.primary&quot;)
+</code></pre>
+<p>Create a button with a click handler:</p>
+<pre class="microlight"><code>const [button] = cf.nu(&quot;button#submit.primary&quot;)
   .content(&quot;Submit&quot;)
   .attr(&quot;type&quot;, &quot;submit&quot;)
   .on(&quot;click&quot;, () =&gt; console.log(&quot;Clicked!&quot;))
   .style(&quot;backgroundColor&quot;, &quot;blue&quot;)
   .done();
-
-// Element with classes
-const [card] = cf.nu(&quot;.card.shadow&quot;) // Creates div by default
+</code></pre>
+<p>Create an element with classes:</p>
+<pre class="microlight"><code>const [card] = cf.nu(&quot;.card.shadow&quot;) // Creates div by default
   .content(&quot;Card content&quot;)
   .done();
-
-// Element with reactive content
-const name = cf.store({ value: &quot;John&quot; });
+</code></pre>
+<p>With reactive content:</p>
+<pre class="microlight"><code>const name = cf.store({ value: &quot;John&quot; });
 
 const [greeting] = cf.nu(&quot;h1&quot;)
   .content(({ name }) =&gt; `Hello, ${name}!`)
   .deps({ name })
   .done();
-
-// Multiple element selection with gimme
-const [card, title, desc] = cf.nu(&quot;div.card&quot;)
+</code></pre>
+<p>Select multiple elements with <code>.gimme()</code>:</p>
+<pre class="microlight"><code>const [card, title, desc] = cf.nu(&quot;div.card&quot;)
   .html(`
     &lt;h2 class=&quot;title&quot;&gt;Card Title&lt;/h2&gt;
     &lt;p class=&quot;desc&quot;&gt;Description&lt;/p&gt;
   `)
   .gimme(&quot;.title&quot;, &quot;.desc&quot;) // Variadic - pass any number of selectors
   .done();
-
-// Composing elements with reactive children
-const parentData = cf.store({ value: &quot;Parent content&quot; });
+</code></pre>
+<p>Compose elements with reactive children:</p>
+<pre class="microlight"><code>const parentData = cf.store({ value: &quot;Parent content&quot; });
 const childData = cf.store({ value: &quot;Child content&quot; });
 
-// Create a parent with slots for child components
+// Parent with slots for child components
 const [parent] = cf.nu(&quot;section&quot;)
   .deps({ data: parentData })
   .html(({ data }) =&gt; `
@@ -223,15 +223,13 @@ const [parent] = cf.nu(&quot;section&quot;)
   `)
   .children({
     // Child components maintain independent reactivity
+    // and are preserved between re-renders of the parent
     child: cf.nu(&quot;div&quot;)
       .deps({ data: childData })
       .content(({ data }) =&gt; data)
       .done(),
   })
   .done();
-
-// Updates when store changes
-name.update(&quot;Alice&quot;);
 </code></pre>
 </details>
 
@@ -239,33 +237,33 @@ name.update(&quot;Alice&quot;);
 <summary><code>store()</code> - reactive data stores</summary>
 
 <p>Creates reactive data stores to manage state with automatic UI updates.</p>
-<pre class="microlight"><code>// Simple value store
-const counter = cf.store({ value: 0 });
+<p>A simple value store</p>
+<pre class="microlight"><code>const counter = cf.store({ value: 0 });
 counter.update(5); // Sets value to 5
 counter.value; // Gets current value (5)
-
-// Subscribe to changes
-counter.subscribe((event) =&gt; {
+</code></pre>
+<h5>Subscribe to changes</h5>
+<pre class="microlight"><code>counter.on(&quot;change&quot;, (event) =&gt; {
   console.log(`Value changed to ${event.value}`);
 });
-
-// List store for arrays
-const todoList = cf.store({ type: &quot;list&quot;, value: [&quot;Buy milk&quot;] });
+</code></pre>
+<h5>List store for arrays</h5>
+<pre class="microlight"><code>const todoList = cf.store({ type: &quot;list&quot;, value: [&quot;Buy milk&quot;] });
 todoList.push(&quot;Walk dog&quot;); // Adds to the end
 todoList.remove(0); // Removes first item
 todoList.clear(); // Empties the list
-
-// Map store for key-value data
-const user = cf.store({
+</code></pre>
+<h5>Map store for key-value data</h5>
+<pre class="microlight"><code>const user = cf.store({
   type: &quot;map&quot;,
   value: { name: &quot;John&quot;, age: 30 },
 });
 user.set(&quot;location&quot;, &quot;New York&quot;); // Add/update a property
 user.delete(&quot;age&quot;); // Remove a property
 user.clear(); // Empty the map
-
-// Subscribe to all events with any()
-todoList.any((event) =&gt; {
+</code></pre>
+<h5>Subscribe to all events with any()</h5>
+<pre class="microlight"><code>todoList.any((event) =&gt; {
   console.log(`Event type: ${event.type}`);
 });
 </code></pre>
@@ -275,23 +273,25 @@ todoList.any((event) =&gt; {
 <summary><code>select()</code> - element selection</summary>
 
 <p>Selects elements from the DOM with a unified API.</p>
-<pre class="microlight"><code>// Select a single element (returns an array with one item)
-const [header] = cf.select({ s: &quot;#page-header&quot; });
-
-// Select from a specific parent element
-const [submitButton] = cf.select({
+<h5>Select a single element (returns an array with one item)</h5>
+<pre class="microlight"><code>const [header] = cf.select({ s: &quot;#page-header&quot; });
+// or if you need the ref for passing somewhere:
+const header = cf.select({ s: &quot;#page-header&quot;, single: true });
+</code></pre>
+<h5>Select from a specific parent element</h5>
+<pre class="microlight"><code>const [submitButton] = cf.select({
   s: &#39;button[type=&quot;submit&quot;]&#39;,
   from: formElement,
 });
-
-// Select multiple elements
-const paragraphs = cf.select({
+</code></pre>
+<h5>Select multiple elements</h5>
+<pre class="microlight"><code>const paragraphs = cf.select({
   s: &quot;p&quot;,
   all: true,
 });
-
-// Combining with other operations
-cf.select({ s: &quot;.cards&quot;, all: true }).forEach((card) =&gt; {
+</code></pre>
+<h5>Combining with other operations</h5>
+<pre class="microlight"><code>cf.select({ s: &quot;.cards&quot;, all: true }).forEach((card) =&gt; {
   cf.extend(card, { style: { border: &quot;1px solid black&quot; } });
 });
 </code></pre>
@@ -301,20 +301,20 @@ cf.select({ s: &quot;.cards&quot;, all: true }).forEach((card) =&gt; {
 <summary><code>insert()</code> - element insertion</summary>
 
 <p>Inserts elements into the DOM at specific positions.</p>
-<pre class="microlight"><code>// Insert at the end of a container
-cf.insert([elt], { into: container });
-
-// Insert at the start of a container
-cf.insert([elt], { into: container, at: &quot;start&quot; });
-
-// Insert before (as siblings of) another element
-cf.insert([elt], { before: referenceElement });
-
-// Insert multiple elements after (as siblings of) another element
-cf.insert([elt1, elt2], { after: referenceElement });
-
-// Create and insert in one step
-cf.insert(cf.nu().content(&quot;New content&quot;).done(), { into: document.body });
+<h5>Insert at the end of a container</h5>
+<pre class="microlight"><code>cf.insert([elt], { into: container });
+</code></pre>
+<h5>Insert at the start of a container</h5>
+<pre class="microlight"><code>cf.insert([elt], { into: container, at: &quot;start&quot; });
+</code></pre>
+<h5>Insert before (as siblings of) another element</h5>
+<pre class="microlight"><code>cf.insert([elt], { before: referenceElement });
+</code></pre>
+<h5>Insert multiple elements after (as siblings of) another element</h5>
+<pre class="microlight"><code>cf.insert([elt1, elt2], { after: referenceElement });
+</code></pre>
+<h5>Create and insert in one step</h5>
+<pre class="microlight"><code>cf.insert(cf.nu().content(&quot;New content&quot;).done(), { into: document.body });
 </code></pre>
 </details>
 
@@ -322,20 +322,21 @@ cf.insert(cf.nu().content(&quot;New content&quot;).done(), { into: document.body
 <summary><code>html()</code> - auto-escaping template literal and element builder method</summary>
 
 <p>Creates HTML strings with automatic escaping of interpolated values.</p>
-<pre class="microlight"><code>// Basic usage with automatic escaping
-const username = &#39;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;&#39;;
+<h5>Basic usage with automatic escaping</h5>
+<pre class="microlight"><code>const username = &#39;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;&#39;;
 const greeting = cf.html`Hello, ${username}!`;
 // Result: &quot;Hello, &amp;lt;script&amp;gt;alert(&quot;XSS&quot;)&amp;lt;/script&amp;gt;!&quot;
-
-// Use r() to disable escaping for trusted content
-const trusted = cf.r(&#39;&quot;&lt;b&gt;Bold text&lt;/b&gt;&quot;&#39;);
+</code></pre>
+<h5>Use r() to disable escaping for trusted content</h5>
+<pre class="microlight"><code>const trusted = cf.r(&#39;&quot;&lt;b&gt;Bold text&lt;/b&gt;&quot;&#39;);
 const message = cf.html`Safe message: ${trusted}`;
 // Result: &quot;Safe message: &quot;&lt;b&gt;Bold text&lt;/b&gt;&quot;&quot;
-
-// Use with element creation
-const [div] = cf.nu(&quot;div&quot;)
+</code></pre>
+<h5>Use with element creation</h5>
+<pre class="microlight"><code>const [div] = cf.nu(&quot;div&quot;)
+  .deps({ user })
   // .html() is equivalent to .content().raw(true)
-  .html(cf.html`&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;${userName}&lt;/p&gt;`)
+  .html(({ user }) =&gt; cf.html`&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;${user}&lt;/p&gt;`)
   .done();
 </code></pre>
 </details>
@@ -344,24 +345,24 @@ const [div] = cf.nu(&quot;div&quot;)
 <summary><code>mustache()</code> and <code>template()</code> - reusable and composable string templates</summary>
 
 <p>Simple templating system for string interpolation.</p>
-<pre class="microlight"><code>// Basic mustache templating (escaped by default)
-const result = cf.mustache(&quot;Hello, {{ name }}!&quot;, { name: &quot;John&quot; });
+<h5>Basic mustache templating (escaped by default)</h5>
+<pre class="microlight"><code>const result = cf.mustache(&quot;Hello, {{ name }}!&quot;, { name: &quot;John&quot; });
 // Result: &quot;Hello, John!&quot;
-
-// With HTML content (escaped by default)
-const result = cf.mustache(&quot;Welcome, {{ user }}!&quot;, { user: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot; });
+</code></pre>
+<h5>With HTML content (escaped by default)</h5>
+<pre class="microlight"><code>const result = cf.mustache(&quot;Welcome, {{ user }}!&quot;, { user: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot; });
 // Result: &quot;Welcome, &amp;lt;b&amp;gt;Admin&amp;lt;/b&amp;gt;!&quot;
-
-// Disable escaping for trusted content
-const result = cf.mustache(
+</code></pre>
+<h5>Disable escaping for trusted content</h5>
+<pre class="microlight"><code>const result = cf.mustache(
   &quot;Welcome, {{ userName }}!&quot;,
   { userName: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot; },
   false, // disable escaping
 );
 // Result: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot;
-
-// Create reusable template function
-const greet = cf.template(&quot;Hello, {{ name }}!&quot;);
+</code></pre>
+<h5>Create reusable template function</h5>
+<pre class="microlight"><code>const greet = cf.template(&quot;Hello, {{ name }}!&quot;);
 const aliceGreeting = greet({ name: &quot;Alice&quot; }); // &quot;Hello, Alice!&quot;
 const bobGreeting = greet({ name: &quot;Bob&quot; }); // &quot;Hello, Bob!&quot;
 </code></pre>
@@ -371,31 +372,31 @@ const bobGreeting = greet({ name: &quot;Bob&quot; }); // &quot;Hello, Bob!&quot;
 <summary><code>extend()</code> - element modification</summary>
 
 <p>Modifies existing DOM elements with the same options as <code>nu()</code>.</p>
-<pre class="microlight"><code>// Basic usage
-const element = document.querySelector(&quot;#my-element&quot;);
+<h5>Basic usage</h5>
+<pre class="microlight"><code>const element = document.querySelector(&quot;#my-element&quot;);
 cf.extend(element, {
   contents: &quot;New content&quot;,
   style: { color: &quot;red&quot;, fontSize: &quot;16px&quot; },
 });
-
-// Add event handlers
-cf.extend(element, {
+</code></pre>
+<h5>Add event handlers</h5>
+<pre class="microlight"><code>cf.extend(element, {
   on: {
     click: () =&gt; console.log(&quot;Clicked!&quot;),
     mouseover: () =&gt; element.style.opacity = &quot;0.8&quot;,
   },
 });
-
-// With reactive data
-const titleStore = cf.store({ value: &quot;Initial Title&quot; });
+</code></pre>
+<h5>With reactive data</h5>
+<pre class="microlight"><code>const titleStore = cf.store({ value: &quot;Initial Title&quot; });
 
 cf.extend(pageHeader, {
   contents: ({ title }) =&gt; `Page: ${title}`,
   deps: { title: titleStore },
 });
-
-// Composing elements with extend
-const childContent = cf.store({ value: &quot;Child text&quot; });
+</code></pre>
+<h5>Composing elements with extend</h5>
+<pre class="microlight"><code>const childContent = cf.store({ value: &quot;Child text&quot; });
 
 cf.extend(container, {
   contents: `&lt;h2&gt;Container&lt;/h2&gt;
@@ -405,7 +406,7 @@ cf.extend(container, {
     childSlot: cf.nu(&quot;span&quot;)
       .deps({ childContent })
       .content(({ childContent }) =&gt; childContent)
-      .done(),
+      .ref(),
   },
 });
 </code></pre>
@@ -415,11 +416,11 @@ cf.extend(container, {
 <summary><code>empty()</code> and <code>rm()</code> - element cleanup</summary>
 
 <p>Remove elements or their contents from the DOM.</p>
-<pre class="microlight"><code>// Empty an element (removes all children)
-cf.empty(container);
-
-// Remove element entirely
-cf.rm(element);
+<h5>Empty an element (removes all children)</h5>
+<pre class="microlight"><code>cf.empty(container);
+</code></pre>
+<h5>Remove element entirely</h5>
+<pre class="microlight"><code>cf.rm(element);
 </code></pre>
 </details>
 
@@ -427,8 +428,8 @@ cf.rm(element);
 <summary><code>escape()</code> and <code>unescape()</code> - string sanitization</summary>
 Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text into the DOM - you should look to a different library for more complex needs.
 
-<pre class="microlight"><code>// Escape HTML characters
-escape(&quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;); // &quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;&quot;
+<h5>Escape HTML characters</h5>
+<pre class="microlight"><code>escape(&quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;); // &quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;&quot;
 
 // Unescape previously escaped strings
 unescape(&quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;&quot;); // &quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;
@@ -437,8 +438,8 @@ unescape(&quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;
 
 <details>
 <summary><code>onload()</code> - DOM ready handler</summary>
-Executes code when the DOM is fully loaded.
 
+<p>Executes code when the DOM is fully loaded.</p>
 <pre class="microlight"><code>cf.onload(() =&gt; {
   // Initialize application
   const [app] = cf.nu(&quot;div#app&quot;).done();
@@ -451,17 +452,17 @@ Executes code when the DOM is fully loaded.
 <summary><code>seq()</code> - sequence generator</summary>
 
 <p>Generates numerical sequences for iteration.</p>
-<pre class="microlight"><code>// Range from 0 to 5 (exclusive)
-cf.seq(5); // [0, 1, 2, 3, 4]
-
-// Range from 2 to 7 (exclusive)
-cf.seq(2, 7); // [2, 3, 4, 5, 6]
-
-// Range with custom step
-cf.seq(1, 10, 2); // [1, 3, 5, 7, 9]
-
-// Creating multiple elements with seq
-cf.seq(5).forEach((i) =&gt; {
+<h5>Range from 0 to 5 (exclusive)</h5>
+<pre class="microlight"><code>cf.seq(5); // [0, 1, 2, 3, 4]
+</code></pre>
+<h5>Range from 2 to 7 (exclusive)</h5>
+<pre class="microlight"><code>cf.seq(2, 7); // [2, 3, 4, 5, 6]
+</code></pre>
+<h5>Range with custom step</h5>
+<pre class="microlight"><code>cf.seq(1, 10, 2); // [1, 3, 5, 7, 9]
+</code></pre>
+<h5>Creating multiple elements with seq</h5>
+<pre class="microlight"><code>cf.seq(5).forEach((i) =&gt; {
   const [item] = cf.nu(&quot;li&quot;)
     .content(`Item ${i + 1}`)
     .done();

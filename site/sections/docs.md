@@ -102,23 +102,26 @@ counter.update(5); // Sets value to 5
 counter.value; // Gets current value (5)
 ```
 
+##### Subscribe to changes
+
 ```js
-// Subscribe to changes
 counter.on("change", (event) => {
   console.log(`Value changed to ${event.value}`);
 });
 ```
 
+##### List store for arrays
+
 ```js
-// List store for arrays
 const todoList = cf.store({ type: "list", value: ["Buy milk"] });
 todoList.push("Walk dog"); // Adds to the end
 todoList.remove(0); // Removes first item
 todoList.clear(); // Empties the list
 ```
 
+##### Map store for key-value data
+
 ```js
-// Map store for key-value data
 const user = cf.store({
   type: "map",
   value: { name: "John", age: 30 },
@@ -128,8 +131,9 @@ user.delete("age"); // Remove a property
 user.clear(); // Empty the map
 ```
 
+##### Subscribe to all events with any()
+
 ```js
-// Subscribe to all events with any()
 todoList.any((event) => {
   console.log(`Event type: ${event.type}`);
 });
@@ -142,31 +146,35 @@ todoList.any((event) => {
 
 Selects elements from the DOM with a unified API.
 
+##### Select a single element (returns an array with one item)
+
 ```js
-// Select a single element (returns an array with one item)
 const [header] = cf.select({ s: "#page-header" });
 // or if you need the ref for passing somewhere:
 const header = cf.select({ s: "#page-header", single: true });
 ```
 
+##### Select from a specific parent element
+
 ```js
-// Select from a specific parent element
 const [submitButton] = cf.select({
   s: 'button[type="submit"]',
   from: formElement,
 });
 ```
 
+##### Select multiple elements
+
 ```js
-// Select multiple elements
 const paragraphs = cf.select({
   s: "p",
   all: true,
 });
 ```
 
+##### Combining with other operations
+
 ```js
-// Combining with other operations
 cf.select({ s: ".cards", all: true }).forEach((card) => {
   cf.extend(card, { style: { border: "1px solid black" } });
 });
@@ -179,28 +187,33 @@ cf.select({ s: ".cards", all: true }).forEach((card) => {
 
 Inserts elements into the DOM at specific positions.
 
+##### Insert at the end of a container
+
 ```js
-// Insert at the end of a container
 cf.insert([elt], { into: container });
 ```
 
+##### Insert at the start of a container
+
 ```js
-// Insert at the start of a container
 cf.insert([elt], { into: container, at: "start" });
 ```
 
+##### Insert before (as siblings of) another element
+
 ```js
-// Insert before (as siblings of) another element
 cf.insert([elt], { before: referenceElement });
 ```
 
+##### Insert multiple elements after (as siblings of) another element
+
 ```js
-// Insert multiple elements after (as siblings of) another element
 cf.insert([elt1, elt2], { after: referenceElement });
 ```
 
+##### Create and insert in one step
+
 ```js
-// Create and insert in one step
 cf.insert(cf.nu().content("New content").done(), { into: document.body });
 ```
 
@@ -211,22 +224,25 @@ cf.insert(cf.nu().content("New content").done(), { into: document.body });
 
 Creates HTML strings with automatic escaping of interpolated values.
 
+##### Basic usage with automatic escaping
+
 ```js
-// Basic usage with automatic escaping
 const username = '<script>alert("XSS")</script>';
 const greeting = cf.html`Hello, ${username}!`;
 // Result: "Hello, &lt;script&gt;alert("XSS")&lt;/script&gt;!"
 ```
 
+##### Use r() to disable escaping for trusted content
+
 ```js
-// Use r() to disable escaping for trusted content
 const trusted = cf.r('"<b>Bold text</b>"');
 const message = cf.html`Safe message: ${trusted}`;
 // Result: "Safe message: "<b>Bold text</b>""
 ```
 
+##### Use with element creation
+
 ```js
-// Use with element creation
 const [div] = cf.nu("div")
   .deps({ user })
   // .html() is equivalent to .content().raw(true)
@@ -241,20 +257,23 @@ const [div] = cf.nu("div")
 
 Simple templating system for string interpolation.
 
+##### Basic mustache templating (escaped by default)
+
 ```js
-// Basic mustache templating (escaped by default)
 const result = cf.mustache("Hello, {{ name }}!", { name: "John" });
 // Result: "Hello, John!"
 ```
 
+##### With HTML content (escaped by default)
+
 ```js
-// With HTML content (escaped by default)
 const result = cf.mustache("Welcome, {{ user }}!", { user: "<b>Admin</b>" });
 // Result: "Welcome, &lt;b&gt;Admin&lt;/b&gt;!"
 ```
 
+##### Disable escaping for trusted content
+
 ```js
-// Disable escaping for trusted content
 const result = cf.mustache(
   "Welcome, {{ userName }}!",
   { userName: "<b>Admin</b>" },
@@ -263,8 +282,9 @@ const result = cf.mustache(
 // Result: "<b>Admin</b>"
 ```
 
+##### Create reusable template function
+
 ```js
-// Create reusable template function
 const greet = cf.template("Hello, {{ name }}!");
 const aliceGreeting = greet({ name: "Alice" }); // "Hello, Alice!"
 const bobGreeting = greet({ name: "Bob" }); // "Hello, Bob!"
@@ -277,8 +297,9 @@ const bobGreeting = greet({ name: "Bob" }); // "Hello, Bob!"
 
 Modifies existing DOM elements with the same options as <code>nu()</code>.
 
+##### Basic usage
+
 ```js
-// Basic usage
 const element = document.querySelector("#my-element");
 cf.extend(element, {
   contents: "New content",
@@ -286,8 +307,9 @@ cf.extend(element, {
 });
 ```
 
+##### Add event handlers
+
 ```js
-// Add event handlers
 cf.extend(element, {
   on: {
     click: () => console.log("Clicked!"),
@@ -296,8 +318,9 @@ cf.extend(element, {
 });
 ```
 
+##### With reactive data
+
 ```js
-// With reactive data
 const titleStore = cf.store({ value: "Initial Title" });
 
 cf.extend(pageHeader, {
@@ -306,8 +329,9 @@ cf.extend(pageHeader, {
 });
 ```
 
+##### Composing elements with extend
+
 ```js
-// Composing elements with extend
 const childContent = cf.store({ value: "Child text" });
 
 cf.extend(container, {
@@ -330,13 +354,15 @@ cf.extend(container, {
 
 Remove elements or their contents from the DOM.
 
+##### Empty an element (removes all children)
+
 ```js
-// Empty an element (removes all children)
 cf.empty(container);
 ```
 
+##### Remove element entirely
+
 ```js
-// Remove element entirely
 cf.rm(element);
 ```
 
@@ -346,8 +372,9 @@ cf.rm(element);
 <summary><code>escape()</code> and <code>unescape()</code> - string sanitization</summary>
 Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text into the DOM - you should look to a different library for more complex needs.
 
+##### Escape HTML characters
+
 ```js
-// Escape HTML characters
 escape("<script>alert('XSS')</script>"); // "&lt;script&gt;alert('XSS')&lt;/script&gt;"
 
 // Unescape previously escaped strings
@@ -358,6 +385,7 @@ unescape("&lt;script&gt;alert('XSS')&lt;/script&gt;"); // "<script>alert('XSS')<
 
 <details>
 <summary><code>onload()</code> - DOM ready handler</summary>
+
 Executes code when the DOM is fully loaded.
 
 ```js
@@ -375,23 +403,27 @@ cf.onload(() => {
 
 Generates numerical sequences for iteration.
 
+##### Range from 0 to 5 (exclusive)
+
 ```js
-// Range from 0 to 5 (exclusive)
 cf.seq(5); // [0, 1, 2, 3, 4]
 ```
 
+##### Range from 2 to 7 (exclusive)
+
 ```js
-// Range from 2 to 7 (exclusive)
 cf.seq(2, 7); // [2, 3, 4, 5, 6]
 ```
 
+##### Range with custom step
+
 ```js
-// Range with custom step
 cf.seq(1, 10, 2); // [1, 3, 5, 7, 9]
 ```
 
+##### Creating multiple elements with seq
+
 ```js
-// Creating multiple elements with seq
 cf.seq(5).forEach((i) => {
   const [item] = cf.nu("li")
     .content(`Item ${i + 1}`)

@@ -24,6 +24,14 @@ h6 {
     color: #ff9a00;
 }
 
+details>h5 {
+    color: #ff9a00;
+    font-size: 1.1rem;
+    margin: 1rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+}
+
 @media screen and (max-aspect-ratio: 1/1) {
     body>#app {
         width: 80%;
@@ -50,7 +58,6 @@ a:visited {
 }
 
 .cf-site-div {
-    display: none;
     margin-top: 2rem;
     margin-bottom: 1rem;
     width: 100%;
