@@ -2,11 +2,21 @@
   "include": [
     "site/build.ts"
   ],
-  "exclude": ["src/**", "site/*.js", "test/setup.ts"],
+  "lint": {
+    "rules": {
+      "exclude": ["no-explicit-any"]
+    }
+  },
+  "exclude": ["test/setup.ts"],
   "compilerOptions": {
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "types": []
+    "types": [],
+    "lib": [
+      "DOM",
+      "ES2020",
+      "deno.ns"
+    ]
   },
   "unstable": [
     "sloppy-imports"

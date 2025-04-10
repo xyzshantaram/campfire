@@ -94,7 +94,7 @@ fork of [`microlight`](https://asvd.github.io/microlight) by
 [asvd](https://github.com/asvd) and is used under the
 [MIT License](https://github.com/asvd/microlight/blob/master/LICENSE).
 
-The Campfire playground uses the [CodeJar editor](https://medv.io/codejar/) by
-[Anton Medvedev](https://medv.io/) as an embedded editor. The CodeJar editor is
+The Campfire playground uses the [Ace editor](https://github.com/ajaxorg/ace/)
+as an embedded editor. The Ace editor is a copyright of Ajax.org B.V. and is
 used under the
-[MIT license](https://github.com/antonmedv/codejar/blob/master/LICENSE).
+[3-clause BSD license](https://github.com/ajaxorg/ace/blob/master/LICENSE).
