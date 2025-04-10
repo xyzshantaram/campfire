@@ -174,13 +174,13 @@ descriptions of the methods and classes provided by Campfire.</p>
 <summary><code>nu()</code> - element creation helper</summary>
 
 <p>Creates a new DOM element with a fluent builder API.</p>
-<p>Create a simple element:</p>
+<h5>Create a simple element</h5>
 <pre class="microlight"><code>const [div] = cf.nu(&quot;div&quot;)
   .content(&quot;Hello World&quot;)
   .attr(&quot;id&quot;, &quot;greeting&quot;)
   .done();
 </code></pre>
-<p>Create a button with a click handler:</p>
+<h5>Button with click handler</h5>
 <pre class="microlight"><code>const [button] = cf.nu(&quot;button#submit.primary&quot;)
   .content(&quot;Submit&quot;)
   .attr(&quot;type&quot;, &quot;submit&quot;)
@@ -188,12 +188,12 @@ descriptions of the methods and classes provided by Campfire.</p>
   .style(&quot;backgroundColor&quot;, &quot;blue&quot;)
   .done();
 </code></pre>
-<p>Create an element with classes:</p>
+<h5>Element with classes</h5>
 <pre class="microlight"><code>const [card] = cf.nu(&quot;.card.shadow&quot;) // Creates div by default
   .content(&quot;Card content&quot;)
   .done();
 </code></pre>
-<p>With reactive content:</p>
+<h5>Element with reactive content</h5>
 <pre class="microlight"><code>const name = cf.store({ value: &quot;John&quot; });
 
 const [greeting] = cf.nu(&quot;h1&quot;)
@@ -201,7 +201,7 @@ const [greeting] = cf.nu(&quot;h1&quot;)
   .deps({ name })
   .done();
 </code></pre>
-<p>Select multiple elements with <code>.gimme()</code>:</p>
+<h5>Select multiple created elements with <code>.gimme()</code></h5>
 <pre class="microlight"><code>const [card, title, desc] = cf.nu(&quot;div.card&quot;)
   .html(`
     &lt;h2 class=&quot;title&quot;&gt;Card Title&lt;/h2&gt;
@@ -210,7 +210,7 @@ const [greeting] = cf.nu(&quot;h1&quot;)
   .gimme(&quot;.title&quot;, &quot;.desc&quot;) // Variadic - pass any number of selectors
   .done();
 </code></pre>
-<p>Compose elements with reactive children:</p>
+<h5>Compose elements with reactive children</h5>
 <pre class="microlight"><code>const parentData = cf.store({ value: &quot;Parent content&quot; });
 const childData = cf.store({ value: &quot;Child content&quot; });
 
@@ -237,7 +237,7 @@ const [parent] = cf.nu(&quot;section&quot;)
 <summary><code>store()</code> - reactive data stores</summary>
 
 <p>Creates reactive data stores to manage state with automatic UI updates.</p>
-<p>A simple value store</p>
+<h5>A simple value store</h5>
 <pre class="microlight"><code>const counter = cf.store({ value: 0 });
 counter.update(5); // Sets value to 5
 counter.value; // Gets current value (5)
@@ -426,9 +426,10 @@ cf.extend(container, {
 
 <details>
 <summary><code>escape()</code> and <code>unescape()</code> - string sanitization</summary>
-Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text into the DOM - you should look to a different library for more complex needs.
 
-<h5>Escape HTML characters</h5>
+<p>Simple HTML escaping and unescaping utilities. These are the bare minimum for
+inserting text into the DOM - you should look to a different library for more
+complex needs.</p>
 <pre class="microlight"><code>escape(&quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;); // &quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;&quot;
 
 // Unescape previously escaped strings

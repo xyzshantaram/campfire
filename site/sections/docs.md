@@ -12,7 +12,7 @@ Campfire provides the following methods and classes:
 
 Creates a new DOM element with a fluent builder API.
 
-Create a simple element:
+##### Create a simple element
 
 ```js
 const [div] = cf.nu("div")
@@ -21,7 +21,7 @@ const [div] = cf.nu("div")
   .done();
 ```
 
-Create a button with a click handler:
+##### Button with click handler
 
 ```js
 const [button] = cf.nu("button#submit.primary")
@@ -32,7 +32,7 @@ const [button] = cf.nu("button#submit.primary")
   .done();
 ```
 
-Create an element with classes:
+##### Element with classes
 
 ```js
 const [card] = cf.nu(".card.shadow") // Creates div by default
@@ -40,7 +40,7 @@ const [card] = cf.nu(".card.shadow") // Creates div by default
   .done();
 ```
 
-With reactive content:
+##### Element with reactive content
 
 ```js
 const name = cf.store({ value: "John" });
@@ -51,7 +51,7 @@ const [greeting] = cf.nu("h1")
   .done();
 ```
 
-Select multiple elements with `.gimme()`:
+##### Select multiple created elements with `.gimme()`
 
 ```js
 const [card, title, desc] = cf.nu("div.card")
@@ -63,7 +63,7 @@ const [card, title, desc] = cf.nu("div.card")
   .done();
 ```
 
-Compose elements with reactive children:
+##### Compose elements with reactive children
 
 ```js
 const parentData = cf.store({ value: "Parent content" });
@@ -94,7 +94,7 @@ const [parent] = cf.nu("section")
 
 Creates reactive data stores to manage state with automatic UI updates.
 
-A simple value store
+##### A simple value store
 
 ```js
 const counter = cf.store({ value: 0 });
@@ -370,9 +370,10 @@ cf.rm(element);
 
 <details>
 <summary><code>escape()</code> and <code>unescape()</code> - string sanitization</summary>
-Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text into the DOM - you should look to a different library for more complex needs.
 
-##### Escape HTML characters
+Simple HTML escaping and unescaping utilities. These are the bare minimum for
+inserting text into the DOM - you should look to a different library for more
+complex needs.
 
 ```js
 escape("<script>alert('XSS')</script>"); // "&lt;script&gt;alert('XSS')&lt;/script&gt;"
