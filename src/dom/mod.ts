@@ -1,9 +1,5 @@
 import type { ElementPosition } from "../types.ts";
 
-class CfDomInterface {
-
-}
-
 /**
  * Inserts an element into the DOM given a reference element and the relative position
  * of the new element.

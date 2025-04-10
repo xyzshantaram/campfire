@@ -44,12 +44,12 @@ const isValidRenderFn = <T extends HTMLElement>(
  */
 export const extend = <
     T extends HTMLElement,
-    D extends Record<string, Store<any>> = {},
+    D extends Record<string, Store<any>>,
 >(
     elt: T,
     args: ElementProperties<T, D> = {},
 ): [T, ...HTMLElement[]] => {
-    let { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D), children = {} } = args;
+    const { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D), children = {} } = args;
 
     let content = "";
     if (isValidRenderFn<T>(contents)) {
@@ -84,7 +84,7 @@ export const extend = <
             const name = itm.getAttribute('name');
             if (!name) return;
             if (name in children) {
-                let val = children[name];
+                const val = children[name];
                 const [child] = Array.isArray(val) ? val : [val];
                 if (!child) return;
                 itm.replaceWith(child);
@@ -100,7 +100,9 @@ export const extend = <
     if (misc) Object.assign(elt, misc);
     if (style) Object.assign(elt.style, style);
 
-    Object.entries(on).forEach(([evt, listener]) => elt.addEventListener(evt, listener));
+    Object.entries(on)
+        .forEach(([evt, listener]) => elt
+            .addEventListener(evt, listener as (evt: Event) => void));
 
     Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, String(value)));
 
@@ -145,7 +147,7 @@ export const extend = <
 export const nu = <
     const T extends string,
     E extends InferElementType<T>,
-    D extends Record<string, Store<any>> = {},
+    D extends Record<string, Store<any>>,
 >(
     info: T = 'div' as T,
     args: ElementProperties<E, D> = {},

@@ -11,7 +11,7 @@ import type { Template } from '../types.ts';
 const _mustache = (string: string, data: Record<string, string> = {}): string => {
     const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
     new RegExp(Object.keys(data).join("|"), "gi");
-    return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function (matched, p1, p2) {
+    return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function (_, p1, p2) {
         return `${p1 || ""}${data[p2]}`;
     }).replace(escapeExpr, '$1');
 }
@@ -22,7 +22,7 @@ const _mustache = (string: string, data: Record<string, string> = {}): string =>
  * the mustache'd expression will be replaced with the value of the property in `data`.
  * Prefixing the opening {{ with double backslashes will escape the expression.
  * By default, mustache data is escaped with campfire's escape() function - you can
- * disable this by supplying the value of `esc` as false.
+ * disable this by supplying the value of `shouldEscape` as false.
  * @param string - the string to be templated.
  * @param data - The data which will be used to perform replacements.
  * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
