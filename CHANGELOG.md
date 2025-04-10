@@ -1,5 +1,11 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc9
+
+- select now optionally accepts a `single: true` arg to only return a single
+  element
+- Added NuBuilder::ref() to return the element directly
+
 ## 4.0.0-rc8
 
 - Both insert() and children() now accept either a single HTMLElement or

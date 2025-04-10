@@ -1,4 +1,4 @@
-import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc8';
+import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc9';
 import toml from 'https://esm.sh/toml@3.0.0';
 
 const iframeContentTemplate = cf.template(cf.html`\
@@ -59,7 +59,7 @@ export const editorReady = () => {
         ['html', 'css', 'js', 'output']
             .map(itm => [itm, {
                 elt: cf.select({ s: '.cf-editor-' + itm, single: true }),
-                mode: itm === 'output' ? null : 'ace/mode/' + item,
+                mode: itm === 'output' ? null : 'ace/mode/' + itm,
                 editor: null
             }]));
 
@@ -86,6 +86,7 @@ export const editorReady = () => {
 
         cf.insert(button, { into: switcher });
 
+        console.log(current)
         // Set up Ace Editor
         current.editor = ace.edit(current.elt, {
             mode: current.mode,

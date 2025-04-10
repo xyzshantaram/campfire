@@ -185,7 +185,7 @@ describe('Tests for NuBuilder', () => {
                 to: nu('span')
                     .deps({ to })
                     .html(({ to }) => `Child: ${to}`)
-                    .done()
+                    .ref()
             })
             .done();
 
