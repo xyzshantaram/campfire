@@ -25,6 +25,8 @@
   "remote": {
     "https://esm.sh/campfire.js@4.0.0-rc8": "b988777fea2aa0928504cdc14b4c3ff0ba23375609d61f75e6f26136e3a219c8",
     "https://esm.sh/campfire.js@4.0.0-rc8/denonext/campfire.mjs": "292e99c3daff389829f5b8d8db6e8ad282e7ef3db1804ce99931590b82025e30",
+    "https://esm.sh/campfire.js@4.0.0-rc9": "15a1f42f2b04f19fa2a2b1c75b751245e6158413a671d01a35f0e5330f08320d",
+    "https://esm.sh/campfire.js@4.0.0-rc9/denonext/campfire.mjs": "b5a2d4ba3cd7804280ac7279295a5249922c9102aac18779abb52af123df849f",
     "https://esm.sh/macrolight@1.5.0": "503cef0295f695b468d29903042860d606fb178d6afc59aefb604c8fde340a28",
     "https://esm.sh/macrolight@1.5.0/denonext/macrolight.mjs": "9b5659208edd2424bbeafb25e1baa1964631d351580d811cf5113501b9b752d7",
     "https://esm.sh/marked@15.0.7": "ef80f69d22751f86de68c04793a0755000b5a6db6297575c60d8bb7e5b1c9263",

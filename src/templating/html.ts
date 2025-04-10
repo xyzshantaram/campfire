@@ -43,7 +43,7 @@ export const html = (strings: TemplateStringsArray, ...values: (string | number 
     const built = [];
     for (let i = 0; i < strings.length; i++) {
         built.push(strings[i] || '');
-        let val = values[i];
+        const val = values[i];
         if (typeof val !== 'undefined' && typeof val !== 'object') {
             built.push(escape((val || '').toString()));
         }
