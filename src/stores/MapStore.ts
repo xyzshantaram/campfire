@@ -37,15 +37,6 @@ export class MapStore<T> extends Store<Map<string, T>> {
     }
 
     /**
-     * A no-operation method for MapStore to maintain base Store compatibility.
-     * Does not perform any action.
-     * @deprecated
-     */
-    update() {
-        // Intentionally left as a no-op for MapStore
-    }
-
-    /**
      * Removes a key-value pair from the store.
      * @param key The key to remove.
      * @emits 'deletion' event with:
@@ -53,8 +44,10 @@ export class MapStore<T> extends Store<Map<string, T>> {
      *   - `value`: The current state of the map after deletion
      */
     remove(key: string) {
+        const value = this.value.get(key);
+        if (!value) return;
         this.value.delete(key);
-        this._sendEvent({ key, value: this.value, type: 'deletion' });
+        this._sendEvent({ key, value, type: 'deletion' });
     }
 
     /**
