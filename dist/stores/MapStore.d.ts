@@ -23,12 +23,6 @@ export declare class MapStore<T> extends Store<Map<string, T>> {
      */
     set(key: string, value: T): void;
     /**
-     * A no-operation method for MapStore to maintain base Store compatibility.
-     * Does not perform any action.
-     * @deprecated
-     */
-    update(): void;
-    /**
      * Removes a key-value pair from the store.
      * @param key The key to remove.
      * @emits 'deletion' event with:

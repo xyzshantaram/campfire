@@ -304,7 +304,7 @@ var isValidRenderFn = (fn) => {
   return true;
 };
 var extend = (elt, args = {}) => {
-  let { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = {}, children = {} } = args;
+  const { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = {}, children = {} } = args;
   let content = "";
   if (isValidRenderFn(contents)) {
     Object.entries(deps).forEach(([name, dep]) => {
@@ -332,7 +332,7 @@ var extend = (elt, args = {}) => {
       const name = itm.getAttribute("name");
       if (!name) return;
       if (name in children) {
-        let val = children[name];
+        const val = children[name];
         const [child] = Array.isArray(val) ? val : [val];
         if (!child) return;
         itm.replaceWith(child);
@@ -393,7 +393,7 @@ var Store = class {
      * @internal
      */
     this._dead = false;
-    if (typeof value !== "undefined" && value !== null) this.value = value;
+    this.value = value;
   }
   /**
   * Add an event listener to the store.
@@ -405,18 +405,14 @@ var Store = class {
   *   - 'clear': Triggered when the store is cleared.
   * @param fn A callback function that will be invoked when the specified event occurs.
   *   The function receives a `StoreEvent` object with details about the event.
-  * @param callNow Determines whether the callback should be immediately invoked 
-  *   with the current store value. Only applies to 'change' event type.
   * @returns A unique subscriber ID that can be used to unsubscribe the listener.
   */
-  on(type, fn, callNow = false) {
-    var _a;
-    this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
-    (_a = this._subscribers)[type] ?? (_a[type] = {});
-    this._subscribers[type][this._subscriberCounts[type]] = fn;
-    if (callNow && !["push", "remove", "mutation", "setAt"].includes(type)) {
-      fn({ type: "change", value: this.value });
-    }
+  on(type, fn) {
+    var _a, _b;
+    (_a = this._subscriberCounts)[type] ?? (_a[type] = 0);
+    (_b = this._subscribers)[type] ?? (_b[type] = {});
+    const id = this._subscriberCounts[type]++;
+    this._subscribers[type][id] = fn;
     return this._subscriberCounts[type]++;
   }
   /**
@@ -432,6 +428,7 @@ var Store = class {
     this.on("change", fn);
     this.on("clear", fn);
     this.on("deletion", fn);
+    this.on("update", fn);
   }
   /**
    * Removes a specific event listener from the store.
@@ -451,7 +448,7 @@ var Store = class {
   update(value) {
     if (this._dead) return;
     this.value = value;
-    this._sendEvent({ type: "change", value });
+    this._sendEvent({ type: "update", value });
   }
   /**
    * Sends an event to all subscribers if the store has not been disposed of.
@@ -459,10 +456,9 @@ var Store = class {
   */
   _sendEvent(event) {
     if (this._dead) return;
-    this._subscribers[event.type] = this._subscribers[event.type] || {};
     const subs = this._subscribers[event.type];
     if (!subs) return;
-    for (const idx in Object.keys(subs)) {
+    for (const idx in subs) {
       subs[idx](event);
     }
   }
@@ -482,7 +478,7 @@ var Store = class {
 // src/stores/ListStore.ts
 var ListStore = class extends Store {
   constructor(ls) {
-    super(ls);
+    super(ls || []);
   }
   /**
    * Clears all elements from the store.
@@ -580,13 +576,6 @@ var MapStore = class extends Store {
     this._sendEvent({ key, value, type: "change" });
   }
   /**
-   * A no-operation method for MapStore to maintain base Store compatibility.
-   * Does not perform any action.
-   * @deprecated
-   */
-  update() {
-  }
-  /**
    * Removes a key-value pair from the store.
    * @param key The key to remove.
    * @emits 'deletion' event with:
@@ -594,8 +583,10 @@ var MapStore = class extends Store {
    *   - `value`: The current state of the map after deletion
    */
   remove(key) {
+    const value = this.value.get(key);
+    if (!value) return;
     this.value.delete(key);
-    this._sendEvent({ key, value: this.value, type: "deletion" });
+    this._sendEvent({ key, value, type: "deletion" });
   }
   /**
    * Removes all key-value pairs from the store.
@@ -655,7 +646,7 @@ var html = (strings, ...values) => {
   const built = [];
   for (let i = 0; i < strings.length; i++) {
     built.push(strings[i] || "");
-    let val = values[i];
+    const val = values[i];
     if (typeof val !== "undefined" && typeof val !== "object") {
       built.push(escape((val || "").toString()));
     } else {
@@ -669,7 +660,7 @@ var html = (strings, ...values) => {
 var _mustache = (string, data = {}) => {
   const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
   new RegExp(Object.keys(data).join("|"), "gi");
-  return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function(matched, p1, p2) {
+  return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function(_, p1, p2) {
     return `${p1 || ""}${data[p2]}`;
   }).replace(escapeExpr, "$1");
 };

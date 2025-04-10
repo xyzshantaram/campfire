@@ -8,7 +8,7 @@ import { NuBuilder } from "./NuBuilder.ts";
  * @param elt The element to modify.
  * @param args Properties to set on the element.
  */
-export declare const extend: <T extends HTMLElement, D extends Record<string, Store<any>> = {}>(elt: T, args?: ElementProperties<T, D>) => [T, ...HTMLElement[]];
+export declare const extend: <T extends HTMLElement, D extends Record<string, Store<any>>>(elt: T, args?: ElementProperties<T, D>) => [T, ...HTMLElement[]];
 /**
  * An element creation helper.
  * @param info Basic information about the element.
@@ -35,4 +35,4 @@ export declare const extend: <T extends HTMLElement, D extends Record<string, St
  * }) // Output is still a list [<span.some-span>]
  * ```
  */
-export declare const nu: <const T extends string, E extends InferElementType<T>, D extends Record<string, Store<any>> = {}>(info?: T, args?: ElementProperties<E, D>) => NuBuilder<T, E, D>;
+export declare const nu: <const T extends string, E extends InferElementType<T>, D extends Record<string, Store<any>>>(info?: T, args?: ElementProperties<E, D>) => NuBuilder<T, E, D>;

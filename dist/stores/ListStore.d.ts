@@ -1,10 +1,6 @@
 import { Store } from "./Store.ts";
 /**
     * A reactive list store.
-    * Implements push(item). remove(idx), get(idx), and setAt(idx, item).
-    * push() sends an "append" event
-    * remove() sends a "deletion" event
-    * setAt() sends a "change" event with idx
 */
 export declare class ListStore<T> extends Store<T[]> {
     constructor(ls?: T[]);

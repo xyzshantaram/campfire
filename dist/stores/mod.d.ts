@@ -19,6 +19,9 @@ export declare function store<T>(opts: {
     value?: Record<string, T>;
 }): MapStore<T>;
 export declare function store<T>(opts: {
-    value?: T;
+    value: T;
 }): Store<T>;
+export declare function store<T>(opts: {
+    value?: T;
+}): Store<T | undefined>;
 export { Store, ListStore, MapStore };

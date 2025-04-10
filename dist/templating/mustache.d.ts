@@ -5,7 +5,7 @@ import type { Template } from '../types.ts';
  * the mustache'd expression will be replaced with the value of the property in `data`.
  * Prefixing the opening {{ with double backslashes will escape the expression.
  * By default, mustache data is escaped with campfire's escape() function - you can
- * disable this by supplying the value of `esc` as false.
+ * disable this by supplying the value of `shouldEscape` as false.
  * @param string - the string to be templated.
  * @param data - The data which will be used to perform replacements.
  * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.

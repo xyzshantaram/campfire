@@ -41,7 +41,7 @@
         "npm:@testing-library/dom@^9.3.4",
         "npm:@types/chai-dom@^1.11.3",
         "npm:@types/chai@^4.3.11",
-        "npm:@types/jsdom@^21.1.6",
+        "npm:@types/jsdom@^21.1.7",
         "npm:@types/mocha@^10.0.6",
         "npm:@types/node@^22.14.0",
         "npm:@types/sinon@^17.0.3",
@@ -49,15 +49,19 @@
         "npm:c8@^10.1.3",
         "npm:chai-dom@^1.12.0",
         "npm:chai@^5.1.0",
+        "npm:entities@6",
         "npm:esbuild-node-externals@^1.18.0",
         "npm:esbuild@~0.25.2",
         "npm:jsdom-global@^3.0.2",
-        "npm:jsdom@24",
+        "npm:jsdom@^24.1.3",
         "npm:mocha@^10.3.0",
+        "npm:parse5@^7.2.1",
         "npm:sinon@^17.0.1",
+        "npm:tough-cookie@^5.1.2",
         "npm:ts-node@^10.9.2",
         "npm:typedoc@~0.28.1",
-        "npm:typescript@^5.7.3"
+        "npm:typescript@^5.7.3",
+        "npm:undici-types@^7.8.0"
       ]
     }
   }
