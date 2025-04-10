@@ -14,11 +14,11 @@ const expect = chai.expect;
 
 describe('Tests for nu', () => {
     it('should create a div when no args are passed', () => {
-        expect(nu().done()[0].tagName).to.equal('DIV');
+        expect(nu().ref().tagName).to.equal('DIV');
     });
 
     it('the new div must be empty', () => {
-        expect(nu().done()[0]).to.be.empty;
+        expect(nu().ref()).to.be.empty;
     });
 
     it('should parse element string correctly', () => {
@@ -151,15 +151,15 @@ describe('Tests for NuBuilder', () => {
             <p class="content">Paragraph 2</p>
         `;
 
-        const [container, title, firstContent, secondContent] = nu('div')
+        const [, title, first, second] = nu('div')
             .content(html)
             .raw(true)
             .gimme('.title', '.content:first-of-type', '.content:last-child')
             .done();
 
         expect(title.innerHTML).to.equal('Hello');
-        expect(firstContent.innerHTML).to.equal('Paragraph 1');
-        expect(secondContent.innerHTML).to.equal('Paragraph 2');
+        expect(first.innerHTML).to.equal('Paragraph 1');
+        expect(second.innerHTML).to.equal('Paragraph 2');
     });
 
     it('should handle misc properties', () => {

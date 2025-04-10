@@ -101,6 +101,10 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
         return extend(elem as E, this.props);
     }
 
+    ref() {
+        return this.done()[0];
+    }
+
     /**
      * Sets the content of the element.
      * 
