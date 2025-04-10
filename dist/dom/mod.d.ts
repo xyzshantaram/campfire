@@ -23,20 +23,25 @@ export declare const insert: (els: Element | Element[], where: ElementPosition) 
  * @returns void
  */
 export declare const onload: (cb: (ev: Event) => void) => void;
-export interface SelectParams {
+export type SelectParams = {
     /** The selector to query for. */
     s: string;
     /** The parent node to query. Defaults to `document`. */
     from?: ParentNode;
     /** Whether to return all elements matching the given selector or just the first. */
     all?: true;
-}
+};
 /**
  * Queries the DOM for a particular selector, and returns the first element matching it.
  * @param opts See SelectParams.
  * @returns Element(s) matching the given selector, or an empty list.
  */
-export declare const select: ({ s, all, from }: SelectParams) => HTMLElement[];
+export declare function select(params: SelectParams & {
+    single: true;
+}): HTMLElement | null;
+export declare function select(params: SelectParams & {
+    single?: false;
+}): HTMLElement[];
 /**
  * Removes `elt` from the DOM.
  * @param elt The element to remove.

@@ -40,7 +40,7 @@ export type DOMEventHandlers = {
 /**
  * Properties for the HTML element to be created.
  */
-export interface ElementProperties<T extends HTMLElement, D extends Record<string, Store<any>> = {}> {
+export interface ElementProperties<T extends HTMLElement, D extends Record<string, Store<any>>> {
     /**
      * String that will be set as the inner HTML of the created element. By default,
      * this is escaped using cf.escape() - however, if you supply `raw: true` in
@@ -85,7 +85,7 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
      * corresponding to the Record's keys and preserved between re-renders of
      * the parent. Only the first element returned by nu() will be appended.
      */
-    children?: Record<string, HTMLElement | HTMLElement[]>;
+    children?: Record<string, HTMLElement>;
 }
 /**
  * An interface to store data parsed from an element descriptor string passed to `nu`.

@@ -36,6 +36,7 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @throws Error if a class name contains a '#' character
      */
     done(): [E, ...HTMLElement[]];
+    ref(): E;
     /**
      * Sets the content of the element.
      *
@@ -118,8 +119,7 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * across re-renders and can be independently reactive.
      * @param children An object whose keys correspond to the `name` attributes
      * of cf-slot elements in the parent's innerHTML.
-     * Only the first child for each key will be appended.
      * @returns The builder object for chaining.
      */
-    children(children: Record<string, HTMLElement | HTMLElement[]>): this;
+    children(children: Record<string, HTMLElement>): this;
 }

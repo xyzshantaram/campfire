@@ -35,14 +35,14 @@ var insert = (els, where) => {
   return els;
 };
 var onload = (cb) => globalThis.addEventListener("DOMContentLoaded", cb);
-var select = ({ s, all, from }) => {
+function select({ s, all, from, single }) {
   from ?? (from = document);
   if (all) {
     return Array.from(from.querySelectorAll(s));
-  } else {
-    return [from.querySelector(s)];
   }
-};
+  const elt = from.querySelector(s);
+  return single ? elt : [elt];
+}
 var rm = (elt) => elt.remove();
 var empty = (elt) => {
   elt.innerHTML = "";
@@ -149,6 +149,9 @@ var NuBuilder = class {
     if (id) elem.id = id;
     classes.forEach((cls) => elem.classList.add(cls));
     return extend(elem, this.props);
+  }
+  ref() {
+    return this.done()[0];
   }
   /**
    * Sets the content of the element.
@@ -267,7 +270,6 @@ var NuBuilder = class {
    * across re-renders and can be independently reactive.
    * @param children An object whose keys correspond to the `name` attributes 
    * of cf-slot elements in the parent's innerHTML.
-   * Only the first child for each key will be appended.
    * @returns The builder object for chaining.
    */
   children(children) {

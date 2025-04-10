@@ -22,7 +22,7 @@ declare const _default: {
     insert: (els: Element | Element[], where: ElementPosition) => Element | Element[];
     empty: (elt: Element) => void;
     rm: (elt: Element) => void;
-    select: ({ s, all, from }: SelectParams) => HTMLElement[];
+    select: typeof select;
     onload: (cb: (ev: Event) => void) => void;
     html: (strings: TemplateStringsArray, ...values: (string | number | import("./templating/html.ts").RawHtml)[]) => string;
     r: (val: any, options?: RawHtmlOptions) => import("./templating/html.ts").RawHtml;
