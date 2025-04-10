@@ -1,10 +1,9 @@
-import cf from 'https://esm.sh/campfire.js@4.0.0-rc6';
+// deno-lint-ignore-file no-window no-window-prefix
+import cf from 'https://esm.sh/campfire.js@4.0.0-rc8';
 import { highlightAll, HL_KEYWORDS } from 'https://esm.sh/macrolight@1.5.0';
 import { editorReady } from "./editor.js";
 
-window.cf = cf;
-
-window.addEventListener("DOMContentLoaded", (e) => {
+window.addEventListener("DOMContentLoaded", () => {
     const mask = document.querySelector("#mask");
     const h1 = document.querySelector('h1');
 

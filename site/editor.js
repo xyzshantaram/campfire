@@ -55,26 +55,13 @@ export const editorReady = () => {
     const [examples] = cf.select({ s: '.cf-site-div[data-heading="playground"]' });
     if (!examples) return;
 
-    const editorConfigs = {
-        html: {
-            elt: cf.select({ s: '.cf-editor-html' })[0],
-            mode: 'ace/mode/html',
-            editor: null
-        },
-        css: {
-            elt: cf.select({ s: '.cf-editor-css' })[0],
-            mode: 'ace/mode/css',
-            editor: null
-        },
-        js: {
-            elt: cf.select({ s: '.cf-editor-js' })[0],
-            mode: 'ace/mode/javascript',
-            editor: null
-        },
-        out: {
-            elt: cf.select({ s: '.cf-editor-output' })[0]
-        }
-    }
+    const editorConfigs = Object.fromEntries(
+        ['html', 'css', 'js', 'output']
+            .map(itm => [itm, {
+                elt: cf.select({ s: '.cf-editor-' + itm, single: true }),
+                mode: itm === 'output' ? null : 'ace/mode/' + item,
+                editor: null
+            }]));
 
     const wrapper = examples.querySelector('.editor-wrapper');
     const [switcher] = cf.nu('div.switcher').done();
@@ -163,11 +150,11 @@ export const editorReady = () => {
 
     fetch("site/data/examples.toml").then(res => res.text()).then(text => {
         const data = toml.parse(text);
-        for (let key of Object.keys(data)) {
+        for (const key of Object.keys(data)) {
             const itm = data[key];
             const [item] = cf.nu('li')
                 .content(`<a href='javascript:void(0)'>${itm.title}</a>`)
-                .on('click', (e) => {
+                .on('click', _ => {
                     setActivePlaygroundDemo(itm);
                     currentEditorStore.update('out');
                 })
@@ -182,7 +169,7 @@ export const editorReady = () => {
     const clearBtn = document.querySelector("#cf-editor-clear");
     const dlBtn = document.querySelector("#cf-editor-dl");
 
-    dlBtn.onclick = (e) => {
+    dlBtn.onclick = _ => {
         const [link] = cf.nu('a')
             .attr('download', 'playground.html')
             .attr('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(getIframeContents()))
@@ -190,7 +177,7 @@ export const editorReady = () => {
         link.click();
     }
 
-    clearBtn.onclick = (e) => {
+    clearBtn.onclick = _ => {
         for (const str of ['html', 'js', 'css']) {
             editorConfigs[str].editor.setValue("");
         }

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-process-global
 import { build } from 'esbuild'
 
 // Automatically exclude all node_modules from the bundled version
