@@ -7,6 +7,6 @@
     "**/*.test.ts"
   ],
   "extension": [".ts"],
-  "reporter": ["text"],
+  "reporter": ["text", "html"],
   "report-dir": "coverage"
 }
