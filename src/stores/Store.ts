@@ -1,4 +1,4 @@
-import type { StoreEvent, Subscriber } from "../types.ts";
+import type { EventSubscriber, EventType, StoreEvent, AnySubscriber } from "../types.ts";
 
 const storeIds = new Set<string>();
 const genId = () => 'cf-' + Math.random().toString(36).slice(2, 8);
@@ -29,7 +29,7 @@ export class Store<T> {
      * @internal
     */
     _subscribers: {
-        [K in StoreEvent['type']]?: Record<number, Subscriber>;
+        [K in EventType]?: Record<number, EventSubscriber<K, Store<T>>>
     } = {};
     /** 
      * The subscribers currently registered to the store. 
@@ -46,8 +46,8 @@ export class Store<T> {
      * Creates an instance of Store.
      * @param value - The initial value of the store.
      */
-    constructor(value?: T) {
-        if (typeof value !== 'undefined' && value !== null) this.value = value;
+    constructor(value: T) {
+        this.value = value;
     }
 
     /**
@@ -60,17 +60,13 @@ export class Store<T> {
  *   - 'clear': Triggered when the store is cleared.
  * @param fn A callback function that will be invoked when the specified event occurs.
  *   The function receives a `StoreEvent` object with details about the event.
- * @param callNow Determines whether the callback should be immediately invoked 
- *   with the current store value. Only applies to 'change' event type.
  * @returns A unique subscriber ID that can be used to unsubscribe the listener.
  */
-    on(type: StoreEvent['type'], fn: Subscriber, callNow: boolean = false): number {
-        this._subscriberCounts[type] = this._subscriberCounts[type] || 0;
+    on<K extends EventType>(type: K, fn: EventSubscriber<K, Store<T>>): number {
+        this._subscriberCounts[type] ??= 0;
         this._subscribers[type] ??= {};
-        this._subscribers[type]![this._subscriberCounts[type]] = fn;
-        if (callNow && !["push", "remove", "mutation", "setAt"].includes(type)) {
-            fn({ type: 'change', value: this.value });
-        }
+        const id = this._subscriberCounts[type]++;
+        this._subscribers[type][id] = fn;
         return this._subscriberCounts[type]++;
     }
 
@@ -82,11 +78,12 @@ export class Store<T> {
          * @param fn A callback function that will be called for all store events
          * @returns void
          */
-    any(fn: Subscriber) {
+    any(fn: AnySubscriber<Store<T>>) {
         this.on('append', fn);
         this.on('change', fn);
         this.on('clear', fn);
         this.on('deletion', fn);
+        this.on('update', fn);
     }
 
     /**
@@ -95,7 +92,7 @@ export class Store<T> {
      * @param id The subscriber ID returned by the `on()` method when the listener was registered.
      * @throws Will throw an error if the subscriber ID is invalid or not found.
      */
-    unsubscribe(type: StoreEvent['type'], id: number) {
+    unsubscribe(type: EventType, id: number) {
         delete this._subscribers[type]?.[id];
     }
 
@@ -108,19 +105,19 @@ export class Store<T> {
     update(value: T) {
         if (this._dead) return;
         this.value = value;
-        this._sendEvent({ type: 'change', value });
+        this._sendEvent({ type: 'update', value });
     }
 
     /**
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
     */
-    _sendEvent(event: StoreEvent) {
+    _sendEvent(event: StoreEvent<Store<T>>) {
         if (this._dead) return;
-        this._subscribers[event.type] = this._subscribers[event.type] || {};
-        const subs = this._subscribers[event.type];
+        const subs = this._subscribers[event.type] as Record<number, EventSubscriber<typeof event.type, Store<T>>>;
         if (!subs) return;
-        for (const idx in Object.keys(subs)) {
+
+        for (const idx in subs) {
             subs[idx](event);
         }
     }

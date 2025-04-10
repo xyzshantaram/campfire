@@ -9,12 +9,14 @@ export type StoreInitializer<T> =
 
 export function store<T>(opts: { type: 'list'; value?: T[] }): ListStore<T>;
 export function store<T>(opts: { type: 'map'; value?: Record<string, T> }): MapStore<T>;
-export function store<T>(opts: { value?: T }): Store<T>;
+export function store<T>(opts: { value: T }): Store<T>;
+export function store<T>(opts: { value?: T }): Store<T | undefined>;
 export function store<T>(opts: StoreInitializer<T>): Store<any> {
     if ('type' in opts) {
         if (opts.type === 'list') return new ListStore(opts.value);
         if (opts.type === 'map') return new MapStore(opts.value);
     }
-    return new Store<T>(opts.value);
+    return new Store(opts.value);
 }
+
 export { Store, ListStore, MapStore };

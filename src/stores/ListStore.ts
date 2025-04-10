@@ -5,7 +5,7 @@ import { Store } from "./Store.ts";
 */
 export class ListStore<T> extends Store<T[]> {
     constructor(ls?: T[]) {
-        super(ls);
+        super(ls || []);
     }
 
     /**

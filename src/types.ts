@@ -1,28 +1,59 @@
 import { Store } from "./stores/mod.ts";
 
-export type StoreEvent =
-    | {
-        type: "change";
-        value: any;
-        key?: string;
-        idx?: number;
-    }
-    | {
-        type: "deletion";
-        value: any;
-    } & ({ key: string } | { idx: number })
-    | {
-        type: "clear";
-    }
-    | {
-        type: "append";
-        value: any;
-        idx: any;
-    };
+type StoreValue<ST> =
+    ST extends Store<infer T> ?
+    (T extends Map<string, infer M> ? M : (T extends (infer L)[] ? L : T)) :
+    never;
 
+type test = StoreValue<Store<any>>;
 
-/** A signature for a subscriber type. */
-export type Subscriber = (event: StoreEvent) => void;
+export interface UpdateEvent<ST> {
+    type: "update";
+    value: ST extends Store<infer T> ? T : never;
+}
+
+export interface ChangeEvent<ST> {
+    type: "change";
+    value: StoreValue<ST>;
+    key?: ST extends Store<Map<string, StoreValue<ST>>> ? string : undefined;
+    idx?: ST extends Store<StoreValue<ST>[]> ? number : undefined;
+}
+
+export interface DeletionEvent<ST> {
+    type: "deletion";
+    value: StoreValue<ST>;
+    key?: ST extends Store<Map<string, StoreValue<ST>>> ? string : undefined;
+    idx?: ST extends Store<StoreValue<ST>[]> ? number : undefined;
+}
+
+export interface ClearEvent {
+    type: "clear";
+}
+
+export interface AppendEvent<ST> {
+    type: "append";
+    value: StoreValue<ST>;
+    idx?: ST extends Store<StoreValue<ST>[]> ? number : undefined;
+}
+
+export type StoreEvent<ST> =
+    | ChangeEvent<ST>
+    | DeletionEvent<ST>
+    | AppendEvent<ST>
+    | UpdateEvent<ST>
+    | ClearEvent;
+
+export type EventType = StoreEvent<any>["type"];
+
+export type SubscriberTypeMap<ST> = {
+    [K in EventType]: Extract<StoreEvent<ST>, { type: K }>;
+};
+
+/** A signature for a subscriber function. */
+export type AnySubscriber<ST> = (event: StoreEvent<ST>) => void;
+
+/** A signature for a subscriber of a specific event. */
+export type EventSubscriber<K extends EventType, ST> = (event: SubscriberTypeMap<ST>[K]) => void;
 
 /** The function signature for a function returned by `template()`. */
 export type Template = (e: Record<string, any>) => string;
@@ -35,9 +66,13 @@ export type UnwrapStore<D> = {
     : never;
 };
 
+export type StoreEventFromObject<D> = {
+    [K in keyof D]: D[K] extends Store<any> ? StoreEvent<D[K]> : never;
+}[keyof D];
+
 export type RenderFunction<T extends HTMLElement, D> = (
     props: UnwrapStore<D>,
-    opts: { event?: StoreEvent & { triggeredBy: string }, elt: T }
+    opts: { event?: StoreEventFromObject<D> & { triggeredBy: string }, elt: T }
 ) => string | undefined;
 
 export type StringStyleProps = keyof {

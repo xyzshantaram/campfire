@@ -6,7 +6,7 @@ import * as chai from 'chai';
 import sinon from 'sinon';
 import { describe, it } from 'mocha';
 import chaiDom from 'chai-dom';
-import cf, { MapStore, nu } from '../campfire.ts';
+import cf, { nu } from '../campfire.ts';
 
 // Setup chai
 chai.use(chaiDom);
@@ -23,9 +23,9 @@ describe('Tests for stores', () => {
     it('Store should notify subscribers of changes', () => {
         const s = cf.store({ value: 'test' });
         const mockFn = sinon.spy();
-        s.on('change', mockFn);
+        s.on('update', mockFn);
         s.update('new value');
-        expect(mockFn.calledWith({ type: 'change', value: 'new value' })).to.be.true;
+        expect(mockFn.calledWith({ type: 'update', value: 'new value' })).to.be.true;
     });
 
     it('ListStore should handle array operations', () => {
@@ -39,7 +39,7 @@ describe('Tests for stores', () => {
     });
 
     it('MapStore should handle object operations', () => {
-        const ms: MapStore<number | string> = cf.store({ type: 'map', value: { name: 'John' } });
+        const ms = cf.store<string | number>({ type: 'map', value: { name: 'John' } });
         expect(ms.get('name')).to.deep.equal('John');
 
         const mockFn = sinon.spy();
