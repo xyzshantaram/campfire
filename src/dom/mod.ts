@@ -89,7 +89,7 @@ export type SelectParams = {
 export function select(params: SelectParams & { single: true }): HTMLElement | null;
 export function select(params: SelectParams & { single?: false }): HTMLElement[];
 export function select({ s, all, from, single }: SelectParams & { single?: boolean }) {
-    const parent: ParentNode = from ?? CfDom._document!;
+    const parent = (from ?? CfDom._document) as ParentNode;
     if (all) {
         return Array.from(CfDom.querySelectorAll(s, parent)) as HTMLElement[];
     }

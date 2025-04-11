@@ -3,6 +3,35 @@
 import { StringStyleProps } from "../types.ts";
 
 /**
+ * Define minimally required interface for Document implementation
+ * This includes only the methods and properties we actually use
+ */
+export interface CfDocumentInterface {
+  createElement(tagName: string): HTMLElement;
+  createDocumentFragment(): DocumentFragment;
+  querySelector(selectors: string): Element | null;
+  querySelectorAll(selectors: string): NodeListOf<Element>;
+  body: HTMLElement;
+}
+
+/**
+ * Define minimally required interface for Window implementation
+ * This includes only the methods and properties we actually use
+ */
+export interface CfWindowInterface {
+  document: Document;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+}
+
+/**
+ * Define minimally required interface for HTMLElement constructor
+ */
+export interface CfHTMLElementConstructor {
+  new(): HTMLElement;
+  prototype: HTMLElement;
+}
+
+/**
  * DOMShim provides a configurable interface for DOM operations.
  * 
  * This allows Campfire to work in both browser environments 
@@ -13,42 +42,42 @@ import { StringStyleProps } from "../types.ts";
  * 
  * 1. Browser environment (automatic initialization):
  *    ```ts
- *    import { DOMShim } from './dom/config';
+ *    import { CfDom } from './dom/config';
  *    
  *    // Methods are already initialized with browser DOM
- *    const element = DOMShim.createElement('div');
- *    DOMShim.setInnerHTML(element, 'Hello world');
+ *    const element = CfDom.createElement('div');
+ *    CfDom.setInnerHTML(element, 'Hello world');
  *    ```
  * 
  * 2. Server-side rendering with custom DOM implementation:
  *    ```ts
- *    import { DOMShim } from './dom/config';
+ *    import { CfDom } from './dom/config';
  *    import { JSDOM } from 'jsdom';
  *    
  *    // Setup a custom DOM environment
  *    const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
  *    
- *    // Configure DOMShim to use jsdom
- *    DOMShim.configure({
+ *    // Configure CfDom to use jsdom
+ *    CfDom.configure({
  *      document: dom.window.document,
  *      window: dom.window,
  *      HTMLElement: dom.window.HTMLElement
  *    });
  *    
  *    // Now use the shim methods with jsdom backing
- *    const element = DOMShim.createElement('div');
+ *    const element = CfDom.createElement('div');
  *    ```
  */
 export class CfDom {
   // Use a different name for the private field to avoid naming conflicts with getter
-  private static __document: Document | null = null;
-  private static _window: Window | null = null;
-  private static _HTMLElement: typeof HTMLElement | null = null;
+  private static __document: CfDocumentInterface | null = null;
+  private static _window: CfWindowInterface | null = null;
+  private static _HTMLElement: CfHTMLElementConstructor | null = null;
   private static _initialized = false;
   static ssr: boolean = false;
 
   // Public accessor for document
-  public static get _document(): Document | null {
+  public static get _document(): CfDocumentInterface | null {
     return CfDom.__document;
   }
 
@@ -77,9 +106,9 @@ export class CfDom {
    * Configure the shim with custom DOM implementation.
    */
   public static configure(options: {
-    document?: Document;
-    window?: Window;
-    HTMLElement?: typeof HTMLElement;
+    document?: CfDocumentInterface;
+    window?: CfWindowInterface;
+    HTMLElement?: CfHTMLElementConstructor;
     ssr?: boolean;
   }): void {
     if (options.document) CfDom.__document = options.document;
@@ -107,8 +136,8 @@ export class CfDom {
    */
   private static ensureAvailable(obj: any, name: string): void {
     if (!obj) {
-      throw new Error(`DOMShim: ${name} is not available.` +
-        'Please configure DOMShim with a valid DOM implementation.');
+      throw new Error(`CfDom: ${name} is not available.` +
+        'Please configure CfDom with a valid DOM implementation.');
     }
   }
 

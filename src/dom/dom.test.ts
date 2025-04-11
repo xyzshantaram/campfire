@@ -7,6 +7,7 @@ import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import { describe, it } from 'mocha';
 import { nu, extend, store, insert, seq, rm } from '../campfire.ts';
+import { CfDom } from "./config.ts";
 
 // Setup chai
 chai.use(chaiDom);
@@ -163,7 +164,7 @@ describe('Tests for NuBuilder', () => {
     });
 
     it('should handle misc properties', () => {
-        const checkbox = document.createElement('input');
+        const [checkbox] = nu('input').done();
 
         extend(checkbox, {
             misc: { type: 'checkbox', checked: true, disabled: false }
@@ -229,7 +230,7 @@ describe('Tests for NuBuilder', () => {
 describe('Tests for insert()', () => {
     it('should insert a single element', () => {
         const [container] = nu().done();
-        insert(container, { into: document.body });
+        insert(container, { into: CfDom._document!.body });
 
         const [element] = nu('p').content('Test paragraph').done();
         const result = insert(element, { into: container });
@@ -243,7 +244,7 @@ describe('Tests for insert()', () => {
 
     it('should insert an array of elements', () => {
         const [container] = nu().done();
-        insert(container, { into: document.body });
+        insert(container, { into: CfDom._document!.body });
 
         const paragraphs = seq(3).map(i => nu('p').content(`Paragraph ${i}`).done()).flat();
         const result = insert(paragraphs, { into: container });
@@ -257,7 +258,7 @@ describe('Tests for insert()', () => {
 
     it('should insert a single element before another element', () => {
         const [container] = nu().done();
-        insert(container, { into: document.body });
+        insert(container, { into: CfDom._document!.body });
 
         const [existing] = nu('#existing').done();
         insert(existing, { into: container });
@@ -274,7 +275,7 @@ describe('Tests for insert()', () => {
 
     it('should insert a single element after another element', () => {
         const [container] = nu().done();
-        insert(container, { into: document.body });
+        insert(container, { into: CfDom._document!.body });
 
         const [existing] = nu('#existing').done();
         insert(existing, { into: container });
@@ -291,7 +292,7 @@ describe('Tests for insert()', () => {
 
     it('should insert a single element at the start of a container', () => {
         const [container] = nu().done();
-        insert(container, { into: document.body });
+        insert(container, { into: CfDom._document!.body });
 
         const [existing] = nu('#existing').done();
         insert(existing, { into: container });
