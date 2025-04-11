@@ -3,13 +3,16 @@ import type { ElementProperties, InferElementType, RenderFunction, UnwrapStore }
 import { escape, initMutationObserver } from "../utils.ts";
 import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
+import { CfDom } from "./config.ts";
 
-if ("MutationObserver" in globalThis) initMutationObserver();
-else {
-    console.warn(
-        "MutationObserver was not found in your browser. Campfire will",
-        "not be able to warn you of destructive mutations!",
-    );
+if (CfDom.isBrowser()) {
+    if ("MutationObserver" in globalThis) initMutationObserver();
+    else {
+        console.warn(
+            "MutationObserver was not found in your browser. Campfire will",
+            "not be able to warn you of destructive mutations!",
+        );
+    }
 }
 
 const unwrapDeps = <D extends Record<string, Store<any>>>(
@@ -63,7 +66,7 @@ export const extend = <
                     elt.innerHTML = res;
                     reactiveChildren.forEach(([slot, ref]) => {
                         elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
-                    })
+                    });
                 }
             });
         });
@@ -90,7 +93,7 @@ export const extend = <
                 itm.replaceWith(child);
                 child.setAttribute('data-cf-slot', name);
             }
-        })
+        });
     }
 
     const depIds = Object.values(deps).map((dep) => dep.id);
@@ -101,8 +104,7 @@ export const extend = <
     if (style) Object.assign(elt.style, style);
 
     Object.entries(on)
-        .forEach(([evt, listener]) => elt
-            .addEventListener(evt, listener as (evt: Event) => void));
+        .forEach(([evt, listener]) => CfDom.addElEventListener(elt, evt, listener as (evt: Event) => void));
 
     Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, String(value)));
 

@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 import { use } from 'chai';
 import chaiDom from 'chai-dom';
+import { CfDom } from '../src/dom/config.ts';
 
 const dom = new JSDOM(`<!DOCTYPE html><body></body>`, {
     url: "http://localhost/",
@@ -26,11 +27,13 @@ function defineGlobal(name: string, value: unknown) {
     }
 }
 
-defineGlobal('window', window);
-defineGlobal('document', window.document);
-defineGlobal('HTMLElement', window.HTMLElement);
+CfDom.configure({
+    window,
+    document: window.document,
+    HTMLElement: window.HTMLElement
+});
+
 defineGlobal('Event', window.Event);
-defineGlobal('getComputedStyle', window.getComputedStyle);
 defineGlobal('MouseEvent', window.MouseEvent);
 defineGlobal('MutationObserver', window.MutationObserver);
 
