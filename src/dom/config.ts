@@ -1,4 +1,7 @@
 // deno-lint-ignore-file no-window
+
+import { StringStyleProps } from "../types.ts";
+
 /**
  * DOMShim provides a configurable interface for DOM operations.
  * 
@@ -37,11 +40,17 @@
  *    ```
  */
 export class CfDom {
-  private static _document: Document | null = null;
+  // Use a different name for the private field to avoid naming conflicts with getter
+  private static __document: Document | null = null;
   private static _window: Window | null = null;
   private static _HTMLElement: typeof HTMLElement | null = null;
   private static _initialized = false;
   static ssr: boolean = false;
+
+  // Public accessor for document
+  public static get _document(): Document | null {
+    return CfDom.__document;
+  }
 
   /**
    * Initialize the shim by attempting to detect browser environment.
@@ -53,7 +62,7 @@ export class CfDom {
     try {
       // Check if we're in a browser environment
       if (typeof window !== 'undefined' && window.document) {
-        CfDom._document = window.document;
+        CfDom.__document = window.document;
         CfDom._window = window;
         CfDom._HTMLElement = window.HTMLElement;
       }
@@ -73,7 +82,7 @@ export class CfDom {
     HTMLElement?: typeof HTMLElement;
     ssr?: boolean;
   }): void {
-    if (options.document) CfDom._document = options.document;
+    if (options.document) CfDom.__document = options.document;
     if (options.window) CfDom._window = options.window;
     if (options.HTMLElement) CfDom._HTMLElement = options.HTMLElement;
     if (typeof options.ssr !== 'undefined') this.ssr = options.ssr;
@@ -88,7 +97,7 @@ export class CfDom {
       CfDom.initialize();
     }
 
-    CfDom.ensureAvailable(CfDom._document, 'document');
+    CfDom.ensureAvailable(CfDom.__document, 'document');
     CfDom.ensureAvailable(CfDom._window, 'window');
     CfDom.ensureAvailable(CfDom._HTMLElement, 'HTMLElement');
   }
@@ -106,29 +115,29 @@ export class CfDom {
   // Document methods
   public static createElement(tagName: string): HTMLElement {
     CfDom.ensureInitialized();
-    return CfDom._document!.createElement(tagName);
+    return CfDom.__document!.createElement(tagName);
   }
 
   public static createDocumentFragment(): DocumentFragment {
     CfDom.ensureInitialized();
-    return CfDom._document!.createDocumentFragment();
+    return CfDom.__document!.createDocumentFragment();
   }
 
   public static querySelector(selector: string, node?: ParentNode): Element | null {
     CfDom.ensureInitialized();
-    const n = node ?? CfDom._document!;
+    const n = node ?? CfDom.__document!;
     return n.querySelector(selector);
   }
 
   public static querySelectorAll(selector: string, node?: ParentNode): NodeListOf<Element> {
     CfDom.ensureInitialized();
-    const n = node ?? CfDom._document!;
+    const n = node ?? CfDom.__document!;
     return n.querySelectorAll(selector);
   }
 
   public static get body(): HTMLElement {
     CfDom.ensureInitialized();
-    return CfDom._document!.body;
+    return CfDom.__document!.body;
   }
 
   // Element methods
@@ -218,7 +227,7 @@ export class CfDom {
     (el.style as any)[property] = value;
   }
 
-  public static setStyles(el: HTMLElement, styles: Record<string, string>): void {
+  public static setStyles(el: HTMLElement, styles: Partial<Record<StringStyleProps, string | number>>): void {
     CfDom.ensureInitialized();
     Object.assign(el.style, styles);
   }
@@ -254,7 +263,7 @@ export class CfDom {
   }
 
   // Additional helpers
-  public static isHTMLElement(obj: any): boolean {
+  public static isHTMLElement(obj: any): obj is HTMLElement {
     CfDom.ensureInitialized();
     return obj instanceof CfDom._HTMLElement!;
   }
@@ -272,8 +281,8 @@ export class CfDom {
    */
   public static isUsingCustomDOMImplementation(): boolean {
     CfDom.ensureInitialized();
-    return CfDom._document !== null &&
-      (typeof window === 'undefined' || CfDom._document !== window.document);
+    return CfDom.__document !== null &&
+      (typeof window === 'undefined' || CfDom.__document !== window.document);
   }
 
   public static isSsr(value?: boolean): boolean {

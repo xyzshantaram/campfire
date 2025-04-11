@@ -3,6 +3,7 @@ import type { ElementProperties, InferElementType, RenderFunction, UnwrapStore }
 import { escape, initMutationObserver } from "../utils.ts";
 import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
+import { CfDom } from "./config.ts";
 
 if ("MutationObserver" in globalThis) initMutationObserver();
 else {
@@ -59,10 +60,11 @@ export const extend = <
 
                 if (res !== undefined) {
                     const reactiveChildren = select({ s: '[data-cf-slot]', all: true, from: elt })
-                        .map(elt => [elt.getAttribute('data-cf-slot'), elt]) as [string, HTMLElement][];
-                    elt.innerHTML = res;
+                        .map(elt => [CfDom.getAttribute(elt, 'data-cf-slot'), elt]) as [string, HTMLElement][];
+                    CfDom.setInnerHTML(elt, res);
                     reactiveChildren.forEach(([slot, ref]) => {
-                        elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
+                        const slotElement = CfDom.querySelector(`cf-slot[name='${slot}']`, elt);
+                        if (slotElement) CfDom.replaceWith(slotElement, ref);
                     })
                 }
             });
@@ -70,8 +72,8 @@ export const extend = <
 
         const result = contents(unwrapDeps(deps), { elt });
 
-        if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
-        else elt.removeAttribute("data-cf-fg-updates");
+        if (typeof result === "undefined") CfDom.setAttribute(elt, "data-cf-fg-updates", "true");
+        else CfDom.removeAttribute(elt, "data-cf-fg-updates");
 
         content = result || "";
     } else if (typeof contents === "string") {
@@ -79,36 +81,35 @@ export const extend = <
     }
 
     if (content?.trim()) {
-        elt.innerHTML = raw ? content : escape(content);
-        elt.querySelectorAll('cf-slot[name]').forEach(itm => {
-            const name = itm.getAttribute('name');
+        CfDom.setInnerHTML(elt, raw ? content : escape(content));
+        CfDom.querySelectorAll('cf-slot[name]', elt).forEach(itm => {
+            const name = CfDom.getAttribute(itm, 'name');
             if (!name) return;
             if (name in children) {
                 const val = children[name];
                 const [child] = Array.isArray(val) ? val : [val];
                 if (!child) return;
-                itm.replaceWith(child);
-                child.setAttribute('data-cf-slot', name);
+                CfDom.replaceWith(itm, child);
+                CfDom.setAttribute(child, 'data-cf-slot', name);
             }
         })
     }
 
     const depIds = Object.values(deps).map((dep) => dep.id);
-    if (depIds.length) elt.setAttribute("data-cf-reactive", "true");
-    else elt.removeAttribute("data-cf-reactive");
+    if (depIds.length) CfDom.setAttribute(elt, "data-cf-reactive", "true");
+    else CfDom.removeAttribute(elt, "data-cf-reactive");
 
     if (misc) Object.assign(elt, misc);
-    if (style) Object.assign(elt.style, style);
+    if (style) CfDom.setStyles(elt, style);
 
     Object.entries(on)
-        .forEach(([evt, listener]) => elt
-            .addEventListener(evt, listener as (evt: Event) => void));
+        .forEach(([evt, listener]) => CfDom.addElEventListener(elt, evt, listener as (evt: Event) => void));
 
-    Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, String(value)));
+    Object.entries(attrs).forEach(([attr, value]) => CfDom.setAttribute(elt, attr, String(value)));
 
     const extras: HTMLElement[] = [];
     for (const selector of gimme) {
-        const found = elt.querySelector(selector);
+        const found = CfDom.querySelector(selector, elt);
         // This is on purpose.
         // The user will expect the items to be at the same indices
         // as the selectors they supplied.

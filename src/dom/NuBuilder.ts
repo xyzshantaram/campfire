@@ -8,7 +8,7 @@ import type {
     DOMEventHandlers
 } from "../types.ts";
 import { extend } from "./nu.ts";
-
+import { CfDom } from "./config.ts";
 
 /**
  * Creates a typed HTML element based on the tag name.
@@ -18,7 +18,7 @@ import { extend } from "./nu.ts";
  * @internal
  */
 const createTypedElement = <K extends keyof HTMLElementTagNameMap>(name: K) => {
-    return document.createElement(name);
+    return CfDom.createElement(name);
 }
 
 /**
@@ -95,8 +95,8 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
         if (!tag) tag = 'div';
         const elem = createTypedElement(tag as keyof HTMLElementTagNameMap);
 
-        if (id) elem.id = id;
-        classes.forEach((cls) => elem.classList.add(cls));
+        if (id) CfDom.setId(elem, id);
+        if (classes?.length) CfDom.addClasses(elem, ...classes);
 
         return extend(elem as E, this.props);
     }

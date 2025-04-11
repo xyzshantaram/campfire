@@ -27,7 +27,7 @@ function defineGlobal(name: string, value: unknown) {
     }
 }
 
-CfDom.initialize({
+CfDom.configure({
     window,
     document: window.document,
     HTMLElement: window.HTMLElement
