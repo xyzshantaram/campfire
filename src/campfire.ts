@@ -5,17 +5,18 @@ import { ListStore, MapStore, Store, store } from "./stores/mod.ts"
 import { html, r } from "./templating/html.ts"
 import { mustache, template } from "./templating/mustache.ts"
 import { seq, escape, unescape } from './utils.ts'
+import { CfDom } from "./dom/mod.ts";
 
 import type { SelectParams } from "./dom/mod.ts";
 import type { RawHtmlOptions } from "./templating/html.ts";
 import type { ElementPosition, ElementProperties, AnySubscriber, EventSubscriber, Template } from "./types.ts"
 
 export default {
-    ListStore, MapStore, Store, store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq
+    ListStore, MapStore, Store, store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq, CfDom
 }
 
 export {
-    ListStore, MapStore, Store, store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq
+    ListStore, MapStore, Store, store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq, CfDom
 }
 
 export type {

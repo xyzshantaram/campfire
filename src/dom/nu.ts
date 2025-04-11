@@ -5,12 +5,14 @@ import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
 import { CfDom } from "./config.ts";
 
-if ("MutationObserver" in globalThis) initMutationObserver();
-else {
-    console.warn(
-        "MutationObserver was not found in your browser. Campfire will",
-        "not be able to warn you of destructive mutations!",
-    );
+if (CfDom.isBrowser()) {
+    if ("MutationObserver" in globalThis) initMutationObserver();
+    else {
+        console.warn(
+            "MutationObserver was not found in your browser. Campfire will",
+            "not be able to warn you of destructive mutations!",
+        );
+    }
 }
 
 const unwrapDeps = <D extends Record<string, Store<any>>>(

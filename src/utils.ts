@@ -73,6 +73,7 @@ const fmtNode = (node: CfHTMLElementInterface) => {
 }
 
 export const initMutationObserver = () => {
+    if (!CfDom.isBrowser()) return;
     const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             mutation.addedNodes.forEach(node => {

@@ -1,5 +1,6 @@
 import type { ElementPosition } from "../types.ts";
 import { CfDom, CfHTMLElementInterface } from "./config.ts";
+export { CfDom };
 
 /**
  * Inserts an element into the DOM given a reference element and the relative position
@@ -68,7 +69,7 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
  * @param cb The callback to run.
  * @returns void
  */
-export const onload = (cb: (ev: Event) => void) => CfDom.addGlobalEventListener('DOMContentLoaded', cb);
+export const onload = (cb: (ev: Event) => void) => globalThis.addEventListener('DOMContentLoaded', cb);
 
 export type SelectParams = {
     /** The selector to query for. */

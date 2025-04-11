@@ -17,7 +17,6 @@ export interface CfDocumentInterface {
  */
 export interface CfWindowInterface {
   document: Document;
-  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
 }
 
 /**
@@ -230,16 +229,6 @@ export class CfDom {
   public static isSsr(value?: boolean): boolean {
     if (typeof value !== 'undefined') return this.ssr = value;
     return this.ssr;
-  }
-
-  public static addGlobalEventListener(
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions
-  ): void {
-    this.ensureInitialized();
-    if (this.isSsr()) throw new Error("Event listeners are not available in SSR contexts!");
-    return CfDom._window!.addEventListener(type, listener, options);
   }
 }
 
