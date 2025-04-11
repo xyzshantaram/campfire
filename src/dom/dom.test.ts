@@ -230,7 +230,7 @@ describe('Tests for NuBuilder', () => {
 describe('Tests for insert()', () => {
     it('should insert a single element', () => {
         const [container] = nu().done();
-        insert(container, { into: CfDom._document!.body });
+        insert(container, { into: CfDom.document!.body });
 
         const [element] = nu('p').content('Test paragraph').done();
         const result = insert(element, { into: container });
@@ -244,7 +244,7 @@ describe('Tests for insert()', () => {
 
     it('should insert an array of elements', () => {
         const [container] = nu().done();
-        insert(container, { into: CfDom._document!.body });
+        insert(container, { into: CfDom.document!.body });
 
         const paragraphs = seq(3).map(i => nu('p').content(`Paragraph ${i}`).done()).flat();
         const result = insert(paragraphs, { into: container });
@@ -258,7 +258,7 @@ describe('Tests for insert()', () => {
 
     it('should insert a single element before another element', () => {
         const [container] = nu().done();
-        insert(container, { into: CfDom._document!.body });
+        insert(container, { into: CfDom.document!.body });
 
         const [existing] = nu('#existing').done();
         insert(existing, { into: container });
@@ -275,7 +275,7 @@ describe('Tests for insert()', () => {
 
     it('should insert a single element after another element', () => {
         const [container] = nu().done();
-        insert(container, { into: CfDom._document!.body });
+        insert(container, { into: CfDom.document!.body });
 
         const [existing] = nu('#existing').done();
         insert(existing, { into: container });
@@ -292,7 +292,7 @@ describe('Tests for insert()', () => {
 
     it('should insert a single element at the start of a container', () => {
         const [container] = nu().done();
-        insert(container, { into: CfDom._document!.body });
+        insert(container, { into: CfDom.document!.body });
 
         const [existing] = nu('#existing').done();
         insert(existing, { into: container });

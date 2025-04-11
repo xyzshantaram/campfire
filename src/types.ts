@@ -1,3 +1,4 @@
+import { CfHTMLElementInterface } from "./dom/config.ts";
 import { Store } from "./stores/mod.ts";
 
 type StoreValue<ST> =
@@ -75,7 +76,7 @@ export type StoreEventFromObject<D> = {
     [K in keyof D]: D[K] extends Store<any> ? StoreEvent<D[K]> : never;
 }[keyof D];
 
-export type RenderFunction<T extends HTMLElement, D> = (
+export type RenderFunction<T extends CfHTMLElementInterface, D> = (
     props: UnwrapStore<D>,
     opts: { event?: StoreEventFromObject<D> & { triggeredBy: string }, elt: T }
 ) => string | undefined;
@@ -91,7 +92,7 @@ export type DOMEventHandlers = {
 /**
  * Properties for the HTML element to be created.
  */
-export interface ElementProperties<T extends HTMLElement, D extends Record<string, Store<any>>> {
+export interface ElementProperties<T extends CfHTMLElementInterface, D extends Record<string, Store<any>>> {
     /**
      * String that will be set as the inner HTML of the created element. By default,
      * this is escaped using cf.escape() - however, if you supply `raw: true` in
@@ -145,7 +146,7 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
      * corresponding to the Record's keys and preserved between re-renders of 
      * the parent. Only the first element returned by nu() will be appended.
      */
-    children?: Record<string, HTMLElement>;
+    children?: Record<string, CfHTMLElementInterface>;
 }
 
 /**
@@ -162,9 +163,9 @@ export interface TagStringParseResult {
 }
 
 export type ElementPosition =
-    | { before: HTMLElement }
-    | { after: HTMLElement }
-    | { into: HTMLElement; at?: "start" };
+    | { before: CfHTMLElementInterface }
+    | { after: CfHTMLElementInterface }
+    | { into: CfHTMLElementInterface; at?: "start" };
 
 type TagName = keyof HTMLElementTagNameMap;
 

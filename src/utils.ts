@@ -1,4 +1,4 @@
-import { CfDom } from "./dom/config.ts";
+import { CfDom, CfHTMLElementInterface } from "./dom/config.ts";
 
 /**
  * a simple HTML sanitizer. Escapes `&`, `<`, `>`, `'`, and `"` by 
@@ -60,14 +60,12 @@ export const seq = (...args: number[]) => {
     return result;
 }
 
-const fmtNode = (node: HTMLElement) => {
+const fmtNode = (node: CfHTMLElementInterface) => {
     const result = ['<'];
-    result.push(CfDom.getTagName(node).toLowerCase());
-    const id = CfDom.getId(node);
-    if (id) result.push(`#${id}`);
-    const className = CfDom.getClassName(node);
-    if (className.trim()) result.push(`.${className.split(' ').join('.')}`);
-    result.push(...Array.from(CfDom.getAttributes(node))
+    result.push(node.tagName.toLowerCase());
+    if (node.id) result.push(`#${node.id}`);
+    if (node.className.trim()) result.push(`.${node.className.split(' ').join('.')}`);
+    result.push(...Array.from(node.attributes)
         .map(attr => `${attr.name}="${attr.value}"`)
         .slice(0, 3) // limit to 3 attributes
         .join(' '));
@@ -79,22 +77,22 @@ export const initMutationObserver = () => {
         for (const mutation of mutations) {
             mutation.addedNodes.forEach(node => {
                 if (!CfDom.isHTMLElement(node)) return;
+
                 // Check parent is reactive
                 const parent = mutation.target as HTMLElement;
-                if (!CfDom.hasAttribute(parent, 'data-cf-deps')) return;
-                if (CfDom.hasAttribute(parent, 'data-cf-fg-updates')) return;
+                if (!parent.hasAttribute('data-cf-deps')) return;
+                if (parent.hasAttribute('data-cf-fg-updates')) return;
 
                 // Check if added node (or its children) are also reactive
                 const reactiveChildren = node.querySelectorAll?.('[data-cf-deps]').length ?? 0;
-                if (!CfDom.hasAttribute(node, 'data-cf-deps') && reactiveChildren === 0) return;
+                if (!node.hasAttribute('data-cf-deps') && reactiveChildren === 0) return;
 
                 console.warn(`[Campfire] ⚠️ A reactive node ${fmtNode(node)} was inserted into a reactive ` +
                     `container ${fmtNode(parent)} This may cause it to be wiped on re-render.`);
-
-            })
+            });
         }
     });
 
-    if (!CfDom.hasAttribute(CfDom.body, 'cf-disable-mo'))
+    if (!CfDom.body.hasAttribute('cf-disable-mo'))
         observer.observe(CfDom.body, { childList: true, subtree: true });
 }

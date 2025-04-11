@@ -1,5 +1,5 @@
 import type { ElementPosition } from "../types.ts";
-import { CfDom } from "./config.ts";
+import { CfDom, CfHTMLElementInterface } from "./config.ts";
 
 /**
  * Inserts an element into the DOM given a reference element and the relative position
@@ -25,7 +25,7 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
     }
 
     let position: InsertPosition = 'beforeend';
-    let ref: Element;
+    let ref: CfHTMLElementInterface;
 
     if ('after' in where) {
         position = 'afterend';
@@ -42,24 +42,22 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
 
     const frag = CfDom.createDocumentFragment();
     if (Array.isArray(els)) {
-        for (const item of els) CfDom.appendChild(frag, item);
+        for (const item of els) frag.appendChild(item);
     }
     else {
-        CfDom.appendChild(frag, els);
+        frag.appendChild(els);
     }
 
     if (position === 'beforebegin') {
-        const parentNode = CfDom.getElParentNode(ref);
-        if (parentNode) CfDom.insertBefore(parentNode, frag, ref);
+        const parentNode = ref.parentNode;
+        if (parentNode) parentNode.insertBefore(frag, ref);
     } else if (position === 'afterend') {
-        const parentNode = CfDom.getElParentNode(ref);
-        const nextSibling = CfDom.getElNextSibling(ref);
-        if (parentNode) CfDom.insertBefore(parentNode, frag, nextSibling);
+        const parentNode = ref.parentNode;
+        if (parentNode) parentNode.insertBefore(frag, ref.nextSibling);
     } else if (position === 'afterbegin') {
-        const firstChild = CfDom.getElFirstChild(ref);
-        CfDom.insertBefore(ref, frag, firstChild);
+        ref.insertBefore(frag, ref.firstChild);
     } else {
-        CfDom.appendChild(ref, frag);
+        ref.appendChild(frag);
     }
 
     return els;
@@ -89,7 +87,7 @@ export type SelectParams = {
 export function select(params: SelectParams & { single: true }): HTMLElement | null;
 export function select(params: SelectParams & { single?: false }): HTMLElement[];
 export function select({ s, all, from, single }: SelectParams & { single?: boolean }) {
-    const parent = (from ?? CfDom._document) as ParentNode;
+    const parent = (from ?? CfDom.document) as ParentNode;
     if (all) {
         return Array.from(CfDom.querySelectorAll(s, parent)) as HTMLElement[];
     }
@@ -103,12 +101,12 @@ export function select({ s, all, from, single }: SelectParams & { single?: boole
  * @param elt The element to remove.
  * @returns void
  */
-export const rm = (elt: Element) => CfDom.remove(elt);
+export const rm = (elt: Element) => elt.remove();
 
 /**
  * Empties a DOM element of its content.
  * @param elt The element to empty.
  */
 export const empty = (elt: Element) => {
-    CfDom.setInnerHTML(elt, '');
+    elt.innerHTML = '';
 };

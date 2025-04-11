@@ -1,7 +1,4 @@
 // deno-lint-ignore-file no-window
-
-import { StringStyleProps } from "../types.ts";
-
 /**
  * Define minimally required interface for Document implementation
  * This includes only the methods and properties we actually use
@@ -27,12 +24,31 @@ export interface CfWindowInterface {
  * Define minimally required interface for HTMLElement constructor
  */
 export interface CfHTMLElementConstructor {
-  new(): HTMLElement;
-  prototype: HTMLElement;
+  new(): CfHTMLElementInterface;
+  prototype: CfHTMLElementInterface;
 }
 
 /**
- * DOMShim provides a configurable interface for DOM operations.
+ * Only the properties of HTMLElement that are actually used in Campfire.
+ */
+export type CfHTMLElementInterface = Pick<
+  HTMLElement,
+  'innerHTML' |
+  'classList' |
+  'setAttribute' |
+  'getAttribute' |
+  'hasAttribute' |
+  'removeAttribute' |
+  'addEventListener' |
+  'style' |
+  'id' |
+  'tagName' |
+  'className' |
+  'attributes'
+> & Node;
+
+/**
+ * DOMShim provides a configurable interface for core DOM operations.
  * 
  * This allows Campfire to work in both browser environments 
  * (using native DOM) and server environments (using a DOM implementation
@@ -46,7 +62,7 @@ export interface CfHTMLElementConstructor {
  *    
  *    // Methods are already initialized with browser DOM
  *    const element = CfDom.createElement('div');
- *    CfDom.setInnerHTML(element, 'Hello world');
+ *    element.innerHTML = 'Hello world';
  *    ```
  * 
  * 2. Server-side rendering with custom DOM implementation:
@@ -67,18 +83,22 @@ export interface CfHTMLElementConstructor {
  *    // Now use the shim methods with jsdom backing
  *    const element = CfDom.createElement('div');
  *    ```
+ * 
+ * Note: This implementation uses a "minimal API" approach, where only document-level
+ * methods (createElement, querySelector, etc.) are provided by CfDom, and element-level
+ * operations are performed directly on the elements themselves.
  */
 export class CfDom {
   // Use a different name for the private field to avoid naming conflicts with getter
-  private static __document: CfDocumentInterface | null = null;
+  private static _document: CfDocumentInterface | null = null;
   private static _window: CfWindowInterface | null = null;
   private static _HTMLElement: CfHTMLElementConstructor | null = null;
   private static _initialized = false;
   static ssr: boolean = false;
 
   // Public accessor for document
-  public static get _document(): CfDocumentInterface | null {
-    return CfDom.__document;
+  public static get document(): CfDocumentInterface | null {
+    return CfDom._document;
   }
 
   /**
@@ -91,7 +111,7 @@ export class CfDom {
     try {
       // Check if we're in a browser environment
       if (typeof window !== 'undefined' && window.document) {
-        CfDom.__document = window.document;
+        CfDom._document = window.document;
         CfDom._window = window;
         CfDom._HTMLElement = window.HTMLElement;
       }
@@ -111,7 +131,7 @@ export class CfDom {
     HTMLElement?: CfHTMLElementConstructor;
     ssr?: boolean;
   }): void {
-    if (options.document) CfDom.__document = options.document;
+    if (options.document) CfDom._document = options.document;
     if (options.window) CfDom._window = options.window;
     if (options.HTMLElement) CfDom._HTMLElement = options.HTMLElement;
     if (typeof options.ssr !== 'undefined') this.ssr = options.ssr;
@@ -126,7 +146,7 @@ export class CfDom {
       CfDom.initialize();
     }
 
-    CfDom.ensureAvailable(CfDom.__document, 'document');
+    CfDom.ensureAvailable(CfDom._document, 'document');
     CfDom.ensureAvailable(CfDom._window, 'window');
     CfDom.ensureAvailable(CfDom._HTMLElement, 'HTMLElement');
   }
@@ -144,102 +164,35 @@ export class CfDom {
   // Document methods
   public static createElement(tagName: string): HTMLElement {
     CfDom.ensureInitialized();
-    return CfDom.__document!.createElement(tagName);
+    return CfDom._document!.createElement(tagName);
   }
 
   public static createDocumentFragment(): DocumentFragment {
     CfDom.ensureInitialized();
-    return CfDom.__document!.createDocumentFragment();
+    return CfDom._document!.createDocumentFragment();
   }
 
   public static querySelector(selector: string, node?: ParentNode): Element | null {
     CfDom.ensureInitialized();
-    const n = node ?? CfDom.__document!;
+    const n = node ?? CfDom._document!;
     return n.querySelector(selector);
   }
 
   public static querySelectorAll(selector: string, node?: ParentNode): NodeListOf<Element> {
     CfDom.ensureInitialized();
-    const n = node ?? CfDom.__document!;
+    const n = node ?? CfDom._document!;
     return n.querySelectorAll(selector);
   }
 
   public static get body(): HTMLElement {
     CfDom.ensureInitialized();
-    return CfDom.__document!.body;
+    return CfDom._document!.body;
   }
 
-  // Element methods
-  public static setInnerHTML(el: Element, html: string): void {
-    CfDom.ensureInitialized();
-    el.innerHTML = html;
-  }
-
-  public static getInnerHTML(el: Element): string {
-    CfDom.ensureInitialized();
-    return el.innerHTML;
-  }
-
-  public static addClasses(el: Element, ...classNames: string[]): void {
-    CfDom.ensureInitialized();
-    classNames.forEach(cls => el.classList.add(cls));
-  }
-
-  public static appendChild(parent: Node, child: Node): Node {
-    CfDom.ensureInitialized();
-    return parent.appendChild(child);
-  }
-
-  public static getElParentNode(el: Node): Node | null {
-    CfDom.ensureInitialized();
-    return el.parentNode;
-  }
-
-  public static insertBefore(parent: Node, newNode: Node, referenceNode: Node | null): Node {
-    CfDom.ensureInitialized();
-    return parent.insertBefore(newNode, referenceNode);
-  }
-
-  public static getElFirstChild(el: Node): Node | null {
-    CfDom.ensureInitialized();
-    return el.firstChild;
-  }
-
-  public static getElNextSibling(el: Node): Node | null {
-    CfDom.ensureInitialized();
-    return el.nextSibling;
-  }
-
-  public static remove(el: Element): void {
-    CfDom.ensureInitialized();
-    el.remove();
-  }
-
-  public static replaceWith(el: Element, ...nodes: (Node | string)[]): void {
-    CfDom.ensureInitialized();
-    el.replaceWith(...nodes);
-  }
-
-  public static setAttribute(el: Element, name: string, value: string): void {
-    CfDom.ensureInitialized();
-    el.setAttribute(name, value);
-  }
-
-  public static getAttribute(el: Element, name: string): string | null {
-    CfDom.ensureInitialized();
-    return el.getAttribute(name);
-  }
-
-  public static hasAttribute(el: Element, name: string): boolean {
-    CfDom.ensureInitialized();
-    return el.hasAttribute(name);
-  }
-
-  public static removeAttribute(el: Element, name: string): void {
-    CfDom.ensureInitialized();
-    el.removeAttribute(name);
-  }
-
+  /**
+   * Add event listener with SSR protection
+   * This is one of the few element methods we keep as it has special SSR handling
+   */
   public static addElEventListener(
     el: EventTarget,
     type: string,
@@ -249,46 +202,6 @@ export class CfDom {
     CfDom.ensureInitialized();
     if (this.isSsr()) throw new Error("Event listeners are not available in SSR contexts!");
     el.addEventListener(type, listener, options);
-  }
-
-  public static setStyle(el: HTMLElement, property: string, value: string): void {
-    CfDom.ensureInitialized();
-    (el.style as any)[property] = value;
-  }
-
-  public static setStyles(el: HTMLElement, styles: Partial<Record<StringStyleProps, string | number>>): void {
-    CfDom.ensureInitialized();
-    Object.assign(el.style, styles);
-  }
-
-  public static setId(el: Element, id: string): void {
-    CfDom.ensureInitialized();
-    (el as HTMLElement).id = id;
-  }
-
-  public static getId(el: Element): string {
-    CfDom.ensureInitialized();
-    return (el as HTMLElement).id;
-  }
-
-  public static getTagName(el: Element): string {
-    CfDom.ensureInitialized();
-    return el.tagName;
-  }
-
-  public static getClassName(el: Element): string {
-    CfDom.ensureInitialized();
-    return (el as HTMLElement).className;
-  }
-
-  public static setClassName(el: Element, className: string): void {
-    CfDom.ensureInitialized();
-    (el as HTMLElement).className = className;
-  }
-
-  public static getAttributes(el: Element): NamedNodeMap {
-    CfDom.ensureInitialized();
-    return el.attributes;
   }
 
   // Additional helpers
@@ -310,8 +223,8 @@ export class CfDom {
    */
   public static isUsingCustomDOMImplementation(): boolean {
     CfDom.ensureInitialized();
-    return CfDom.__document !== null &&
-      (typeof window === 'undefined' || CfDom.__document !== window.document);
+    return CfDom._document !== null &&
+      (typeof window === 'undefined' || CfDom._document !== window.document);
   }
 
   public static isSsr(value?: boolean): boolean {

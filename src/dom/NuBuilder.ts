@@ -95,8 +95,8 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
         if (!tag) tag = 'div';
         const elem = createTypedElement(tag as keyof HTMLElementTagNameMap);
 
-        if (id) CfDom.setId(elem, id);
-        if (classes?.length) CfDom.addClasses(elem, ...classes);
+        if (id) elem.id = id;
+        if (classes?.length) classes.forEach(cls => elem.classList.add(cls));
 
         return extend(elem as E, this.props);
     }
