@@ -1,5 +1,10 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc12
+
+- Add callbackify function to make doing async ops inside stores easier.
+- Add poll() function.
+
 ## 4.0.0-rc11
 
 - Added CfDom, a DOM shim so campfire can be used in server environments etc.

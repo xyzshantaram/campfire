@@ -99,3 +99,33 @@ export const initMutationObserver = () => {
     if (!CfDom.body.hasAttribute('cf-disable-mo'))
         observer.observe(CfDom.body, { childList: true, subtree: true });
 }
+
+type Callback<U, E> = (err: E | null, res: U | null) => void;
+type Callbackified<T extends any[], U, E> = (cb: Callback<U, E>, ...args: T) => void;
+
+export const callbackify = <T extends any[], U = unknown, E = any>(
+    fn: (...args: T) => Promise<U>
+): Callbackified<T, U, E> => {
+    return (cb, ...args) => {
+        fn(...args)
+            .then((v) => cb(null, v))
+            .catch(err => cb(err, null));
+    };
+}
+
+export const poll = (fn: () => void, interval: number, callNow = false) => {
+    let timeout: number | null = null;
+    const handler = () => {
+        try {
+            fn();
+        }
+        finally {
+            timeout = setTimeout(handler, interval);
+        }
+    }
+    if (callNow) handler();
+    else timeout = setTimeout(handler, interval);
+    return () => {
+        if (timeout !== null) clearTimeout(timeout);
+    }
+}
