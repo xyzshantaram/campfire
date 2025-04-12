@@ -2,8 +2,8 @@
 
 ## 4.0.0-rc12
 
-- Add callbackify function to make doing async ops inside stores easier.
-- Add poll() function.
+- Added callbackify function to make doing async ops inside stores easier.
+- Added poll() function.
 
 ## 4.0.0-rc11
 
