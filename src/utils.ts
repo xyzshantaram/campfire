@@ -105,7 +105,7 @@ export const initMutationObserver = () => {
  * @template U The type of the successful result
  * @template E The type of the error
  */
-type Callback<U, E> = (err: E | null, res: U | null) => void;
+export type Callback<U, E> = (err: E | null, res: U | null) => void;
 
 /**
  * Represents a function that accepts a callback as its first argument, followed by any other arguments.
@@ -113,7 +113,7 @@ type Callback<U, E> = (err: E | null, res: U | null) => void;
  * @template U The type of the successful result passed to the callback
  * @template E The type of the error that might be passed to the callback
  */
-type Callbackified<T extends any[], U, E> = (cb: Callback<U, E>, ...args: T) => void;
+export type Callbackified<T extends any[], U, E> = (cb: Callback<U, E>, ...args: T) => void;
 
 /**
  * Converts a function that returns a Promise into a function that accepts a Node-style callback.
@@ -198,4 +198,21 @@ export const poll = (fn: () => void, interval: number, callNow = false) => {
     return () => {
         if (timeout !== null) clearTimeout(timeout);
     }
+}
+
+/**
+ * Similar to python `enumerate`: returns a list of tuples with item indices.
+ * Super useful for doing for...of loops.
+ * @example
+ * ```js
+ * for (const [i, item] of cf.enumerate(items)) {
+ *   console.log(`${i}. ${item}`);
+ * }
+ * ```
+ * @param arr the array to enumerate.
+ * @returns the enumerated array.
+ */
+export const enumerate = <T>(arr: T[]) => {
+    if (!Array.isArray(arr)) return [];
+    return arr.map((item, i) => [i, item] as const);
 }
