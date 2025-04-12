@@ -4,11 +4,12 @@ import { NuBuilder } from "./dom/NuBuilder.ts";
 import { ListStore, MapStore, Store, store } from "./stores/mod.ts";
 import { html, r } from "./templating/html.ts";
 import { mustache, template } from "./templating/mustache.ts";
-import { seq, escape, unescape } from './utils.ts';
+import { seq, escape, unescape, callbackify, enumerate, poll } from './utils.ts';
 import { CfDom } from "./dom/mod.ts";
 import type { SelectParams } from "./dom/mod.ts";
 import type { RawHtmlOptions } from "./templating/html.ts";
 import type { ElementPosition, ElementProperties, AnySubscriber, EventSubscriber, Template } from "./types.ts";
+import type { Callback, Callbackified } from "./utils.ts";
 declare const _default: {
     ListStore: typeof ListStore;
     MapStore: typeof MapStore;
@@ -29,7 +30,10 @@ declare const _default: {
     r: (val: any, options?: RawHtmlOptions) => import("./templating/html.ts").RawHtml;
     seq: (...args: number[]) => number[];
     CfDom: typeof CfDom;
+    callbackify: <T extends any[], U = unknown, E = any>(fn: (...args: T) => Promise<U>) => Callbackified<T, U, E>;
+    enumerate: <T>(arr: T[]) => (readonly [number, T])[];
+    poll: (fn: () => void, interval: number, callNow?: boolean) => () => void;
 };
 export default _default;
-export { ListStore, MapStore, Store, store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq, CfDom };
-export type { ElementPosition, ElementProperties, AnySubscriber, EventSubscriber, Template, NuBuilder, SelectParams, RawHtmlOptions };
+export { ListStore, MapStore, Store, store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq, CfDom, callbackify, enumerate, poll };
+export type { ElementPosition, ElementProperties, AnySubscriber, EventSubscriber, Template, NuBuilder, SelectParams, RawHtmlOptions, Callback, Callbackified };

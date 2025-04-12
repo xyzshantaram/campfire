@@ -223,6 +223,30 @@ var initMutationObserver = () => {
   if (!CfDom.body.hasAttribute("cf-disable-mo"))
     observer.observe(CfDom.body, { childList: true, subtree: true });
 };
+var callbackify = (fn) => {
+  return (cb, ...args) => {
+    fn(...args).then((v) => cb(null, v)).catch((err) => cb(err, null));
+  };
+};
+var poll = (fn, interval, callNow = false) => {
+  let timeout = null;
+  const handler = () => {
+    try {
+      fn();
+    } finally {
+      timeout = setTimeout(handler, interval);
+    }
+  };
+  if (callNow) handler();
+  else timeout = setTimeout(handler, interval);
+  return () => {
+    if (timeout !== null) clearTimeout(timeout);
+  };
+};
+var enumerate = (arr) => {
+  if (!Array.isArray(arr)) return [];
+  return arr.map((item, i) => [i, item]);
+};
 
 // src/dom/NuBuilder.ts
 var createTypedElement = (name) => {
@@ -819,15 +843,20 @@ var campfire_default = {
   html,
   r,
   seq,
-  CfDom
+  CfDom,
+  callbackify,
+  enumerate,
+  poll
 };
 export {
   CfDom,
   ListStore,
   MapStore,
   Store,
+  callbackify,
   campfire_default as default,
   empty,
+  enumerate,
   escape,
   extend,
   html,
@@ -835,6 +864,7 @@ export {
   mustache,
   nu,
   onload,
+  poll,
   r,
   rm,
   select,

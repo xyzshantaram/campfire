@@ -590,6 +590,37 @@ const cleanup = () =&gt; {
 };
 </code></pre>
 </details>
+
+<details>
+<summary><code>enumerate()</code> - array indexing helper</summary>
+
+<p>Similar to Python&#39;s <code>enumerate()</code>: returns an array of <code>[index, value]</code> tuples
+to simplify for...of loops.</p>
+<h5>Basic usage</h5>
+<pre class="microlight"><code>const items = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;];
+
+for (const [i, item] of cf.enumerate(items)) {
+  console.log(`${i}. ${item}`);
+}
+// Logs:
+// 0. apple
+// 1. banana
+// 2. cherry
+</code></pre>
+<h5>With DOM elements</h5>
+<pre class="microlight"><code>const listItems = cf.select({ s: &quot;li&quot;, all: true });
+
+for (const [index, item] of cf.enumerate(listItems)) {
+  // Add numbering or different styling based on position
+  cf.extend(item, {
+    contents: `${index + 1}. ${item.textContent}`,
+    style: {
+      backgroundColor: index % 2 === 0 ? &quot;#f0f0f0&quot; : &quot;white&quot;,
+    },
+  });
+}
+</code></pre>
+</details>
 </div>
 <div class="cf-site-div" data-heading="playground"><h3>try before you buy</h3>
 <p>Try one of these demos, or do your own thing!</p>

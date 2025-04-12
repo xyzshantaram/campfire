@@ -1,5 +1,9 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc13
+
+- Added enumerate() function, exported callbackify and poll (lol)
+
 ## 4.0.0-rc12
 
 - Added callbackify function to make doing async ops inside stores easier.
