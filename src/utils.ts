@@ -184,7 +184,7 @@ export const callbackify = <T extends any[], U = unknown, E = any>(
  * ```
  */
 export const poll = (fn: () => void, interval: number, callNow = false) => {
-    let timeout: number | null = null;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
     const handler = () => {
         try {
             fn();
