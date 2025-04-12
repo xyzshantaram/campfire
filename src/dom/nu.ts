@@ -147,12 +147,12 @@ export const extend = <
  * ```
  */
 export const nu = <
-    const T extends string,
-    E extends InferElementType<T>,
-    D extends Record<string, Store<any>>,
+    const Info extends string,
+    Elem extends InferElementType<Info>,
+    Deps extends Record<string, Store<any>>,
 >(
-    info: T = 'div' as T,
-    args: ElementProperties<E, D> = {},
-): NuBuilder<T, E, D> => {
-    return new NuBuilder<T, E, D>(info, args);
+    info: Info = 'div' as Info,
+    args: ElementProperties<Elem, Deps> = {},
+): NuBuilder<Elem, Deps, Info> => {
+    return new NuBuilder<Elem, Deps, Info>(info, args);
 };

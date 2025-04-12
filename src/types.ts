@@ -182,4 +182,4 @@ export type EltInfoToTag<T extends string> =
 
 
 export type InferElementType<T extends string> =
-    HTMLElementTagNameMap[EltInfoToTag<T>];
+    T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[EltInfoToTag<T>] : HTMLElement;
