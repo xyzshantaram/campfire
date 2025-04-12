@@ -82,7 +82,6 @@ export const initMutationObserver = () => {
 
                 // Check parent is reactive
                 const parent = mutation.target as HTMLElement;
-                console.log(parent, node);
                 if (!parent.hasAttribute('data-cf-deps')) return;
                 if (parent.hasAttribute('data-cf-fg-updates')) return;
 
