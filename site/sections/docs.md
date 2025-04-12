@@ -571,3 +571,41 @@ const cleanup = () => {
 ```
 
 </details>
+
+<details>
+<summary><code>enumerate()</code> - array indexing helper</summary>
+
+Similar to Python's `enumerate()`: returns an array of `[index, value]` tuples
+to simplify for...of loops.
+
+##### Basic usage
+
+```js
+const items = ["apple", "banana", "cherry"];
+
+for (const [i, item] of cf.enumerate(items)) {
+  console.log(`${i}. ${item}`);
+}
+// Logs:
+// 0. apple
+// 1. banana
+// 2. cherry
+```
+
+##### With DOM elements
+
+```js
+const listItems = cf.select({ s: "li", all: true });
+
+for (const [index, item] of cf.enumerate(listItems)) {
+  // Add numbering or different styling based on position
+  cf.extend(item, {
+    contents: `${index + 1}. ${item.textContent}`,
+    style: {
+      backgroundColor: index % 2 === 0 ? "#f0f0f0" : "white",
+    },
+  });
+}
+```
+
+</details>
