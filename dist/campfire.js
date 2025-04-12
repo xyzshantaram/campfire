@@ -1,3 +1,119 @@
+// src/dom/config.ts
+var _CfDom = class _CfDom {
+  // Public accessor for document
+  static get document() {
+    return _CfDom._document;
+  }
+  /**
+   * Initialize the shim by attempting to detect browser environment.
+   * If in a browser, use the native DOM objects; otherwise, leave them unset.
+   */
+  static initialize() {
+    if (_CfDom._initialized) return;
+    try {
+      if (typeof window !== "undefined" && window.document) {
+        _CfDom._document = window.document;
+        _CfDom._window = window;
+        _CfDom._HTMLElement = window.HTMLElement;
+      }
+    } catch {
+    }
+    _CfDom._initialized = true;
+  }
+  /**
+   * Configure the shim with custom DOM implementation.
+   */
+  static configure(options) {
+    if (options.document) _CfDom._document = options.document;
+    if (options.window) _CfDom._window = options.window;
+    if (options.HTMLElement) _CfDom._HTMLElement = options.HTMLElement;
+    if (typeof options.ssr !== "undefined") this.ssr = options.ssr;
+    _CfDom._initialized = true;
+  }
+  /**
+   * Check if shim is properly configured.
+   */
+  static ensureInitialized() {
+    if (!_CfDom._initialized) {
+      _CfDom.initialize();
+    }
+    _CfDom.ensureAvailable(_CfDom._document, "document");
+    _CfDom.ensureAvailable(_CfDom._window, "window");
+    _CfDom.ensureAvailable(_CfDom._HTMLElement, "HTMLElement");
+  }
+  /**
+   * Throws an error if the specified object is not available.
+   */
+  static ensureAvailable(obj, name) {
+    if (!obj) {
+      throw new Error(`CfDom: ${name} is not available.Please configure CfDom with a valid DOM implementation.`);
+    }
+  }
+  // Document methods
+  static createElement(tagName) {
+    _CfDom.ensureInitialized();
+    return _CfDom._document.createElement(tagName);
+  }
+  static createDocumentFragment() {
+    _CfDom.ensureInitialized();
+    return _CfDom._document.createDocumentFragment();
+  }
+  static querySelector(selector, node) {
+    _CfDom.ensureInitialized();
+    const n = node ?? _CfDom._document;
+    return n.querySelector(selector);
+  }
+  static querySelectorAll(selector, node) {
+    _CfDom.ensureInitialized();
+    const n = node ?? _CfDom._document;
+    return n.querySelectorAll(selector);
+  }
+  static get body() {
+    _CfDom.ensureInitialized();
+    return _CfDom._document.body;
+  }
+  /**
+   * Add event listener with SSR protection
+   * This is one of the few element methods we keep as it has special SSR handling
+   */
+  static addElEventListener(el, type, listener, options) {
+    _CfDom.ensureInitialized();
+    if (this.isSsr()) throw new Error("Event listeners are not available in SSR contexts!");
+    el.addEventListener(type, listener, options);
+  }
+  // Additional helpers
+  static isHTMLElement(obj) {
+    _CfDom.ensureInitialized();
+    return obj instanceof _CfDom._HTMLElement;
+  }
+  /**
+   * Check if code is running in a browser environment.
+   * This can be useful for conditional logic based on environment.
+   */
+  static isBrowser() {
+    return typeof window !== "undefined" && !!window.document;
+  }
+  /**
+   * Check if DOM shim is using a custom (non-browser) implementation.
+   */
+  static isUsingCustomDOMImplementation() {
+    _CfDom.ensureInitialized();
+    return _CfDom._document !== null && (typeof window === "undefined" || _CfDom._document !== window.document);
+  }
+  static isSsr(value) {
+    if (typeof value !== "undefined") return this.ssr = value;
+    return this.ssr;
+  }
+};
+// Use a different name for the private field to avoid naming conflicts with getter
+_CfDom._document = null;
+_CfDom._window = null;
+_CfDom._HTMLElement = null;
+_CfDom._initialized = false;
+_CfDom.ssr = false;
+var CfDom = _CfDom;
+CfDom.initialize();
+
 // src/dom/mod.ts
 var insert = (els, where) => {
   if (!("into" in where) && !("after" in where) && !("before" in where)) {
@@ -17,16 +133,18 @@ var insert = (els, where) => {
   } else {
     ref = where.into;
   }
-  const frag = document.createDocumentFragment();
+  const frag = CfDom.createDocumentFragment();
   if (Array.isArray(els)) {
     for (const item of els) frag.appendChild(item);
   } else {
     frag.appendChild(els);
   }
   if (position === "beforebegin") {
-    ref.parentNode?.insertBefore(frag, ref);
+    const parentNode = ref.parentNode;
+    if (parentNode) parentNode.insertBefore(frag, ref);
   } else if (position === "afterend") {
-    ref.parentNode?.insertBefore(frag, ref.nextSibling);
+    const parentNode = ref.parentNode;
+    if (parentNode) parentNode.insertBefore(frag, ref.nextSibling);
   } else if (position === "afterbegin") {
     ref.insertBefore(frag, ref.firstChild);
   } else {
@@ -36,11 +154,11 @@ var insert = (els, where) => {
 };
 var onload = (cb) => globalThis.addEventListener("DOMContentLoaded", cb);
 function select({ s, all, from, single }) {
-  from ?? (from = document);
+  const parent = from ?? CfDom.document;
   if (all) {
-    return Array.from(from.querySelectorAll(s));
+    return Array.from(CfDom.querySelectorAll(s, parent));
   }
-  const elt = from.querySelector(s);
+  const elt = CfDom.querySelector(s, parent);
   return single ? elt : [elt];
 }
 var rm = (elt) => elt.remove();
@@ -87,26 +205,28 @@ var fmtNode = (node) => {
   return result.join("");
 };
 var initMutationObserver = () => {
+  if (!CfDom.isBrowser()) return;
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       mutation.addedNodes.forEach((node) => {
-        if (!(node instanceof HTMLElement)) return;
+        if (!CfDom.isHTMLElement(node)) return;
         const parent = mutation.target;
+        console.log(parent, node);
         if (!parent.hasAttribute("data-cf-deps")) return;
         if (parent.hasAttribute("data-cf-fg-updates")) return;
         const reactiveChildren = node.querySelectorAll?.("[data-cf-deps]").length ?? 0;
-        if (!node.hasAttribute?.("data-cf-deps") && reactiveChildren === 0) return;
+        if (!node.hasAttribute("data-cf-deps") && reactiveChildren === 0) return;
         console.warn(`[Campfire] \u26A0\uFE0F A reactive node ${fmtNode(node)} was inserted into a reactive container ${fmtNode(parent)} This may cause it to be wiped on re-render.`);
       });
     }
   });
-  if (!document.body.hasAttribute("cf-disable-mo"))
-    observer.observe(document.body, { childList: true, subtree: true });
+  if (!CfDom.body.hasAttribute("cf-disable-mo"))
+    observer.observe(CfDom.body, { childList: true, subtree: true });
 };
 
 // src/dom/NuBuilder.ts
 var createTypedElement = (name) => {
-  return document.createElement(name);
+  return CfDom.createElement(name);
 };
 var parseEltString = (str) => {
   const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/) : void 0;
@@ -147,7 +267,7 @@ var NuBuilder = class {
     if (!tag) tag = "div";
     const elem = createTypedElement(tag);
     if (id) elem.id = id;
-    classes.forEach((cls) => elem.classList.add(cls));
+    if (classes?.length) classes.forEach((cls) => elem.classList.add(cls));
     return extend(elem, this.props);
   }
   ref() {
@@ -279,12 +399,14 @@ var NuBuilder = class {
 };
 
 // src/dom/nu.ts
-if ("MutationObserver" in globalThis) initMutationObserver();
-else {
-  console.warn(
-    "MutationObserver was not found in your browser. Campfire will",
-    "not be able to warn you of destructive mutations!"
-  );
+if (CfDom.isBrowser()) {
+  if ("MutationObserver" in globalThis) initMutationObserver();
+  else {
+    console.warn(
+      "MutationObserver was not found in your browser. Campfire will",
+      "not be able to warn you of destructive mutations!"
+    );
+  }
 }
 var unwrapDeps = (deps) => {
   const result = {};
@@ -345,7 +467,7 @@ var extend = (elt, args = {}) => {
   else elt.removeAttribute("data-cf-reactive");
   if (misc) Object.assign(elt, misc);
   if (style) Object.assign(elt.style, style);
-  Object.entries(on).forEach(([evt, listener]) => elt.addEventListener(evt, listener));
+  Object.entries(on).forEach(([evt, listener]) => CfDom.addElEventListener(elt, evt, listener));
   Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, String(value)));
   const extras = [];
   for (const selector of gimme) {
@@ -696,9 +818,11 @@ var campfire_default = {
   onload,
   html,
   r,
-  seq
+  seq,
+  CfDom
 };
 export {
+  CfDom,
   ListStore,
   MapStore,
   Store,

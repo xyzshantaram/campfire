@@ -1,5 +1,10 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc11
+
+- Added CfDom, a DOM shim so campfire can be used in server environments etc.
+  Also makes testing easier.
+
 ## 4.0.0-rc10
 
 - 'change' events are now fired only for MapStore and ListStore - this is so

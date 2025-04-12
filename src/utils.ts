@@ -1,3 +1,6 @@
+import { CfDom } from "./dom/config.ts";
+import type { CfHTMLElementInterface } from './dom/config.ts';
+
 /**
  * a simple HTML sanitizer. Escapes `&`, `<`, `>`, `'`, and `"` by 
  * replacing them with their corresponding HTML escapes 
@@ -58,7 +61,7 @@ export const seq = (...args: number[]) => {
     return result;
 }
 
-const fmtNode = (node: HTMLElement) => {
+const fmtNode = (node: CfHTMLElementInterface) => {
     const result = ['<'];
     result.push(node.tagName.toLowerCase());
     if (node.id) result.push(`#${node.id}`);
@@ -71,27 +74,28 @@ const fmtNode = (node: HTMLElement) => {
 }
 
 export const initMutationObserver = () => {
+    if (!CfDom.isBrowser()) return;
     const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             mutation.addedNodes.forEach(node => {
-                if (!(node instanceof HTMLElement)) return;
+                if (!CfDom.isHTMLElement(node)) return;
 
                 // Check parent is reactive
                 const parent = mutation.target as HTMLElement;
+                console.log(parent, node);
                 if (!parent.hasAttribute('data-cf-deps')) return;
                 if (parent.hasAttribute('data-cf-fg-updates')) return;
 
                 // Check if added node (or its children) are also reactive
                 const reactiveChildren = node.querySelectorAll?.('[data-cf-deps]').length ?? 0;
-                if (!node.hasAttribute?.('data-cf-deps') && reactiveChildren === 0) return;
+                if (!node.hasAttribute('data-cf-deps') && reactiveChildren === 0) return;
 
                 console.warn(`[Campfire] ⚠️ A reactive node ${fmtNode(node)} was inserted into a reactive ` +
                     `container ${fmtNode(parent)} This may cause it to be wiped on re-render.`);
-
-            })
+            });
         }
     });
 
-    if (!document.body.hasAttribute('cf-disable-mo'))
-        observer.observe(document.body, { childList: true, subtree: true });
+    if (!CfDom.body.hasAttribute('cf-disable-mo'))
+        observer.observe(CfDom.body, { childList: true, subtree: true });
 }

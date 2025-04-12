@@ -1,4 +1,6 @@
 import type { ElementPosition } from "../types.ts";
+import { CfDom } from "./config.ts";
+export { CfDom };
 /**
  * Inserts an element into the DOM given a reference element and the relative position
  * of the new element.

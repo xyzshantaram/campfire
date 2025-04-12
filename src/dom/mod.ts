@@ -1,4 +1,7 @@
 import type { ElementPosition } from "../types.ts";
+import { CfDom } from "./config.ts";
+import type { CfHTMLElementInterface } from './config.ts';
+export { CfDom };
 
 /**
  * Inserts an element into the DOM given a reference element and the relative position
@@ -24,7 +27,7 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
     }
 
     let position: InsertPosition = 'beforeend';
-    let ref: Element;
+    let ref: CfHTMLElementInterface;
 
     if ('after' in where) {
         position = 'afterend';
@@ -39,7 +42,7 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
         ref = where.into;
     }
 
-    const frag = document.createDocumentFragment();
+    const frag = CfDom.createDocumentFragment();
     if (Array.isArray(els)) {
         for (const item of els) frag.appendChild(item);
     }
@@ -48,9 +51,11 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
     }
 
     if (position === 'beforebegin') {
-        ref.parentNode?.insertBefore(frag, ref);
+        const parentNode = ref.parentNode;
+        if (parentNode) parentNode.insertBefore(frag, ref);
     } else if (position === 'afterend') {
-        ref.parentNode?.insertBefore(frag, ref.nextSibling);
+        const parentNode = ref.parentNode;
+        if (parentNode) parentNode.insertBefore(frag, ref.nextSibling);
     } else if (position === 'afterbegin') {
         ref.insertBefore(frag, ref.firstChild);
     } else {
@@ -84,12 +89,12 @@ export type SelectParams = {
 export function select(params: SelectParams & { single: true }): HTMLElement | null;
 export function select(params: SelectParams & { single?: false }): HTMLElement[];
 export function select({ s, all, from, single }: SelectParams & { single?: boolean }) {
-    from ??= document;
+    const parent = (from ?? CfDom.document) as ParentNode;
     if (all) {
-        return Array.from(from.querySelectorAll(s)) as HTMLElement[];
+        return Array.from(CfDom.querySelectorAll(s, parent)) as HTMLElement[];
     }
 
-    const elt = from.querySelector(s);
+    const elt = CfDom.querySelector(s, parent);
     return single ? elt : [elt];
 }
 
