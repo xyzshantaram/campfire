@@ -471,6 +471,125 @@ unescape(&quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;
 });
 </code></pre>
 </details>
+
+<details>
+<summary><code>callbackify()</code> - convert Promise-based functions to callback style</summary>
+
+<p>Converts a function that returns a Promise into a function that accepts a
+Node-style callback. Especially useful for using async operations in Store event
+handlers.</p>
+<h5>Using with Store event handlers</h5>
+<pre class="microlight"><code>// Store event handlers are expected to be synchronous
+// This pattern enables async operations without marking the handler as async
+
+// Define an async operation
+const loadEditorAsync = async (postId) =&gt; {
+  const content = await fetchPostContent(postId);
+  const [element, editor] = await createEditor(content);
+  return { element, editor };
+};
+
+// In a store subscription:
+postStore.on(&quot;update&quot;, (event) =&gt; {
+  // Launch the async operation properly
+  callbackify(loadEditorAsync)(
+    (err, result) =&gt; {
+      if (err) {
+        console.error(&quot;Failed to load editor:&quot;, err);
+        return;
+      }
+
+      // Handle the result when the async operation completes
+      const { element, editor } = result;
+      cf.insert(element, { into: container });
+      postStore.set(&quot;editor&quot;, editor);
+    },
+    event.value,
+  );
+});
+</code></pre>
+<h5>Integrating with callback-based APIs</h5>
+<pre class="microlight"><code>// Original async function
+const getUser = async (userId) =&gt; {
+  const response = await fetch(`/api/users/${userId}`);
+  return response.json();
+};
+
+// Convert to callback style
+const getUserCb = cf.callbackify(getUser);
+
+// Use with a callback
+getUserCb((err, data) =&gt; {
+  if (err) {
+    console.error(&quot;Error:&quot;, err);
+    return;
+  }
+  console.log(&quot;User data:&quot;, data);
+}, &quot;12345&quot;);
+</code></pre>
+<h5>Error handling with callbackify</h5>
+<pre class="microlight"><code>const processItems = async (items) =&gt; {
+  // This might throw errors
+  const results = await Promise.all(items.map(processItem));
+  return results;
+};
+
+// Safe error handling with callbackify
+cf.store({ value: [] }).on(&quot;update&quot;, (event) =&gt; {
+  cf.callbackify(processItems)(
+    (error, results) =&gt; {
+      if (error) {
+        errorStore.update(`Processing failed: ${error.message}`);
+        return;
+      }
+      resultStore.update(results);
+    },
+    event.value,
+  );
+});
+</code></pre>
+</details>
+
+<details>
+<summary><code>poll()</code> - execute a function at regular intervals</summary>
+
+<p>Repeatedly executes a function at specified intervals with proper cleanup.</p>
+<h5>Basic polling example</h5>
+<pre class="microlight"><code>// Check for updates every 5 seconds, starting 5 seconds from now
+const stopPolling = cf.poll(() =&gt; checkMessages(user), 5000);
+
+// Or call immediately:
+const stopPolling = cf.poll(
+  () =&gt; checkMessages(user),
+  5000,
+  /* callNow */ true,
+);
+
+// Later, when you want to stop polling:
+stopPolling();
+</code></pre>
+<h5>Passing messages out of poll()</h5>
+<p>You can use stores to pass messages out of the poll function, aside from just
+using good old-fashioned closures:</p>
+<pre class="microlight"><code>const messages = cf.store({ type: &quot;list&quot;, value: [] });
+
+const stopMessagePolling = cf.poll(
+  () =&gt; {
+    fetch(&quot;/api/messages&quot;)
+      .then((response) =&gt; response.json())
+      .then((data) =&gt; messages.update(data));
+  },
+  10000,
+  true,
+);
+
+// Cancel polling when component is removed
+const cleanup = () =&gt; {
+  stopMessagePolling();
+  messages.dispose();
+};
+</code></pre>
+</details>
 </div>
 <div class="cf-site-div" data-heading="playground"><h3>try before you buy</h3>
 <p>Try one of these demos, or do your own thing!</p>
