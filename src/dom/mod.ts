@@ -1,5 +1,6 @@
 import type { ElementPosition } from "../types.ts";
-import { CfDom, CfHTMLElementInterface } from "./config.ts";
+import { CfDom } from "./config.ts";
+import type { CfHTMLElementInterface } from './config.ts';
 export { CfDom };
 
 /**

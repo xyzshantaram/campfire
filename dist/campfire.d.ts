@@ -5,6 +5,7 @@ import { ListStore, MapStore, Store, store } from "./stores/mod.ts";
 import { html, r } from "./templating/html.ts";
 import { mustache, template } from "./templating/mustache.ts";
 import { seq, escape, unescape } from './utils.ts';
+import { CfDom } from "./dom/mod.ts";
 import type { SelectParams } from "./dom/mod.ts";
 import type { RawHtmlOptions } from "./templating/html.ts";
 import type { ElementPosition, ElementProperties, AnySubscriber, EventSubscriber, Template } from "./types.ts";
@@ -27,7 +28,8 @@ declare const _default: {
     html: (strings: TemplateStringsArray, ...values: (string | number | import("./templating/html.ts").RawHtml)[]) => string;
     r: (val: any, options?: RawHtmlOptions) => import("./templating/html.ts").RawHtml;
     seq: (...args: number[]) => number[];
+    CfDom: typeof CfDom;
 };
 export default _default;
-export { ListStore, MapStore, Store, store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq };
+export { ListStore, MapStore, Store, store, nu, mustache, template, escape, unescape, extend, insert, empty, rm, select, onload, html, r, seq, CfDom };
 export type { ElementPosition, ElementProperties, AnySubscriber, EventSubscriber, Template, NuBuilder, SelectParams, RawHtmlOptions };

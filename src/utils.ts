@@ -1,4 +1,5 @@
-import { CfDom, CfHTMLElementInterface } from "./dom/config.ts";
+import { CfDom } from "./dom/config.ts";
+import type { CfHTMLElementInterface } from './dom/config.ts';
 
 /**
  * a simple HTML sanitizer. Escapes `&`, `<`, `>`, `'`, and `"` by 
@@ -81,6 +82,7 @@ export const initMutationObserver = () => {
 
                 // Check parent is reactive
                 const parent = mutation.target as HTMLElement;
+                console.log(parent, node);
                 if (!parent.hasAttribute('data-cf-deps')) return;
                 if (parent.hasAttribute('data-cf-fg-updates')) return;
 
