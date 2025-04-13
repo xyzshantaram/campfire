@@ -1,5 +1,19 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc14
+
+- Added new `render()` method to NuBuilder for more flexible reactive content
+  generation:
+  - Render functions can return either strings or builder instances
+  - Automatic reconciliation of styles, attributes, and properties during
+    re-renders
+  - Improved property clearing with empty string values for styles and
+    attributes
+- Can now use `nu(existingElement, props)` to add reactive behavior to existing
+  elements
+- Added NuBuilder::html overload for it to be used as a string templating
+  function
+
 ## 4.0.0-rc13
 
 - Added enumerate() function, exported callbackify and poll (lol)
