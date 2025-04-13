@@ -84,7 +84,7 @@ export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string,
         builder: Omit<NuBuilder<Elem, Deps, string>, "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render">,
         elt: Elem
     }
-) => string | NuBuilder<Elem, Deps, string>;
+) => string | NuBuilder<Elem, Deps, string> | void;
 
 export type StringStyleProps = keyof {
     [K in keyof CSSStyleDeclaration as CSSStyleDeclaration[K] extends string ? K : never]: true

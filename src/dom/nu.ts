@@ -54,7 +54,7 @@ const reconcileBuilderProps = <
     Object.assign(elt.style, style);
     if (attrs) {
         Object.entries(attrs || {}).forEach(([key, value]) => {
-            if (typeof value !== 'number' && !value) {
+            if (typeof value === 'string' && value.length === 0) {
                 elt.removeAttribute(key)
             }
             else if (elt.getAttribute(key) !== String(value)) {
@@ -132,14 +132,13 @@ export const extend = <
         else {
             elt.removeAttribute("data-cf-fg-updates");
             raw = true;
-        }
-
-        if (result instanceof NuBuilder) {
-            content = result.props.contents || '';
-            reconcileBuilderProps(elt, result);
-        }
-        else {
-            content = result;
+            if (typeof result === 'string') {
+                content = result;
+            }
+            if (result instanceof NuBuilder) {
+                content = result.props.contents || '';
+                reconcileBuilderProps(elt, result);
+            }
         }
     } else if (typeof contents === "string") {
         content = contents;
@@ -170,7 +169,13 @@ export const extend = <
     Object.entries(on)
         .forEach(([evt, listener]) => CfDom.addElEventListener(elt, evt, listener as (evt: Event) => void));
 
-    Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, String(value)));
+    Object.entries(attrs).forEach(([attr, value]) => {
+        const current = elt.getAttribute(attr);
+        const str = String(value);
+        if (current === str) return;
+        if (typeof value === 'string' && value.length === 0) elt.removeAttribute(attr);
+        else elt.setAttribute(attr, String(value));
+    });
 
     const extras: HTMLElement[] = [];
     for (const selector of gimme) {
