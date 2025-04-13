@@ -338,37 +338,91 @@ const [div] = cf.nu("div")
 <details>
 <summary><code>mustache()</code> and <code>template()</code> - reusable and composable string templates</summary>
 
-Simple templating system for string interpolation.
+A lightweight implementation of the Mustache templating system for string
+interpolation.
 
-##### Basic mustache templating (escaped by default)
+##### Basic variable interpolation (escaped by default)
 
 ```js
 const result = cf.mustache("Hello, {{ name }}!", { name: "John" });
 // Result: "Hello, John!"
 ```
 
-##### With HTML content (escaped by default)
+##### Unescaped HTML content
 
 ```js
-const result = cf.mustache("Welcome, {{ user }}!", { user: "<b>Admin</b>" });
-// Result: "Welcome, &lt;b&gt;Admin&lt;/b&gt;!"
+const result = cf.mustache("Welcome, {{{ userHtml }}}!", {
+  userHtml: "<b>Admin</b>",
+});
+// Result: "Welcome, <b>Admin</b>!"
 ```
 
-##### Disable escaping for trusted content
+##### Sections - conditionally show content
 
 ```js
 const result = cf.mustache(
-  "Welcome, {{ userName }}!",
-  { userName: "<b>Admin</b>" },
-  false, // disable escaping
+  "{{#loggedIn}}Welcome back!{{/loggedIn}}{{^loggedIn}}Please log in.{{/loggedIn}}",
+  { loggedIn: true },
 );
-// Result: "<b>Admin</b>"
+// Result: "Welcome back!"
 ```
 
-##### Create reusable template function
+##### Array iteration with sections
 
 ```js
+const result = cf.mustache(
+  "<ul>{{#items}}<li>{{name}}</li>{{/items}}</ul>",
+  { items: [{ name: "Item 1" }, { name: "Item 2" }] },
+);
+```
+
+##### Working with primitive arrays
+
+```js
+const result = cf.mustache(
+  "Numbers: {{#numbers}}{{.}}, {{/numbers}}",
+  { numbers: [1, 2, 3] },
+);
+// Result: "Numbers: 1, 2, 3, "
+```
+
+##### Context changes with object values
+
+```js
+const result = cf.mustache(
+  "{{#user}}Name: {{name}}, Age: {{age}}{{/user}}",
+  { user: { name: "John", age: 30 } },
+);
+// Result: "Name: John, Age: 30"
+```
+
+##### Nested sections
+
+```js
+const result = cf.mustache(
+  "{{#user}}{{name}} {{#admin}}(Admin){{/admin}}{{^admin}}(User){{/admin}}{{/user}}",
+  { user: { name: "John", admin: true } },
+);
+// Result: "John (Admin)"
+```
+
+##### Escaping mustache syntax
+
+```js
+const result = cf.mustache(
+  "This is not a variable: \\{{ name }}",
+  { name: "John" },
+);
+// Result: "This is not a variable: {{ name }}"
+```
+
+##### Create reusable template function (compile once, render many times)
+
+```js
+// Compile template once
 const greet = cf.template("Hello, {{ name }}!");
+
+// Use multiple times with different data
 const aliceGreeting = greet({ name: "Alice" }); // "Hello, Alice!"
 const bobGreeting = greet({ name: "Bob" }); // "Hello, Bob!"
 ```

@@ -14,6 +14,14 @@
 - Added NuBuilder::html overload for it to be used as a string templating
   function
 - remove enumerate() - TIL Array::entries() exists
+- Enhanced mustache templating system with:
+  - Support for triple braces `{{{ var }}}` for unescaped HTML content
+  - section functionality (`{{#section}}content{{/section}}`) for conditional
+    rendering
+  - inverted sections (`{{^section}}content when false{{/section}}`)
+  - array iteration with automatic context switching
+  - support for nested sections
+  - Added escaping of mustache syntax with backslash
 - Add NuBuilder::cls
 
 ## 4.0.0-rc13
