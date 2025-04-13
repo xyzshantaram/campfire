@@ -139,7 +139,7 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
      * Sets a single attribute on the element.
      * 
      * @param name - The attribute name
-     * @param value - The attribute value
+     * @param value - The attribute value. Set to empty string ('') to clear/reset an attribute.
      * @returns The builder instance for chaining
      */
     attr(name: string, value: string | boolean | number) {
@@ -190,7 +190,7 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
      * Sets a single CSS style property on the element.
      * 
      * @param prop - The CSS property name
-     * @param value - The CSS property value
+     * @param value - The CSS property value. Set to empty string ('') to clear a style.
      * @returns The builder instance for chaining
      */
     style(prop: StringStyleProps, value: string) {
