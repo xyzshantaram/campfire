@@ -49,7 +49,13 @@ const reconcileBuilderProps = <
     T extends HTMLElement,
     D extends Record<string, Store<any>>
 >(elt: T, builder: RenderBuilder<T, D>) => {
-    const { style = {}, attrs = {}, misc = {} } = builder.props;
+    const { style = {}, attrs = {}, misc = {}, classes = {} } = builder.props;
+
+    const prev: typeof classes = {};
+    elt.classList.forEach(itm => prev[itm] = true);
+    for (const key in classes) {
+        prev[key] = classes[key];
+    }
 
     Object.assign(elt.style, style);
     if (attrs) {
@@ -88,11 +94,18 @@ export const extend = <
         on = {},
         attrs = {},
         raw: r,
+        classes = {},
         gimme = [],
         deps = ({} as D),
         children = {}
     } = args;
     let raw = !!r;
+
+    const existingClasses: typeof classes = {};
+    elt.classList.forEach(itm => existingClasses[itm] = true);
+    for (const key in classes) {
+        existingClasses[key] = classes[key];
+    }
 
     let content = "";
     if (isValidRenderFn<T, D>(render)) {

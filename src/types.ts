@@ -113,7 +113,14 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
 
     contents?: string;
 
+    /** Rendering function to use to update the element on redraws. */
     render?: RenderFunction<T, D>;
+
+    /** 
+     * Classes for the newly created element. Will be combined with whatever is
+     * passed into nu().
+     */
+    classes?: Record<string, boolean>;
 
     /**
      * Whether or not to escape the `contents` string. If `raw` is true, the

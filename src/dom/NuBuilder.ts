@@ -100,6 +100,15 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
     }
 
     /**
+     * Set a class name. Pass on with a f
+     */
+    cls(name: string, on: '' | boolean | 0 | null | undefined = true) {
+        this.props.classes ??= {};
+        this.props.classes[name] = !!on;
+        return this;
+    }
+
+    /**
      * Finalizes the builder and creates the actual DOM element with all configured properties.
      * 
      * @returns A tuple containing the created element as the first item, followed by any child elements
