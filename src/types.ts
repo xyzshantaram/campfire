@@ -1,3 +1,4 @@
+import { NuBuilder } from "./campfire.ts";
 import { CfHTMLElementInterface } from "./dom/config.ts";
 import { Store } from "./stores/mod.ts";
 
@@ -76,10 +77,14 @@ export type StoreEventFromObject<D> = {
     [K in keyof D]: D[K] extends Store<any> ? StoreEvent<D[K]> : never;
 }[keyof D];
 
-export type RenderFunction<T extends CfHTMLElementInterface, D> = (
-    props: UnwrapStore<D>,
-    opts: { event?: StoreEventFromObject<D> & { triggeredBy: string }, elt: T }
-) => string | undefined;
+export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string, Store<any>>> = (
+    props: UnwrapStore<Deps>,
+    opts: {
+        event?: StoreEventFromObject<Deps> & { triggeredBy: string },
+        builder: Omit<NuBuilder<Elem, Deps>, "children" | "done" | "ref" | "on" | "gimme" | "deps">,
+        elt: Elem
+    }
+) => string | NuBuilder<Elem, Deps>;
 
 export type StringStyleProps = keyof {
     [K in keyof CSSStyleDeclaration as CSSStyleDeclaration[K] extends string ? K : never]: true
@@ -92,14 +97,16 @@ export type DOMEventHandlers = {
 /**
  * Properties for the HTML element to be created.
  */
-export interface ElementProperties<T extends CfHTMLElementInterface, D extends Record<string, Store<any>>> {
+export interface ElementProperties<T extends HTMLElement, D extends Record<string, Store<any>>> {
     /**
      * String that will be set as the inner HTML of the created element. By default,
      * this is escaped using cf.escape() - however, if you supply `raw: true` in
      * the args object passed as nu's second argument, escaping is disabled.
      */
 
-    contents?: RenderFunction<T, D> | string;
+    contents?: string;
+
+    render?: RenderFunction<T, D>;
 
     /**
      * Whether or not to escape the `contents` string. If `raw` is true, the

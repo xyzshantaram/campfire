@@ -31,7 +31,7 @@ const unwrapDeps = <D extends Record<string, Store<any>>>(
 };
 
 const isValidRenderFn = <T extends HTMLElement>(
-    fn: ElementProperties<T, any>["contents"],
+    fn: ElementProperties<T, any>["render"],
 ): fn is RenderFunction<T, any> => {
     if (!fn) return false;
     if (typeof fn !== "function") return false;
@@ -52,18 +52,26 @@ export const extend = <
     elt: T,
     args: ElementProperties<T, D> = {},
 ): [T, ...HTMLElement[]] => {
-    const { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D), children = {} } = args;
+    const { contents, render, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D), children = {} } = args;
 
     let content = "";
-    if (isValidRenderFn<T>(contents)) {
+    if (isValidRenderFn<T>(render)) {
         Object.entries(deps).forEach(([name, dep]) => {
             dep.any((evt) => {
-                const res = contents(unwrapDeps(deps), { event: { ...evt, triggeredBy: name }, elt });
+                const builder = new NuBuilder<T, D>(elt);
+                const res = render(unwrapDeps(deps), {
+                    event: { ...evt, triggeredBy: name },
+                    elt,
+                    builder
+                });
 
                 if (res !== undefined) {
                     const reactiveChildren = select({ s: '[data-cf-slot]', all: true, from: elt })
                         .map(elt => [elt.getAttribute('data-cf-slot'), elt]) as [string, HTMLElement][];
-                    elt.innerHTML = res;
+                    if (typeof res === 'string') elt.innerHTML = res;
+                    else {
+                        elt.innerHTML = res.props.contents || '';
+                    }
                     reactiveChildren.forEach(([slot, ref]) => {
                         elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
                     });
@@ -71,12 +79,17 @@ export const extend = <
             });
         });
 
-        const result = contents(unwrapDeps(deps), { elt });
+        const result = render(unwrapDeps(deps), { elt, builder: new NuBuilder<T, D>(elt) });
 
         if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
         else elt.removeAttribute("data-cf-fg-updates");
 
-        content = result || "";
+        if (result instanceof NuBuilder) {
+            content = result.props.contents || '';
+        }
+        else {
+            content = result;
+        }
     } else if (typeof contents === "string") {
         content = contents;
     }
