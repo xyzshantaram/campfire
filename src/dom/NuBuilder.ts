@@ -92,6 +92,7 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
      */
     constructor(elt: Elem, props?: ElementProperties<Elem, Deps>);
     constructor(elt: Info, props?: ElementProperties<Elem, Deps>);
+    constructor(elt: Info | Elem, props?: ElementProperties<Elem, Deps>);
     constructor(elt: Info | Elem, props?: ElementProperties<Elem, Deps>) {
         this.elem = (typeof elt === 'string' ? createElemFromInfo(elt) : elt) as Elem;
         this.props = props || {};

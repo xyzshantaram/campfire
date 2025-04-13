@@ -30,8 +30,8 @@ const unwrapDeps = <D extends Record<string, Store<any>>>(
     return result;
 };
 
-const isValidRenderFn = <T extends HTMLElement>(
-    fn: ElementProperties<T, any>["render"],
+const isValidRenderFn = <T extends HTMLElement, D extends Record<string, Store<any>>>(
+    fn: ElementProperties<T, D>["render"],
 ): fn is RenderFunction<T, any> => {
     if (!fn) return false;
     if (typeof fn !== "function") return false;
@@ -80,18 +80,29 @@ export const extend = <
     elt: T,
     args: ElementProperties<T, D> = {},
 ): [T, ...HTMLElement[]] => {
-    const { contents, render, misc, style, on = {}, attrs = {}, raw: r, gimme = [], deps = ({} as D), children = {} } = args;
+    const {
+        contents,
+        render,
+        misc,
+        style,
+        on = {},
+        attrs = {},
+        raw: r,
+        gimme = [],
+        deps = ({} as D),
+        children = {}
+    } = args;
     let raw = r;
 
     let content = "";
-    if (isValidRenderFn<T>(render)) {
+    if (isValidRenderFn<T, D>(render)) {
         Object.entries(deps).forEach(([name, dep]) => {
             dep.any((evt) => {
                 const builder = new NuBuilder<T, D, string>(elt);
                 const res = render(unwrapDeps(deps), {
                     event: { ...evt, triggeredBy: name },
                     elt,
-                    builder: builder as any
+                    builder: builder as NuBuilder<T, any, string>
                 });
 
                 if (res !== undefined) {
@@ -204,8 +215,8 @@ export const nu = <
     Elem extends InferElementType<Info>,
     Deps extends Record<string, Store<any>>,
 >(
-    info: Info = 'div' as Info,
+    elt = 'div' as Info | Elem,
     args: ElementProperties<Elem, Deps> = {},
 ): NuBuilder<Elem, Deps, Info> => {
-    return new NuBuilder<Elem, Deps, Info>(info, args);
+    return new NuBuilder<Elem, Deps, Info>(elt, args);
 };
