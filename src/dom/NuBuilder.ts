@@ -112,13 +112,25 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
     }
 
     /**
-     * Sets the content of the element.
+     * Sets the content of the element as a string.
      * 
-     * @param value - Either a string of content or a render function that returns content
+     * @param value - String content to set
      * @returns The builder instance for chaining
      */
-    content(value: string | RenderFunction<Elem, Deps>) {
+    content(value: string) {
         this.props.contents = value;
+        return this;
+    }
+
+    /**
+     * Sets a render function that will be called to generate content
+     * whenever dependencies change.
+     * 
+     * @param fn - The render function that returns content
+     * @returns The builder instance for chaining
+     */
+    render(fn: RenderFunction<Elem, Deps>) {
+        this.props.render = fn;
         return this;
     }
 
@@ -234,8 +246,10 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
      * @param value The content function / string to set.
      * @returns The builder for chaining.
      */
-    html(value: string | RenderFunction<Elem, Deps>) {
-        return this.content(value).raw(true);
+    html(value: string, raw = true) {
+        this.props.contents = value;
+        this.props.raw = raw;
+        return this;
     }
 
     /**
