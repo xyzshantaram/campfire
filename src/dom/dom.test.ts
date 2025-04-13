@@ -188,7 +188,8 @@ describe('Tests for NuBuilder', () => {
         // Set raw=true on the parent explicitly to avoid escaping
         const [parent] = nu('div', {
             deps: { greeting },
-            render: ({ greeting }) => `<div>Parent: ${greeting}</div><cf-slot name="to"></cf-slot>`,
+            render: ({ greeting }, { builder }) =>
+                builder.html`<div>Parent: ${greeting}</div><cf-slot name="to"></cf-slot>`,
             children: { to: child }
         }).done();
 
@@ -219,7 +220,8 @@ describe('Tests for NuBuilder', () => {
 
         // Set raw=true explicitly
         const [parent] = nu('div', {
-            render: () => `<div>Parent Content</div><cf-slot name="child"></cf-slot>`,
+            render: (_, { builder }) =>
+                builder.html`<div>Parent Content</div>$<cf-slot name="child"></cf-slot>`,
             children: { child: singleChild }
         }).done();
 

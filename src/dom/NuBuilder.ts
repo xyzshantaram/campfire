@@ -8,6 +8,7 @@ import type {
 } from "../types.ts";
 import { extend } from "./nu.ts";
 import { CfDom } from "./config.ts";
+import { html, RawHtml } from "../templating/html.ts";
 
 /**
  * Creates a typed HTML element based on the tag name.
@@ -82,7 +83,7 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
     props: ElementProperties<Elem, Deps> = {};
 
     /** Element info string (tag, id, classes) */
-    elem: Elem;
+    private elem: Elem;
 
     /**
      * Creates a new NuBuilder instance.
@@ -113,7 +114,8 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
     }
 
     /**
-     * Sets the content of the element as a string.
+     * Sets the content of the element as a string, escaped by default.
+     * Useful for quick and safe interpolation of strings into DOM content.
      * 
      * @param value - String content to set
      * @returns The builder instance for chaining
@@ -247,9 +249,16 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
      * @param value The content function / string to set.
      * @returns The builder for chaining.
      */
-    html(value: string, raw = true) {
-        this.props.contents = value;
-        this.props.raw = raw;
+    html(value: string): NuBuilder<Elem, Deps, Info>;
+    html(arr: TemplateStringsArray, ...values: (string | number | boolean | RawHtml)[]): NuBuilder<Elem, Deps, Info>;
+    html(value: string | TemplateStringsArray, ...args: (string | boolean | number | RawHtml)[]): NuBuilder<Elem, Deps, Info> {
+        this.props.raw = true;
+        if (typeof value === 'string') {
+            this.props.contents = value;
+        }
+        else if (Array.isArray(value)) {
+            this.props.contents = html(value, ...args);
+        }
         return this;
     }
 
