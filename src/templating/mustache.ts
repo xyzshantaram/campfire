@@ -1,55 +1,158 @@
 import { escape } from '../utils.ts';
-import type { Template } from '../types.ts';
 
-/**
- * The function that actually does the mustache templating.
- * @param string - the string to be templated.
- * @param data - The replacement data.
- * @internal
- * @returns the templated string.
-*/
-const _mustache = (string: string, data: Record<string, string> = {}): string => {
-    const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
-    new RegExp(Object.keys(data).join("|"), "gi");
-    return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function (_, p1, p2) {
-        return `${p1 || ""}${data[p2]}`;
-    }).replace(escapeExpr, '$1');
+interface TextToken {
+    type: 'text',
+    value: string
+};
+
+type SectionToken = { key: string } & ({
+    type: 'section-open';
+    inverted: boolean;
+} | {
+    type: 'section-close';
+});
+
+interface VariableToken {
+    type: 'var',
+    key: string,
+    unescaped: boolean;
 }
 
-/**
- * Applies mustache templating to a string. Any names surrounded by {{ }} will be
- * considered for templating: if the name is present as a property in `data`,
- * the mustache'd expression will be replaced with the value of the property in `data`.
- * Prefixing the opening {{ with double backslashes will escape the expression.
- * By default, mustache data is escaped with campfire's escape() function - you can
- * disable this by supplying the value of `shouldEscape` as false.
- * @param string - the string to be templated.
- * @param data - The data which will be used to perform replacements.
- * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
- * @returns the templated string.
-*/
-export const mustache = (string: string, data: Record<string, string> = {}, shouldEscape = true): string => {
-    let escaped = { ...data };
+type MustacheToken = (SectionToken | TextToken | VariableToken);
 
-    if (shouldEscape) {
-        escaped = Object.fromEntries(Object.entries(escaped).map(([key, value]) => {
-            return [key, escape(value)]
-        }));
+const tokenize = (template: string) => {
+    const re = /\\?({{{\s*([^}]+)\s*}}}|{{[#^/]?\s*([^}]+)\s*}})/g;
+    let index = 0;
+    const tokens: MustacheToken[] = [];
+    let match = re.exec(template);
+
+    while (match !== null) {
+        const [chunk, mustache, unsafeKey, key] = match;
+        const escaped = chunk.startsWith('\\');
+        const tag = chunk.length > 2 ? chunk[2] : null;
+
+        if (index < match.index) {
+            tokens.push({ type: 'text', value: template.slice(index, match.index) });
+        }
+        if (escaped) {
+            tokens.push({ type: 'text', value: mustache });
+        }
+        else if (tag === '/') {
+            tokens.push({ type: 'section-close', key });
+        }
+        else if (tag === '#' || tag === '^') {
+            tokens.push({ type: 'section-open', key: key?.trim(), inverted: tag === '^' });
+        }
+        else {
+            tokens.push({ type: 'var', key: (unsafeKey || key)?.trim(), unescaped: !!unsafeKey });
+        }
+
+        index = re.lastIndex;
+        match = re.exec(template);
     }
 
-    return _mustache(string, escaped);
+    if (index < template.length) {
+        tokens.push({ type: 'text', value: template.slice(index) });
+    }
+
+    return tokens;
 }
 
-/**
- * Returns a partial application that can be used to generate templated HTML strings.
- * Does not sanitize html, use with caution.
- * @param str - A string with mustaches in it. (For example: 
- * `<span class='name'> {{ name }} </span>`)
- * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
- * @returns A function that when passed an Object with templating data,
- * returns the result of the templating operation performed on the string str with
- * the data passed in.
- */
-export const template = (str: string, shouldEscape = true): Template => {
-    return (data: Record<string, string>) => mustache(str, data, shouldEscape);
+interface CompiledSection {
+    type: 'section';
+    inverted: boolean;
+    key: string;
+    children: CompiledToken[]
+}
+type CompiledToken = TextToken | VariableToken | CompiledSection
+
+function nest(tokens: MustacheToken[]) {
+    const root: CompiledToken[] = [];
+    const stack = [root];
+
+    for (const token of tokens) {
+        if (token.type === 'section-open') {
+            const section: CompiledSection = {
+                type: 'section',
+                key: token.key,
+                inverted: token.inverted,
+                children: []
+            };
+
+            stack.at(-1)?.push(section);
+            stack.push(section.children);
+        }
+        else if (token.type === 'section-close') {
+            if (stack.length === 1) throw new Error(`Unexpected closing tag ${token.key}`);
+            stack.pop();
+        }
+        else {
+            stack.at(-1)?.push(token);
+        }
+    }
+
+    if (stack.length > 1) {
+        throw new Error(`Unclosed section(s) found`);
+    }
+
+    return root;
+}
+
+const compile = (template: string) => nest(tokenize(template));
+
+const render = <
+    T extends Record<string, any>
+>(tokens: CompiledToken[], ctx: T, parentCtx?: Record<string, any>): string => tokens.map(token => {
+    switch (token.type) {
+        case "text":
+            return token.value;
+        case "var": {
+            if (token.key === '.' && '.' in ctx) {
+                return token.unescaped
+                    ? String(ctx['.'])
+                    : escape(String(ctx['.']));
+            }
+
+            if (!(token.key in ctx)) {
+                return token.unescaped ? `{{{ ${token.key} }}}` : `{{ ${token.key} }}`;
+            }
+
+            const val = String(ctx[token.key]);
+            return token.unescaped ? val : escape(val);
+        }
+        case "section": {
+            const v = ctx[token.key];
+            let visible = !!v;
+
+            if (token.inverted) {
+                visible = (v === null || v === false || typeof v === 'undefined' ||
+                    (Array.isArray(v) && v.length === 0));
+            }
+
+            if (!visible) return '';
+            if (token.inverted) return render(token.children, ctx, parentCtx);
+
+            if (Array.isArray(v)) return v
+                .map(item => render(token.children, typeof item === 'object' ? item : { '.': item }, ctx)
+                ).join('');
+
+            else if (typeof v === 'object' && v !== null)
+                return render(token.children, v, ctx);
+            else
+                return render(token.children, ctx, parentCtx);
+        }
+    }
+}).join('');
+
+export const mustache = <
+    T extends Record<string, any> = Record<string, any>
+>(template: string, ctx: T): string => {
+    return render<T>(compile(template), ctx);
+}
+
+export const template = <
+    T extends Record<string, any> = Record<string, any>
+>(template: string): (ctx: T) => string => {
+    const compiled = compile(template);
+    return (ctx) => render<T>(compiled, ctx);
 }

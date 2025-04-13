@@ -59,7 +59,7 @@ describe('Tests for Reactivity', () => {
         const name = cf.store({ value: 'John' });
         const [div] = nu('div', {
             deps: { name },
-            contents: ({ name }) => `Hello, ${name}!`
+            render: ({ name }) => `Hello, ${name}!`
         }).done();
 
         expect(div.innerHTML).to.equal('Hello, John!');
@@ -74,7 +74,7 @@ describe('Tests for Reactivity', () => {
 
         const [span] = nu('span')
             .deps({ first, last })
-            .content(({ first, last }) => `${first} ${last}`)
+            .render(({ first, last }, { b }) => b.content(`${first} ${last}`))
             .done();
 
         expect(span.innerHTML).to.equal('John Doe');
@@ -93,7 +93,7 @@ describe('Tests for Reactivity', () => {
         });
 
         const [div] = nu('div', {
-            contents: ({ items }) => {
+            render: ({ items }) => {
                 return `<ul>${items.map(item => `<li>${item}</li>`).join('')}</ul>`;
             },
             raw: true,
@@ -119,20 +119,18 @@ describe('Tests for Reactivity', () => {
             }
         });
 
-        const [container, h2, first, second] = nu('')
-            .deps({ user })
-            .content(({ user }) => {
-                return `
+        const [container, h2, first, second] = nu('', {
+            raw: true,
+            deps: { user },
+            render: ({ user }) => `
         <div class="user">
             <h2>${user.name}</h2>
             <p>Age: ${user.age}</p>
             <p>Role: ${user.isAdmin ? 'Admin' : 'User'}</p>
         </div>
-    `;
-            })
-            .raw(true)
-            .gimme('h2', 'p:nth-child(2)', 'p:nth-child(3)')
-            .done();
+    `,
+            gimme: ['h2', 'p:nth-child(2)', 'p:nth-child(3)']
+        }).done();
 
         expect(h2.textContent).to.equal('John');
         expect(first.textContent).to.equal('Age: 30');
@@ -154,7 +152,8 @@ describe('Tests for Reactivity', () => {
         const color = cf.store({ value: 'blue' });
 
         const [counter] = nu('div', {
-            contents: (data, opts) => {
+            raw: true,
+            render: (data, opts) => {
                 // Add event info to demonstrate full reactive system capabilities
                 const eventDetail = opts.event ? ` (triggered by ${opts.event.triggeredBy})` : '';
                 return `<div style="color: ${data.color}">
@@ -162,7 +161,6 @@ describe('Tests for Reactivity', () => {
                     <p>Count: ${data.count}</p>
                 </div>`;
             },
-            raw: true,
             deps: {
                 count: count,
                 message: message,
@@ -191,7 +189,7 @@ describe('Tests for Reactivity', () => {
     it('Should properly clean up subscriptions when element is disposed', () => {
         const countStore = cf.store({ value: 0 });
         const [div] = nu('div', {
-            contents: (data) => {
+            render: (data) => {
                 return `Value: ${data.count}`;
             },
             deps: { count: countStore }

@@ -1,7 +1,6 @@
 import { Store } from "../stores/mod.ts";
 import type {
     ElementProperties,
-    InferElementType,
     RenderFunction,
     StringStyleProps,
     TagStringParseResult,
@@ -9,6 +8,7 @@ import type {
 } from "../types.ts";
 import { extend } from "./nu.ts";
 import { CfDom } from "./config.ts";
+import { html, RawHtml } from "../templating/html.ts";
 
 /**
  * Creates a typed HTML element based on the tag name.
@@ -19,6 +19,26 @@ import { CfDom } from "./config.ts";
  */
 const createTypedElement = <K extends keyof HTMLElementTagNameMap>(name: K) => {
     return CfDom.createElement(name);
+}
+
+/** Creates a typed HTML element from an info string. */
+const createElemFromInfo = (info: string) => {
+    let { tag, id, classes = [] } = parseEltString(info);
+
+    if (classes?.some((itm) => itm.includes('#'))) {
+        throw new Error(
+            "Error: Found # in a class name. " +
+            "Did you mean to do elt#id.classes instead of elt.classes#id?"
+        );
+    }
+
+    if (!tag) tag = 'div';
+    const elem = createTypedElement(tag as keyof HTMLElementTagNameMap);
+
+    if (id) elem.id = id;
+    if (classes?.length) classes.forEach(cls => elem.classList.add(cls));
+
+    return elem;
 }
 
 /**
@@ -58,12 +78,12 @@ const parseEltString = (str: string | undefined): TagStringParseResult => {
  *   .done();
  * ```
  */
-export class NuBuilder<T extends string, E extends InferElementType<T>, D extends Record<string, Store<any>>> {
+export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Store<any>>, Info = string> {
     /** Element properties configuration object */
-    props: ElementProperties<E, D> = {};
+    props: ElementProperties<Elem, Deps> = {};
 
     /** Element info string (tag, id, classes) */
-    info: T;
+    private elem: Elem;
 
     /**
      * Creates a new NuBuilder instance.
@@ -71,9 +91,25 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @param info - A string describing the element in the format 'tag#id.class1.class2'
      * @param props - Optional initial properties for the element
      */
-    constructor(info: T, props?: ElementProperties<E, D>) {
-        if (props) this.props = props;
-        this.info = info;
+    constructor(elt: Elem, props?: ElementProperties<Elem, Deps>);
+    constructor(elt: Info, props?: ElementProperties<Elem, Deps>);
+    constructor(elt: Info | Elem, props?: ElementProperties<Elem, Deps>);
+    constructor(elt: Info | Elem, props?: ElementProperties<Elem, Deps>) {
+        this.elem = (typeof elt === 'string' ? createElemFromInfo(elt) : elt) as Elem;
+        this.props = props || {};
+    }
+
+    /**
+     * Set a class name. Pass on with a falsy value to not apply the class.
+     * 
+     * @param name - The class name to add/remove
+     * @param on - Whether the class should be applied (true) or removed (false/falsy)
+     * @returns The builder instance for chaining
+     */
+    cls(name: string, on: '' | boolean | 0 | null = true) {
+        this.props.classes ??= {};
+        this.props.classes[name] = !!on;
+        return this;
     }
 
     /**
@@ -82,23 +118,8 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @returns A tuple containing the created element as the first item, followed by any child elements
      * @throws Error if a class name contains a '#' character
      */
-    done(): [E, ...HTMLElement[]] {
-        let { tag, id, classes = [] } = parseEltString(this.info);
-
-        if (classes?.some((itm) => itm.includes('#'))) {
-            throw new Error(
-                "Error: Found # in a class name. " +
-                "Did you mean to do elt#id.classes instead of elt.classes#id?"
-            );
-        }
-
-        if (!tag) tag = 'div';
-        const elem = createTypedElement(tag as keyof HTMLElementTagNameMap);
-
-        if (id) elem.id = id;
-        if (classes?.length) classes.forEach(cls => elem.classList.add(cls));
-
-        return extend(elem as E, this.props);
+    done(): [Elem, ...HTMLElement[]] {
+        return extend(this.elem as any as Elem, this.props);
     }
 
     ref() {
@@ -106,13 +127,26 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
     }
 
     /**
-     * Sets the content of the element.
+     * Sets the content of the element as a string, escaped by default.
+     * Useful for quick and safe interpolation of strings into DOM content.
      * 
-     * @param value - Either a string of content or a render function that returns content
+     * @param value - String content to set
      * @returns The builder instance for chaining
      */
-    content(value: string | RenderFunction<E, D>) {
+    content(value: string) {
         this.props.contents = value;
+        return this;
+    }
+
+    /**
+     * Sets a render function that will be called to generate content
+     * whenever dependencies change.
+     * 
+     * @param fn - The render function that returns content
+     * @returns The builder instance for chaining
+     */
+    render(fn: RenderFunction<Elem, Deps>) {
+        this.props.render = fn;
         return this;
     }
 
@@ -120,7 +154,7 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * Sets a single attribute on the element.
      * 
      * @param name - The attribute name
-     * @param value - The attribute value
+     * @param value - The attribute value. Set to empty string ('') to clear/reset an attribute.
      * @returns The builder instance for chaining
      */
     attr(name: string, value: string | boolean | number) {
@@ -135,7 +169,7 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @param value - An object containing attribute name-value pairs
      * @returns The builder instance for chaining
      */
-    attrs(value: ElementProperties<E, D>['attrs']) {
+    attrs(value: ElementProperties<Elem, Deps>['attrs']) {
         this.props.attrs = value;
         return this;
     }
@@ -158,9 +192,9 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @param value - The value for the property if obj is a property name
      * @returns The builder instance for chaining
      */
-    misc(obj: string, value: unknown): NuBuilder<T, E, D>;
-    misc(obj: Record<string, unknown>): NuBuilder<T, E, D>;
-    misc(obj: string | Record<string, unknown>, value?: unknown): NuBuilder<T, E, D> {
+    misc(obj: string, value: unknown): NuBuilder<Elem, Deps, Info>;
+    misc(obj: Record<string, unknown>): NuBuilder<Elem, Deps, Info>;
+    misc(obj: string | Record<string, unknown>, value?: unknown): NuBuilder<Elem, Deps, Info> {
         this.props.misc ||= {};
         if (typeof obj === 'object') this.props.misc = obj;
         else this.props.misc[obj] = value;
@@ -171,7 +205,7 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * Sets a single CSS style property on the element.
      * 
      * @param prop - The CSS property name
-     * @param value - The CSS property value
+     * @param value - The CSS property value. Set to empty string ('') to clear a style.
      * @returns The builder instance for chaining
      */
     style(prop: StringStyleProps, value: string) {
@@ -186,7 +220,7 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @param value - An object containing style name-value pairs
      * @returns The builder instance for chaining
      */
-    styles(value: ElementProperties<E, D>['style']) {
+    styles(value: ElementProperties<Elem, Deps>['style']) {
         this.props.style = value ?? {};
         return this;
     }
@@ -216,9 +250,9 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
         return this;
     }
 
-    deps<ND extends Record<string, Store<any>>>(obj: ND): NuBuilder<T, E, D & ND> {
-        this.props.deps = { ...(this.props.deps as D), ...obj };
-        return this as unknown as NuBuilder<T, E, D & ND>;
+    deps<ND extends Record<string, Store<any>>>(obj: ND): NuBuilder<Elem, Deps & ND, Info> {
+        this.props.deps = { ...(this.props.deps as Deps), ...obj };
+        return this as unknown as NuBuilder<Elem, Deps & ND, Info>;
     }
 
     /**
@@ -228,8 +262,17 @@ export class NuBuilder<T extends string, E extends InferElementType<T>, D extend
      * @param value The content function / string to set.
      * @returns The builder for chaining.
      */
-    html(value: string | RenderFunction<E, D>) {
-        return this.content(value).raw(true);
+    html(value: string): NuBuilder<Elem, Deps, Info>;
+    html(arr: TemplateStringsArray, ...values: (string | number | boolean | RawHtml)[]): NuBuilder<Elem, Deps, Info>;
+    html(value: string | TemplateStringsArray, ...args: (string | boolean | number | RawHtml)[]): NuBuilder<Elem, Deps, Info> {
+        this.props.raw = true;
+        if (typeof value === 'string') {
+            this.props.contents = value;
+        }
+        else if (Array.isArray(value)) {
+            this.props.contents = html(value, ...args);
+        }
+        return this;
     }
 
     /**

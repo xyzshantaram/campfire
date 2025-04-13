@@ -40,15 +40,55 @@ const [card] = cf.nu(".card.shadow") // Creates div by default
   .done();
 ```
 
-##### Element with reactive content
+##### Element with reactive template using NuBuilder::html()
+
+```js
+const name = cf.store({ value: "John" });
+const role = cf.store({ value: "User" });
+
+const [profile] = cf.nu("div.profile")
+  .deps({ name, role })
+  // render function runs again whenever name/role change
+  .render(({ name, role }, { b }) =>
+    b
+      .html`<h2>${name}</h2><p>Role: ${role}</p>`
+      .style("color", role === "Admin" ? "red" : "blue")
+  )
+  .done();
+```
+
+##### Reactive content with builder pattern
+
+```js
+const name = cf.store({ value: "John" });
+const admin = cf.store({ value: false });
+
+const [greeting] = cf.nu("h1")
+  .deps({ name, admin })
+  .render(({ name, admin }, { b }) => b
+    .content(`Hello, ${name}!`)
+    .style("color", admin ? "red" : "black")
+    .attr("title", admin ? "Administrator" : "User");
+  )
+  .done();
+```
+
+##### Direct HTML templating in render function
 
 ```js
 const name = cf.store({ value: "John" });
 
+const renderGreeting = (name: string) => 
+  cf.html`<span>Hello, ${name}</span>`
+
 const [greeting] = cf.nu("h1")
-  .content(({ name }) => `Hello, ${name}!`)
   .deps({ name })
+  // b.html() sets innerHTML without escaping
+  // use b.content() to do it safely
+  .render(({ name }, { b }) => b.html(renderGreeting(name)))
   .done();
+
+// or you can disable escaping with nu(...).raw(true).done()
 ```
 
 ##### Select multiple created elements with `.gimme()`
@@ -68,22 +108,65 @@ const [card, title, desc] = cf.nu("div.card")
 ```js
 const parentData = cf.store({ value: "Parent content" });
 const childData = cf.store({ value: "Child content" });
-
 // Parent with slots for child components
-const [parent] = cf.nu("section")
-  .deps({ data: parentData })
-  .html(({ data }) => `
+const [parent] = cf.nu("section", {
+  deps: { data: parentData },
+  render: ({ data }) => `
     <h3>${data}</h3>
     <cf-slot name="child"></cf-slot>
-  `)
-  .children({
+  `,
+  children: {
     // Child components maintain independent reactivity
     // and are preserved between re-renders of the parent
     child: cf.nu("div")
       .deps({ data: childData })
-      .content(({ data }) => data)
+      .render(({ data }) => data)
       .done(),
+  },
+}).done();
+```
+
+##### Using an existing element with nu()
+
+```js
+// Get a reference to an existing element
+const existing = document.getElementById("my-element");
+
+// Add reactive behavior to it
+cf.nu(existing, {
+  deps: { message },
+  render: ({ message }, { b }) => {
+    return b
+      .content(`Current message: ${message}`)
+      .style("color", message.length > 20 ? "red" : "black");
+  },
+}).done();
+```
+
+##### Clearing attributes and styles conditionally
+
+```js
+const disabled = cf.store({ value: false });
+const theme = cf.store({ value: "light" });
+
+const themes = {
+  dark: { backgroundColor: "#303030", color: "white" },
+  light: { backgroundColor: "#f5f4f0", color: "#202020" },
+};
+
+const [button] = cf.nu("button")
+  .content("Click me")
+  .deps({ disabled, theme })
+  .render(({ disabled, theme }, { b }) => {
+    // Conditionally set or clear attributes (empty string clears)
+    b.attr("disabled", disabled ? "disabled" : "");
+
+    b.style("backgroundColor", themes[theme].backgroundColor);
+    b.style("color", themes[theme].color);
+    return b;
   })
+  // assign click listener
+  .on("click", () => theme.update(theme.value === "light" ? "dark" : "light"))
   .done();
 ```
 
@@ -568,44 +651,6 @@ const cleanup = () => {
   stopMessagePolling();
   messages.dispose();
 };
-```
-
-</details>
-
-<details>
-<summary><code>enumerate()</code> - array indexing helper</summary>
-
-Similar to Python's `enumerate()`: returns an array of `[index, value]` tuples
-to simplify for...of loops.
-
-##### Basic usage
-
-```js
-const items = ["apple", "banana", "cherry"];
-
-for (const [i, item] of cf.enumerate(items)) {
-  console.log(`${i}. ${item}`);
-}
-// Logs:
-// 0. apple
-// 1. banana
-// 2. cherry
-```
-
-##### With DOM elements
-
-```js
-const listItems = cf.select({ s: "li", all: true });
-
-for (const [index, item] of cf.enumerate(listItems)) {
-  // Add numbering or different styling based on position
-  cf.extend(item, {
-    contents: `${index + 1}. ${item.textContent}`,
-    style: {
-      backgroundColor: index % 2 === 0 ? "#f0f0f0" : "white",
-    },
-  });
-}
 ```
 
 </details>

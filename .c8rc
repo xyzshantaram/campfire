@@ -4,7 +4,8 @@
   "exclude": [
     "src/types.ts",
     "test/",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "src/dom/config.ts"
   ],
   "extension": [".ts"],
   "reporter": ["text", "html"],
