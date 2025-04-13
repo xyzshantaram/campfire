@@ -39,6 +39,34 @@ const isValidRenderFn = <T extends HTMLElement>(
 };
 
 /**
+ * Reconciles the properties from a NuBuilder to an existing element.
+ * This applies the builder's properties to the element without replacing it.
+ * 
+ * @param elt The target element to update
+ * @param builder The NuBuilder whose properties will be applied
+ */
+const reconcileBuilderProps = <
+    T extends HTMLElement,
+    D extends Record<string, Store<any>>
+>(elt: T, builder: NuBuilder<T, D>) => {
+    const { style = {}, attrs = {}, misc = {} } = builder.props;
+
+    Object.assign(elt.style, style);
+    if (attrs) {
+        Object.entries(attrs || {}).forEach(([key, value]) => {
+            if (typeof value !== 'number' && !value) {
+                elt.removeAttribute(key)
+            }
+            else if (elt.getAttribute(key) !== String(value)) {
+                elt.setAttribute(key, String(value));
+            }
+        });
+    }
+    if (misc) Object.assign(elt, misc);
+    return elt;
+};
+
+/**
  * Takes an existing element and modifies its properties.
  * Refer ElementProperties documentation for details on
  * what can be changed.
@@ -52,25 +80,30 @@ export const extend = <
     elt: T,
     args: ElementProperties<T, D> = {},
 ): [T, ...HTMLElement[]] => {
-    const { contents, render, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = ({} as D), children = {} } = args;
+    const { contents, render, misc, style, on = {}, attrs = {}, raw: r, gimme = [], deps = ({} as D), children = {} } = args;
+    let raw = r;
 
     let content = "";
     if (isValidRenderFn<T>(render)) {
         Object.entries(deps).forEach(([name, dep]) => {
             dep.any((evt) => {
-                const builder = new NuBuilder<T, D>(elt);
+                const builder = new NuBuilder<T, D, string>(elt);
                 const res = render(unwrapDeps(deps), {
                     event: { ...evt, triggeredBy: name },
                     elt,
-                    builder
+                    builder: builder as any
                 });
 
                 if (res !== undefined) {
                     const reactiveChildren = select({ s: '[data-cf-slot]', all: true, from: elt })
                         .map(elt => [elt.getAttribute('data-cf-slot'), elt]) as [string, HTMLElement][];
-                    if (typeof res === 'string') elt.innerHTML = res;
+                    if (typeof res === 'string') {
+                        elt.innerHTML = res;
+                    }
                     else {
                         elt.innerHTML = res.props.contents || '';
+                        // Reconcile other builder properties with the element
+                        reconcileBuilderProps(elt, res);
                     }
                     reactiveChildren.forEach(([slot, ref]) => {
                         elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
@@ -79,13 +112,20 @@ export const extend = <
             });
         });
 
-        const result = render(unwrapDeps(deps), { elt, builder: new NuBuilder<T, D>(elt) });
+        const result = render(unwrapDeps(deps), {
+            elt,
+            builder: new NuBuilder<T, D, string>(elt) as any
+        });
 
         if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
-        else elt.removeAttribute("data-cf-fg-updates");
+        else {
+            elt.removeAttribute("data-cf-fg-updates");
+            raw = true;
+        }
 
         if (result instanceof NuBuilder) {
             content = result.props.contents || '';
+            reconcileBuilderProps(elt, result);
         }
         else {
             content = result;
