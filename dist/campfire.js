@@ -211,7 +211,6 @@ var initMutationObserver = () => {
       mutation.addedNodes.forEach((node) => {
         if (!CfDom.isHTMLElement(node)) return;
         const parent = mutation.target;
-        console.log(parent, node);
         if (!parent.hasAttribute("data-cf-deps")) return;
         if (parent.hasAttribute("data-cf-fg-updates")) return;
         const reactiveChildren = node.querySelectorAll?.("[data-cf-deps]").length ?? 0;
@@ -243,14 +242,44 @@ var poll = (fn, interval, callNow = false) => {
     if (timeout !== null) clearTimeout(timeout);
   };
 };
-var enumerate = (arr) => {
-  if (!Array.isArray(arr)) return [];
-  return arr.map((item, i) => [i, item]);
+
+// src/templating/html.ts
+var r = (val, options) => {
+  return {
+    raw: true,
+    contents: Array.isArray(val) ? val.join(options?.joiner ?? " ") : val.toString()
+  };
+};
+var html = (strings, ...values) => {
+  const built = [];
+  for (let i = 0; i < strings.length; i++) {
+    built.push(strings[i] || "");
+    const val = values[i];
+    if (typeof val !== "undefined" && typeof val !== "object") {
+      built.push(escape((val ?? "").toString()));
+    } else {
+      built.push(val?.contents || "");
+    }
+  }
+  return built.join("");
 };
 
 // src/dom/NuBuilder.ts
 var createTypedElement = (name) => {
   return CfDom.createElement(name);
+};
+var createElemFromInfo = (info) => {
+  let { tag, id, classes = [] } = parseEltString(info);
+  if (classes?.some((itm) => itm.includes("#"))) {
+    throw new Error(
+      "Error: Found # in a class name. Did you mean to do elt#id.classes instead of elt.classes#id?"
+    );
+  }
+  if (!tag) tag = "div";
+  const elem = createTypedElement(tag);
+  if (id) elem.id = id;
+  if (classes?.length) classes.forEach((cls) => elem.classList.add(cls));
+  return elem;
 };
 var parseEltString = (str) => {
   const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/) : void 0;
@@ -263,17 +292,24 @@ var parseEltString = (str) => {
   } : {};
 };
 var NuBuilder = class {
-  /**
-   * Creates a new NuBuilder instance.
-   * 
-   * @param info - A string describing the element in the format 'tag#id.class1.class2'
-   * @param props - Optional initial properties for the element
-   */
-  constructor(info, props) {
+  constructor(elt, props) {
     /** Element properties configuration object */
     this.props = {};
-    if (props) this.props = props;
-    this.info = info;
+    this.elem = typeof elt === "string" ? createElemFromInfo(elt) : elt;
+    this.props = props || {};
+  }
+  /**
+   * Set a class name. Pass on with a falsy value to not apply the class.
+   * 
+   * @param name - The class name to add/remove
+   * @param on - Whether the class should be applied (true) or removed (false/falsy)
+   * @returns The builder instance for chaining
+   */
+  cls(name, on = true) {
+    var _a;
+    (_a = this.props).classes ?? (_a.classes = {});
+    this.props.classes[name] = !!on;
+    return this;
   }
   /**
    * Finalizes the builder and creates the actual DOM element with all configured properties.
@@ -282,25 +318,16 @@ var NuBuilder = class {
    * @throws Error if a class name contains a '#' character
    */
   done() {
-    let { tag, id, classes = [] } = parseEltString(this.info);
-    if (classes?.some((itm) => itm.includes("#"))) {
-      throw new Error(
-        "Error: Found # in a class name. Did you mean to do elt#id.classes instead of elt.classes#id?"
-      );
-    }
-    if (!tag) tag = "div";
-    const elem = createTypedElement(tag);
-    if (id) elem.id = id;
-    if (classes?.length) classes.forEach((cls) => elem.classList.add(cls));
-    return extend(elem, this.props);
+    return extend(this.elem, this.props);
   }
   ref() {
     return this.done()[0];
   }
   /**
-   * Sets the content of the element.
+   * Sets the content of the element as a string, escaped by default.
+   * Useful for quick and safe interpolation of strings into DOM content.
    * 
-   * @param value - Either a string of content or a render function that returns content
+   * @param value - String content to set
    * @returns The builder instance for chaining
    */
   content(value) {
@@ -308,10 +335,21 @@ var NuBuilder = class {
     return this;
   }
   /**
+   * Sets a render function that will be called to generate content
+   * whenever dependencies change.
+   * 
+   * @param fn - The render function that returns content
+   * @returns The builder instance for chaining
+   */
+  render(fn) {
+    this.props.render = fn;
+    return this;
+  }
+  /**
    * Sets a single attribute on the element.
    * 
    * @param name - The attribute name
-   * @param value - The attribute value
+   * @param value - The attribute value. Set to empty string ('') to clear/reset an attribute.
    * @returns The builder instance for chaining
    */
   attr(name, value) {
@@ -351,7 +389,7 @@ var NuBuilder = class {
    * Sets a single CSS style property on the element.
    * 
    * @param prop - The CSS property name
-   * @param value - The CSS property value
+   * @param value - The CSS property value. Set to empty string ('') to clear a style.
    * @returns The builder instance for chaining
    */
   style(prop, value) {
@@ -399,15 +437,14 @@ var NuBuilder = class {
     this.props.deps = { ...this.props.deps, ...obj };
     return this;
   }
-  /**
-   * Unsafely set the html of the object. This is equivalent to calling
-   * .content(...).raw(true) and is meant to be used with a templating function
-   * like `cf.html`.
-   * @param value The content function / string to set.
-   * @returns The builder for chaining.
-   */
-  html(value) {
-    return this.content(value).raw(true);
+  html(value, ...args) {
+    this.props.raw = true;
+    if (typeof value === "string") {
+      this.props.contents = value;
+    } else if (Array.isArray(value)) {
+      this.props.contents = html(value, ...args);
+    }
+    return this;
   }
   /**
    * Mount reactive children into a parent element. The children are preserved
@@ -449,26 +486,85 @@ var isValidRenderFn = (fn) => {
   if (typeof fn !== "function") return false;
   return true;
 };
+var reconcileClasses = (elt, changed) => {
+  return Object.keys(changed).forEach((key) => {
+    if (changed[key]) elt.classList.add(key);
+    else elt.classList.remove(key);
+  });
+};
+var reconcile = (elt, builder) => {
+  const { style = {}, attrs = {}, misc = {}, classes = {} } = builder.props;
+  reconcileClasses(elt, classes);
+  Object.assign(elt.style, style);
+  if (attrs) {
+    Object.entries(attrs || {}).forEach(([key, value]) => {
+      if (typeof value === "string" && value.length === 0) {
+        elt.removeAttribute(key);
+      } else if (elt.getAttribute(key) !== String(value)) {
+        elt.setAttribute(key, String(value));
+      }
+    });
+  }
+  if (misc) Object.assign(elt, misc);
+  return elt;
+};
 var extend = (elt, args = {}) => {
-  const { contents, misc, style, on = {}, attrs = {}, raw, gimme = [], deps = {}, children = {} } = args;
+  const {
+    contents,
+    render: render2,
+    misc,
+    style,
+    on = {},
+    attrs = {},
+    raw: r2,
+    classes = {},
+    gimme = [],
+    deps = {},
+    children = {}
+  } = args;
+  let raw = !!r2;
+  reconcileClasses(elt, classes);
   let content = "";
-  if (isValidRenderFn(contents)) {
+  if (isValidRenderFn(render2)) {
     Object.entries(deps).forEach(([name, dep]) => {
       dep.any((evt) => {
-        const res = contents(unwrapDeps(deps), { event: { ...evt, triggeredBy: name }, elt });
+        const builder = new NuBuilder(elt);
+        const res = render2(unwrapDeps(deps), {
+          event: { ...evt, triggeredBy: name },
+          elt,
+          b: builder
+        });
         if (res !== void 0) {
           const reactiveChildren = select({ s: "[data-cf-slot]", all: true, from: elt }).map((elt2) => [elt2.getAttribute("data-cf-slot"), elt2]);
-          elt.innerHTML = res;
+          if (typeof res === "string") {
+            elt.innerHTML = res;
+          } else {
+            const c = res.props.contents || "";
+            elt.innerHTML = res.props.raw ? c : escape(c);
+            reconcile(elt, res);
+          }
           reactiveChildren.forEach(([slot, ref]) => {
             elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
           });
         }
       });
     });
-    const result = contents(unwrapDeps(deps), { elt });
+    const result = render2(unwrapDeps(deps), {
+      elt,
+      b: new NuBuilder(elt)
+    });
     if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
-    else elt.removeAttribute("data-cf-fg-updates");
-    content = result || "";
+    else {
+      elt.removeAttribute("data-cf-fg-updates");
+      if (typeof result === "string") {
+        content = result;
+      }
+      if (result instanceof NuBuilder) {
+        raw = !!result.props.raw;
+        content = result.props.contents || "";
+        reconcile(elt, result);
+      }
+    }
   } else if (typeof contents === "string") {
     content = contents;
   }
@@ -492,7 +588,13 @@ var extend = (elt, args = {}) => {
   if (misc) Object.assign(elt, misc);
   if (style) Object.assign(elt.style, style);
   Object.entries(on).forEach(([evt, listener]) => CfDom.addElEventListener(elt, evt, listener));
-  Object.entries(attrs).forEach(([attr, value]) => elt.setAttribute(attr, String(value)));
+  Object.entries(attrs).forEach(([attr, value]) => {
+    const current = elt.getAttribute(attr);
+    const str = String(value);
+    if (current === str) return;
+    if (typeof value === "string" && value.length === 0) elt.removeAttribute(attr);
+    else elt.setAttribute(attr, String(value));
+  });
   const extras = [];
   for (const selector of gimme) {
     const found = elt.querySelector(selector);
@@ -500,8 +602,8 @@ var extend = (elt, args = {}) => {
   }
   return [elt, ...extras];
 };
-var nu = (info = "div", args = {}) => {
-  return new NuBuilder(info, args);
+var nu = (elt = "div", args = {}) => {
+  return new NuBuilder(elt, args);
 };
 
 // src/stores/Store.ts
@@ -545,9 +647,11 @@ var Store = class {
   * Add an event listener to the store.
   * @param type The type of event to listen for.
   *   Supported event types include:
-  *   - 'change': Triggered when the store's value is updated via `update()`.
-  *   - 'append': For ListStore - Triggered when an item is added to the list.
-  *   - 'deletion': For ListStore/MapStore - Triggered when an item is removed.
+  *   - `update`: Triggered when the store's value is updated via `update()`.
+  *   - `append`: For `ListStore` - Triggered when an item is added to the list.
+  *   - `deletion`: For `ListStore`/`MapStore` - Triggered when an item is removed.
+  *   - `change`: For `ListStore`/`MapStore`: Triggered when an item at an index/key
+  *     has its value set via the corresponding store's set() method.
   *   - 'clear': Triggered when the store is cleared.
   * @param fn A callback function that will be invoked when the specified event occurs.
   *   The function receives a `StoreEvent` object with details about the event.
@@ -781,46 +885,100 @@ function store(opts) {
   return new Store(opts.value);
 }
 
-// src/templating/html.ts
-var r = (val, options) => {
-  return {
-    raw: true,
-    contents: Array.isArray(val) ? val.join(options?.joiner ?? " ") : val.toString()
-  };
-};
-var html = (strings, ...values) => {
-  const built = [];
-  for (let i = 0; i < strings.length; i++) {
-    built.push(strings[i] || "");
-    const val = values[i];
-    if (typeof val !== "undefined" && typeof val !== "object") {
-      built.push(escape((val || "").toString()));
+// src/templating/mustache.ts
+var tokenize = (template2) => {
+  const re = /\\?({{{\s*([^}]+)\s*}}}|{{[#^/]?\s*([^}]+)\s*}})/g;
+  let index = 0;
+  const tokens = [];
+  let match = re.exec(template2);
+  while (match !== null) {
+    const [chunk, mustache2, unsafeKey, key] = match;
+    const escaped = chunk.startsWith("\\");
+    const tag = chunk.length > 2 ? chunk[2] : null;
+    if (index < match.index) {
+      tokens.push({ type: "text", value: template2.slice(index, match.index) });
+    }
+    if (escaped) {
+      tokens.push({ type: "text", value: mustache2 });
+    } else if (tag === "/") {
+      tokens.push({ type: "section-close", key });
+    } else if (tag === "#" || tag === "^") {
+      tokens.push({ type: "section-open", key: key?.trim(), inverted: tag === "^" });
     } else {
-      built.push(val?.contents || "");
+      tokens.push({ type: "var", key: (unsafeKey || key)?.trim(), unescaped: !!unsafeKey });
+    }
+    index = re.lastIndex;
+    match = re.exec(template2);
+  }
+  if (index < template2.length) {
+    tokens.push({ type: "text", value: template2.slice(index) });
+  }
+  return tokens;
+};
+function nest(tokens) {
+  const root = [];
+  const stack = [root];
+  for (const token of tokens) {
+    if (token.type === "section-open") {
+      const section = {
+        type: "section",
+        key: token.key,
+        inverted: token.inverted,
+        children: []
+      };
+      stack.at(-1)?.push(section);
+      stack.push(section.children);
+    } else if (token.type === "section-close") {
+      if (stack.length === 1) throw new Error(`Unexpected closing tag ${token.key}`);
+      stack.pop();
+    } else {
+      stack.at(-1)?.push(token);
     }
   }
-  return built.join("");
-};
-
-// src/templating/mustache.ts
-var _mustache = (string, data = {}) => {
-  const escapeExpr = new RegExp("\\\\({{\\s*" + Object.keys(data).join("|") + "\\s*}})", "gi");
-  new RegExp(Object.keys(data).join("|"), "gi");
-  return string.replace(new RegExp("(^|[^\\\\]){{\\s*(" + Object.keys(data).join("|") + ")\\s*}}", "gi"), function(_, p1, p2) {
-    return `${p1 || ""}${data[p2]}`;
-  }).replace(escapeExpr, "$1");
-};
-var mustache = (string, data = {}, shouldEscape = true) => {
-  let escaped = { ...data };
-  if (shouldEscape) {
-    escaped = Object.fromEntries(Object.entries(escaped).map(([key, value]) => {
-      return [key, escape(value)];
-    }));
+  if (stack.length > 1) {
+    throw new Error(`Unclosed section(s) found`);
   }
-  return _mustache(string, escaped);
+  return root;
+}
+var compile = (template2) => nest(tokenize(template2));
+var render = (tokens, ctx, parentCtx) => tokens.map((token) => {
+  switch (token.type) {
+    case "text":
+      return token.value;
+    case "var": {
+      if (token.key === "." && "." in ctx) {
+        return token.unescaped ? String(ctx["."]) : escape(String(ctx["."]));
+      }
+      if (!(token.key in ctx)) {
+        return token.unescaped ? `{{{ ${token.key} }}}` : `{{ ${token.key} }}`;
+      }
+      const val = String(ctx[token.key]);
+      return token.unescaped ? val : escape(val);
+    }
+    case "section": {
+      const v = ctx[token.key];
+      let visible = !!v;
+      if (token.inverted) {
+        visible = v === null || v === false || typeof v === "undefined" || Array.isArray(v) && v.length === 0;
+      }
+      if (!visible) return "";
+      if (token.inverted) return render(token.children, ctx, parentCtx);
+      if (Array.isArray(v)) return v.map(
+        (item) => render(token.children, typeof item === "object" ? item : { ".": item }, ctx)
+      ).join("");
+      else if (typeof v === "object" && v !== null)
+        return render(token.children, v, ctx);
+      else
+        return render(token.children, ctx, parentCtx);
+    }
+  }
+}).join("");
+var mustache = (template2, ctx) => {
+  return render(compile(template2), ctx);
 };
-var template = (str, shouldEscape = true) => {
-  return (data) => mustache(str, data, shouldEscape);
+var template = (template2) => {
+  const compiled = compile(template2);
+  return (ctx) => render(compiled, ctx);
 };
 
 // src/campfire.ts
@@ -845,7 +1003,6 @@ var campfire_default = {
   seq,
   CfDom,
   callbackify,
-  enumerate,
   poll
 };
 export {
@@ -856,7 +1013,6 @@ export {
   callbackify,
   campfire_default as default,
   empty,
-  enumerate,
   escape,
   extend,
   html,

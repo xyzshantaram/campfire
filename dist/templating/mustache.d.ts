@@ -1,25 +1,46 @@
-import type { Template } from '../types.ts';
 /**
- * Applies mustache templating to a string. Any names surrounded by {{ }} will be
- * considered for templating: if the name is present as a property in `data`,
- * the mustache'd expression will be replaced with the value of the property in `data`.
- * Prefixing the opening {{ with double backslashes will escape the expression.
- * By default, mustache data is escaped with campfire's escape() function - you can
- * disable this by supplying the value of `shouldEscape` as false.
- * @param string - the string to be templated.
- * @param data - The data which will be used to perform replacements.
- * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
- * @returns the templated string.
-*/
-export declare const mustache: (string: string, data?: Record<string, string>, shouldEscape?: boolean) => string;
-/**
- * Returns a partial application that can be used to generate templated HTML strings.
- * Does not sanitize html, use with caution.
- * @param str - A string with mustaches in it. (For example:
- * `<span class='name'> {{ name }} </span>`)
- * @param shouldEscape - Whether or not the templating data should be escaped. Defaults to true.
- * @returns A function that when passed an Object with templating data,
- * returns the result of the templating operation performed on the string str with
- * the data passed in.
+ * Renders a mustache template with the provided context data.
+ *
+ * @param template - The template string to render
+ * @param ctx - The context object containing data for rendering
+ * @returns The rendered string result
+ *
+ * @example
+ * ```js
+ * const result = mustache("Hello, {{ name }}!", { name: "World" });
+ * // result: "Hello, World!"
+ * ```
+ *
+ * @example Using sections
+ * ```js
+ * const result = mustache(
+ *   "{{#show}}Visible{{/show}} {{^hide}}Also Visible{{/hide}}",
+ *   { show: true, hide: false }
+ * );
+ * // result: "Visible Also Visible"
+ * ```
+ *
+ * @example Using array iteration
+ * ```js
+ * const result = mustache(
+ *   "Items: {{#items}}{{name}}{{/items}}",
+ *   { items: [{ name: "one" }, { name: "two" }] }
+ * );
+ * // result: "Items: onetwo"
+ * ```
  */
-export declare const template: (str: string, shouldEscape?: boolean) => Template;
+export declare const mustache: <T extends Record<string, any> = Record<string, any>>(template: string, ctx: T) => string;
+/**
+ * Creates a reusable template function from a mustache template string.
+ *
+ * @param template - The template string to compile
+ * @returns A function that accepts a context object and returns the rendered string
+ *
+ * @example
+ * ```js
+ * const greet = template("Hello, {{ name }}!");
+ * const result1 = greet({ name: "Alice" }); // "Hello, Alice!"
+ * const result2 = greet({ name: "Bob" });   // "Hello, Bob!"
+ * ```
+ */
+export declare const template: <T extends Record<string, any> = Record<string, any>>(template: string) => (ctx: T) => string;

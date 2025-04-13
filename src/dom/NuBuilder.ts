@@ -8,7 +8,8 @@ import type {
 } from "../types.ts";
 import { extend } from "./nu.ts";
 import { CfDom } from "./config.ts";
-import { html, RawHtml } from "../templating/html.ts";
+import { html } from "../templating/html.ts";
+import type { RawHtml } from "../templating/html.ts";
 
 /**
  * Creates a typed HTML element based on the tag name.

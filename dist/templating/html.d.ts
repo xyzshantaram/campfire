@@ -27,4 +27,4 @@ export declare const r: (val: any, options?: RawHtmlOptions) => RawHtml;
  * const safeHtml = html`<div>${r("<b>Bold</b>")}</div>`; // Using r() to prevent escaping
  * ```
  */
-export declare const html: (strings: TemplateStringsArray, ...values: (string | number | RawHtml)[]) => string;
+export declare const html: (strings: TemplateStringsArray, ...values: (string | boolean | number | RawHtml)[]) => string;

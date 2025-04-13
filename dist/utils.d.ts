@@ -94,16 +94,3 @@ export declare const callbackify: <T extends any[], U = unknown, E = any>(fn: (.
  * ```
  */
 export declare const poll: (fn: () => void, interval: number, callNow?: boolean) => () => void;
-/**
- * Similar to python `enumerate`: returns a list of tuples with item indices.
- * Super useful for doing for...of loops.
- * @example
- * ```js
- * for (const [i, item] of cf.enumerate(items)) {
- *   console.log(`${i}. ${item}`);
- * }
- * ```
- * @param arr the array to enumerate.
- * @returns the enumerated array.
- */
-export declare const enumerate: <T>(arr: T[]) => (readonly [number, T])[];

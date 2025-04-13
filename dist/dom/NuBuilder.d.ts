@@ -1,5 +1,6 @@
 import { Store } from "../stores/mod.ts";
-import type { ElementProperties, InferElementType, RenderFunction, StringStyleProps } from "../types.ts";
+import type { ElementProperties, RenderFunction, StringStyleProps } from "../types.ts";
+import type { RawHtml } from "../templating/html.ts";
 /**
  * Builder class for creating and configuring HTML elements using a fluent API.
  *
@@ -17,38 +18,57 @@ import type { ElementProperties, InferElementType, RenderFunction, StringStylePr
  *   .done();
  * ```
  */
-export declare class NuBuilder<T extends string, E extends InferElementType<T>, D extends Record<string, Store<any>>> {
+export declare class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Store<any>>, Info = string> {
     /** Element properties configuration object */
-    props: ElementProperties<E, D>;
+    props: ElementProperties<Elem, Deps>;
     /** Element info string (tag, id, classes) */
-    info: T;
+    private elem;
     /**
      * Creates a new NuBuilder instance.
      *
      * @param info - A string describing the element in the format 'tag#id.class1.class2'
      * @param props - Optional initial properties for the element
      */
-    constructor(info: T, props?: ElementProperties<E, D>);
+    constructor(elt: Elem, props?: ElementProperties<Elem, Deps>);
+    constructor(elt: Info, props?: ElementProperties<Elem, Deps>);
+    constructor(elt: Info | Elem, props?: ElementProperties<Elem, Deps>);
+    /**
+     * Set a class name. Pass on with a falsy value to not apply the class.
+     *
+     * @param name - The class name to add/remove
+     * @param on - Whether the class should be applied (true) or removed (false/falsy)
+     * @returns The builder instance for chaining
+     */
+    cls(name: string, on?: '' | boolean | 0 | null): this;
     /**
      * Finalizes the builder and creates the actual DOM element with all configured properties.
      *
      * @returns A tuple containing the created element as the first item, followed by any child elements
      * @throws Error if a class name contains a '#' character
      */
-    done(): [E, ...HTMLElement[]];
-    ref(): E;
+    done(): [Elem, ...HTMLElement[]];
+    ref(): Elem;
     /**
-     * Sets the content of the element.
+     * Sets the content of the element as a string, escaped by default.
+     * Useful for quick and safe interpolation of strings into DOM content.
      *
-     * @param value - Either a string of content or a render function that returns content
+     * @param value - String content to set
      * @returns The builder instance for chaining
      */
-    content(value: string | RenderFunction<E, D>): this;
+    content(value: string): this;
+    /**
+     * Sets a render function that will be called to generate content
+     * whenever dependencies change.
+     *
+     * @param fn - The render function that returns content
+     * @returns The builder instance for chaining
+     */
+    render(fn: RenderFunction<Elem, Deps>): this;
     /**
      * Sets a single attribute on the element.
      *
      * @param name - The attribute name
-     * @param value - The attribute value
+     * @param value - The attribute value. Set to empty string ('') to clear/reset an attribute.
      * @returns The builder instance for chaining
      */
     attr(name: string, value: string | boolean | number): this;
@@ -58,7 +78,7 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @param value - An object containing attribute name-value pairs
      * @returns The builder instance for chaining
      */
-    attrs(value: ElementProperties<E, D>['attrs']): this;
+    attrs(value: ElementProperties<Elem, Deps>['attrs']): this;
     /**
      * Sets whether the content value should be treated as raw HTML.
      *
@@ -73,13 +93,13 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @param value - The value for the property if obj is a property name
      * @returns The builder instance for chaining
      */
-    misc(obj: string, value: unknown): NuBuilder<T, E, D>;
-    misc(obj: Record<string, unknown>): NuBuilder<T, E, D>;
+    misc(obj: string, value: unknown): NuBuilder<Elem, Deps, Info>;
+    misc(obj: Record<string, unknown>): NuBuilder<Elem, Deps, Info>;
     /**
      * Sets a single CSS style property on the element.
      *
      * @param prop - The CSS property name
-     * @param value - The CSS property value
+     * @param value - The CSS property value. Set to empty string ('') to clear a style.
      * @returns The builder instance for chaining
      */
     style(prop: StringStyleProps, value: string): this;
@@ -89,7 +109,7 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @param value - An object containing style name-value pairs
      * @returns The builder instance for chaining
      */
-    styles(value: ElementProperties<E, D>['style']): this;
+    styles(value: ElementProperties<Elem, Deps>['style']): this;
     /**
      * Attaches an event handler to the element.
      *
@@ -105,7 +125,7 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @returns The builder instance for chaining
      */
     gimme(...selectors: string[]): this;
-    deps<ND extends Record<string, Store<any>>>(obj: ND): NuBuilder<T, E, D & ND>;
+    deps<ND extends Record<string, Store<any>>>(obj: ND): NuBuilder<Elem, Deps & ND, Info>;
     /**
      * Unsafely set the html of the object. This is equivalent to calling
      * .content(...).raw(true) and is meant to be used with a templating function
@@ -113,7 +133,8 @@ export declare class NuBuilder<T extends string, E extends InferElementType<T>, 
      * @param value The content function / string to set.
      * @returns The builder for chaining.
      */
-    html(value: string | RenderFunction<E, D>): this;
+    html(value: string): NuBuilder<Elem, Deps, Info>;
+    html(arr: TemplateStringsArray, ...values: (string | number | boolean | RawHtml)[]): NuBuilder<Elem, Deps, Info>;
     /**
      * Mount reactive children into a parent element. The children are preserved
      * across re-renders and can be independently reactive.
