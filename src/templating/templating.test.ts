@@ -39,6 +39,16 @@ describe('tests for html``', () => {
 
         expect(num).to.equal('<li>0</li><li>1</li><li>2</li>');
     });
+
+    it('should not erase zeroes', () => {
+        const s = html`1${0}1`;
+        expect(s).to.equal('101');
+    })
+
+    it('should handle booleans correctly', () => {
+        const s = html`1${true}1`;
+        expect(s).to.equal('1true1');
+    })
 });
 
 describe('Tests for mustache', () => {

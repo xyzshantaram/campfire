@@ -39,13 +39,13 @@ export const r = (val: any, options?: RawHtmlOptions): RawHtml => {
  * const safeHtml = html`<div>${r("<b>Bold</b>")}</div>`; // Using r() to prevent escaping
  * ```
  */
-export const html = (strings: TemplateStringsArray, ...values: (string | number | RawHtml)[]) => {
+export const html = (strings: TemplateStringsArray, ...values: (string | boolean | number | RawHtml)[]) => {
     const built = [];
     for (let i = 0; i < strings.length; i++) {
         built.push(strings[i] || '');
         const val = values[i];
         if (typeof val !== 'undefined' && typeof val !== 'object') {
-            built.push(escape((val || '').toString()));
+            built.push(escape((val ?? '').toString()));
         }
         else {
             built.push(val?.contents || '');
