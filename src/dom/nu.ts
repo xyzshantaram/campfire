@@ -92,7 +92,7 @@ export const extend = <
         deps = ({} as D),
         children = {}
     } = args;
-    let raw = r;
+    let raw = !!r;
 
     let content = "";
     if (isValidRenderFn<T, D>(render)) {
@@ -112,8 +112,8 @@ export const extend = <
                         elt.innerHTML = res;
                     }
                     else {
-                        elt.innerHTML = res.props.contents || '';
-                        // Reconcile other builder properties with the element
+                        const c = res.props.contents || '';
+                        elt.innerHTML = res.props.raw ? c : escape(c);
                         reconcileBuilderProps(elt, res);
                     }
                     reactiveChildren.forEach(([slot, ref]) => {
@@ -131,11 +131,11 @@ export const extend = <
         if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
         else {
             elt.removeAttribute("data-cf-fg-updates");
-            raw = true;
             if (typeof result === 'string') {
                 content = result;
             }
             if (result instanceof NuBuilder) {
+                raw = !!result.props.raw;
                 content = result.props.contents || '';
                 reconcileBuilderProps(elt, result);
             }
