@@ -80,7 +80,7 @@ export type StoreEventFromObject<D> = {
 type NuBuilderInstance<Elem extends HTMLElement, Deps extends Record<string, Store<any>>> =
     NuBuilder<Elem, Deps, string>;
 
-type RenderBuilder<Elem extends HTMLElement, Deps> =
+export type RenderBuilder<Elem extends HTMLElement, Deps> =
     Omit<NuBuilderInstance<Elem, Deps extends Record<string, Store<any>> ? Deps : never>,
         "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render">;
 
@@ -88,10 +88,10 @@ export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string,
     props: UnwrapStore<Deps>,
     opts: {
         event?: StoreEventFromObject<Deps> & { triggeredBy: string },
-        builder: RenderBuilder<Elem, Deps>,
+        b: RenderBuilder<Elem, Deps>,
         elt: Elem
     }
-) => string | NuBuilder<Elem, Deps, string> | void;
+) => string | RenderBuilder<Elem, Deps> | void;
 
 export type StringStyleProps = keyof {
     [K in keyof CSSStyleDeclaration as CSSStyleDeclaration[K] extends string ? K : never]: true

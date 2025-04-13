@@ -1,5 +1,5 @@
 /**
- * Tests specifically for the builder-style render function in NuBuilder
+ * Tests specifically for the -style render function in NuBuilder
  */
 
 import * as chai from 'chai';
@@ -32,8 +32,8 @@ describe('Builder-style render function tests', () => {
       const count = store({ value: 0 });
       const [div] = nu('div', {
         deps: { count },
-        render: ({ count }, { builder }) => {
-          return builder.html(`Count: ${count}`);
+        render: ({ count }, { b }) => {
+          return b.html(`Count: ${count}`);
         }
       }).done();
 
@@ -58,8 +58,8 @@ describe('Builder-style render function tests', () => {
       const color = store({ value: 'red' });
       const [div] = nu('div', {
         deps: { color },
-        render: ({ color }, { builder }) => {
-          return builder
+        render: ({ color }, { b }) => {
+          return b
             .content('Styled text')
             .style('color', color)
             .style('fontWeight', 'bold');
@@ -79,8 +79,8 @@ describe('Builder-style render function tests', () => {
       const [div] = nu('div', {
         style: { color: 'red', fontSize: '20px', fontWeight: 'bold' },
         deps: { useStyle },
-        render: ({ useStyle }, { builder }) => {
-          const b = builder.content('Style clearing test');
+        render: ({ useStyle }, { b }) => {
+          b.content('Style clearing test');
 
           if (!useStyle) {
             // Set empty string to clear styles
@@ -110,8 +110,8 @@ describe('Builder-style render function tests', () => {
       const disabled = store({ value: false });
       const [button] = nu('button', {
         deps: { isDisabled: disabled },
-        render: ({ isDisabled }, { builder }) => {
-          const b = builder.content('Click me');
+        render: ({ isDisabled }, { b }) => {
+          b.content('Click me');
           if (isDisabled) {
             return b.attr('disabled', 'disabled')
               .attr('aria-disabled', 'true');
@@ -139,8 +139,8 @@ describe('Builder-style render function tests', () => {
           'data-persist': 'always-here'
         },
         deps: { showAttr },
-        render: ({ showAttr }, { builder }) => {
-          const b = builder.content('Attribute clearing test');
+        render: ({ showAttr }, { b }) => {
+          b.content('Attribute clearing test');
 
           if (!showAttr) {
             b.attr('data-test', '');
@@ -168,8 +168,8 @@ describe('Builder-style render function tests', () => {
       const [checkbox] = nu('input', {
         attrs: { type: 'checkbox' },
         deps: { isChecked },
-        render: ({ isChecked }, { builder }) => {
-          return builder
+        render: ({ isChecked }, { b }) => {
+          return b
             .content('')
             .misc('checked', isChecked);
         }
@@ -194,8 +194,8 @@ describe('Builder-style render function tests', () => {
 
       const [div] = nu('div', {
         deps: { count, color, size },
-        render: ({ count, color, size }, { builder }) => {
-          return builder
+        render: ({ count, color, size }, { b }) => {
+          return b
             .content(`Count: ${count}`)
             .style('color', color)
             .style('fontSize', size);
@@ -238,21 +238,21 @@ describe('Builder-style render function tests', () => {
 
       const [div] = nu('div', {
         deps: { mode },
-        render: ({ mode }, { builder }) => {
+        render: ({ mode }, { b }) => {
           switch (mode) {
             case 'warning':
-              return builder
+              return b
                 .content('Warning: Proceed with caution')
                 .style('color', 'orange')
                 .style('fontWeight', 'bold');
             case 'error':
-              return builder
+              return b
                 .content('Error: Action could not be completed')
                 .style('color', 'red')
                 .style('fontWeight', 'bold')
                 .style('textDecoration', 'underline');
             default:
-              return builder
+              return b
                 .content('Normal operation')
                 .style('fontWeight', '')
                 .style('textDecoration', '')
@@ -363,11 +363,9 @@ describe('Builder-style render function tests', () => {
 
       const [updatedDiv] = nu(existingDiv, {
         deps: { count },
-        render: ({ count }, { builder }) => {
-          return builder
-            .content(`New content: ${count}`)
-            .style('color', 'blue');
-        }
+        render: ({ count }, { b }) => b
+          .content(`New content: ${count}`)
+          .style('color', 'blue')
       }).done();
 
       // Should be the same element

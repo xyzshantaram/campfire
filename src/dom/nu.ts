@@ -1,5 +1,5 @@
 import type { Store } from "../stores/mod.ts";
-import type { ElementProperties, InferElementType, RenderFunction, UnwrapStore } from "../types.ts";
+import type { ElementProperties, InferElementType, RenderBuilder, RenderFunction, UnwrapStore } from "../types.ts";
 import { escape, initMutationObserver } from "../utils.ts";
 import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
@@ -48,14 +48,14 @@ const isValidRenderFn = <T extends HTMLElement, D extends Record<string, Store<a
 const reconcileBuilderProps = <
     T extends HTMLElement,
     D extends Record<string, Store<any>>
->(elt: T, builder: NuBuilder<T, D>) => {
+>(elt: T, builder: RenderBuilder<T, D>) => {
     const { style = {}, attrs = {}, misc = {} } = builder.props;
 
     Object.assign(elt.style, style);
     if (attrs) {
         Object.entries(attrs || {}).forEach(([key, value]) => {
             if (typeof value === 'string' && value.length === 0) {
-                elt.removeAttribute(key)
+                elt.removeAttribute(key);
             }
             else if (elt.getAttribute(key) !== String(value)) {
                 elt.setAttribute(key, String(value));
@@ -102,7 +102,7 @@ export const extend = <
                 const res = render(unwrapDeps(deps), {
                     event: { ...evt, triggeredBy: name },
                     elt,
-                    builder: builder as NuBuilder<T, any, string>
+                    b: builder as NuBuilder<T, any, string>
                 });
 
                 if (res !== undefined) {
@@ -124,8 +124,7 @@ export const extend = <
         });
 
         const result = render(unwrapDeps(deps), {
-            elt,
-            builder: new NuBuilder<T, D, string>(elt) as any
+            elt, b: new NuBuilder<T, D, string>(elt) as any
         });
 
         if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");

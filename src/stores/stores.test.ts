@@ -74,7 +74,7 @@ describe('Tests for Reactivity', () => {
 
         const [span] = nu('span')
             .deps({ first, last })
-            .render(({ first, last }, { builder }) => builder.content(`${first} ${last}`))
+            .render(({ first, last }, { b }) => b.content(`${first} ${last}`))
             .done();
 
         expect(span.innerHTML).to.equal('John Doe');
