@@ -179,16 +179,18 @@ describe('Tests for NuBuilder', () => {
         const greeting = store({ value: 'Hello' });
         const to = store({ value: 'World' });
 
-        const [parent] = nu('div')
-            .deps({ greeting })
-            .html(({ greeting }) => `<div>Parent: ${greeting}</div><cf-slot name="to"></cf-slot>`)
-            .children({
-                to: nu('span')
-                    .deps({ to })
-                    .html(({ to }) => `Child: ${to}`)
-                    .ref()
-            })
+        // Create the child element first
+        const [child] = nu('span')
+            .deps({ to })
+            .render(({ to }) => `Child: ${to}`)
             .done();
+
+        // Set raw=true on the parent explicitly to avoid escaping
+        const [parent] = nu('div', {
+            deps: { greeting },
+            render: ({ greeting }) => `<div>Parent: ${greeting}</div><cf-slot name="to"></cf-slot>`,
+            children: { to: child }
+        }).done();
 
         expect(parent.innerHTML).to.equal(
             `<div>Parent: Hello</div><span data-cf-reactive="true" data-cf-slot="to">Child: World</span>`
@@ -209,16 +211,17 @@ describe('Tests for NuBuilder', () => {
     it('should support a single element as a child', () => {
         const value = store({ value: 'Child Content' });
 
-        // Get a single element - with the change to children parameter, this is now supported
+        // Get a single element
         const [singleChild] = nu('span')
             .deps({ value })
-            .html(({ value }) => `${value}`)
+            .render(({ value }) => `${value}`)
             .done();
 
-        const [parent] = nu('div')
-            .html(() => `<div>Parent Content</div><cf-slot name="child"></cf-slot>`)
-            .children({ child: singleChild })
-            .done();
+        // Set raw=true explicitly
+        const [parent] = nu('div', {
+            render: () => `<div>Parent Content</div><cf-slot name="child"></cf-slot>`,
+            children: { child: singleChild }
+        }).done();
 
         expect(parent.innerHTML).to.contain('<span data-cf-reactive="true" data-cf-slot="child">Child Content</span>');
 
