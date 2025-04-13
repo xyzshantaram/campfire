@@ -77,11 +77,18 @@ export type StoreEventFromObject<D> = {
     [K in keyof D]: D[K] extends Store<any> ? StoreEvent<D[K]> : never;
 }[keyof D];
 
+type NuBuilderInstance<Elem extends HTMLElement, Deps extends Record<string, Store<any>>> =
+    NuBuilder<Elem, Deps, string>;
+
+type RenderBuilder<Elem extends HTMLElement, Deps> =
+    Omit<NuBuilderInstance<Elem, Deps extends Record<string, Store<any>> ? Deps : never>,
+        "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render">;
+
 export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string, Store<any>>> = (
     props: UnwrapStore<Deps>,
     opts: {
         event?: StoreEventFromObject<Deps> & { triggeredBy: string },
-        builder: Omit<NuBuilder<Elem, Deps, string>, "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render">,
+        builder: RenderBuilder<Elem, Deps>,
         elt: Elem
     }
 ) => string | NuBuilder<Elem, Deps, string> | void;
@@ -144,7 +151,7 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
 
     /** 
      * A Record<string, Store> of the element's dependencies. The element's 
-     * content function will be called every time any of the deps change.
+     * render function will be called every time any of the deps change.
      */
     deps?: D;
 
