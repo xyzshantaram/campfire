@@ -21,7 +21,7 @@ interface VariableToken {
 type MustacheToken = (SectionToken | TextToken | VariableToken);
 
 const tokenize = (template: string) => {
-    const re = /\\?({{{\s*(\w+)\s*}}}|{{[#^/]?\s*(\w+)\s*}})/g;
+    const re = /\\?({{{\s*([^}]+)\s*}}}|{{[#^/]?\s*([^}]+)\s*}})/g;
     let index = 0;
     const tokens: MustacheToken[] = [];
     let match = re.exec(template);
@@ -29,7 +29,7 @@ const tokenize = (template: string) => {
     while (match !== null) {
         const [chunk, mustache, unsafeKey, key] = match;
         const escaped = chunk.startsWith('\\');
-        const tag = chunk[2];
+        const tag = chunk.length > 2 ? chunk[2] : null;
 
         if (index < match.index) {
             tokens.push({ type: 'text', value: template.slice(index, match.index) });
@@ -41,14 +41,18 @@ const tokenize = (template: string) => {
             tokens.push({ type: 'section-close', key });
         }
         else if (tag === '#' || tag === '^') {
-            tokens.push({ type: 'section-open', key, inverted: tag === '^' });
+            tokens.push({ type: 'section-open', key: key?.trim(), inverted: tag === '^' });
         }
         else {
-            tokens.push({ type: 'var', key: unsafeKey || key, unescaped: !!unsafeKey });
+            tokens.push({ type: 'var', key: (unsafeKey || key)?.trim(), unescaped: !!unsafeKey });
         }
 
-        match = re.exec(template);
         index = re.lastIndex;
+        match = re.exec(template);
+    }
+
+    if (index < template.length) {
+        tokens.push({ type: 'text', value: template.slice(index) });
     }
 
     return tokens;
@@ -103,6 +107,9 @@ const render = <
         case "text":
             return token.value;
         case "var":
+            if (!(token.key in ctx)) {
+                return token.unescaped ? `{{{ ${token.key} }}}` : `{{ ${token.key} }}`;
+            }
             return token.unescaped ? String(ctx[token.key]) : escape(ctx[token.key]);
         case "section": {
             const v = ctx[token.key];
