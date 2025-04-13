@@ -54,9 +54,11 @@ export class Store<T> {
  * Add an event listener to the store.
  * @param type The type of event to listen for.
  *   Supported event types include:
- *   - 'change': Triggered when the store's value is updated via `update()`.
- *   - 'append': For ListStore - Triggered when an item is added to the list.
- *   - 'deletion': For ListStore/MapStore - Triggered when an item is removed.
+ *   - `update`: Triggered when the store's value is updated via `update()`.
+ *   - `append`: For `ListStore` - Triggered when an item is added to the list.
+ *   - `deletion`: For `ListStore`/`MapStore` - Triggered when an item is removed.
+ *   - `change`: For `ListStore`/`MapStore`: Triggered when an item at an index/key
+ *     has its value set via the corresponding store's set() method.
  *   - 'clear': Triggered when the store is cleared.
  * @param fn A callback function that will be invoked when the specified event occurs.
  *   The function receives a `StoreEvent` object with details about the event.
