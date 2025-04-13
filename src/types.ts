@@ -81,7 +81,7 @@ export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string,
     props: UnwrapStore<Deps>,
     opts: {
         event?: StoreEventFromObject<Deps> & { triggeredBy: string },
-        builder: Omit<NuBuilder<Elem, Deps, string>, "children" | "done" | "ref" | "on" | "gimme" | "deps">,
+        builder: Omit<NuBuilder<Elem, Deps, string>, "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render">,
         elt: Elem
     }
 ) => string | NuBuilder<Elem, Deps, string>;
