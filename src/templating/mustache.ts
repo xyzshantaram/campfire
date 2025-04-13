@@ -102,31 +102,44 @@ const compile = (template: string) => nest(tokenize(template));
 
 const render = <
     T extends Record<string, any>
->(tokens: CompiledToken[], ctx: T): string => tokens.map(token => {
+>(tokens: CompiledToken[], ctx: T, parentCtx?: Record<string, any>): string => tokens.map(token => {
     switch (token.type) {
         case "text":
             return token.value;
-        case "var":
+        case "var": {
+            if (token.key === '.' && '.' in ctx) {
+                return token.unescaped
+                    ? String(ctx['.'])
+                    : escape(String(ctx['.']));
+            }
+
             if (!(token.key in ctx)) {
                 return token.unescaped ? `{{{ ${token.key} }}}` : `{{ ${token.key} }}`;
             }
-            return token.unescaped ? String(ctx[token.key]) : escape(ctx[token.key]);
+
+            const val = String(ctx[token.key]);
+            return token.unescaped ? val : escape(val);
+        }
         case "section": {
             const v = ctx[token.key];
-            const visible = token.inverted ? (!v || Array.isArray(v) && v.length === 0) : !!v;
-            if (!visible) return '';
+            let visible = !!v;
 
-            if (Array.isArray(v)) {
-                return v.map(item =>
-                    render(token.children, typeof item === 'object' ? item : { '.': item }))
-                    .join('')
+            if (token.inverted) {
+                visible = (v === null || v === false || typeof v === 'undefined' ||
+                    (Array.isArray(v) && v.length === 0));
             }
-            else if (typeof v === 'object') {
-                return render(token.children, v);
-            }
-            else {
-                return render(token.children, ctx);
-            }
+
+            if (!visible) return '';
+            if (token.inverted) return render(token.children, ctx, parentCtx);
+
+            if (Array.isArray(v)) return v
+                .map(item => render(token.children, typeof item === 'object' ? item : { '.': item }, ctx)
+                ).join('');
+
+            else if (typeof v === 'object' && v !== null)
+                return render(token.children, v, ctx);
+            else
+                return render(token.children, ctx, parentCtx);
         }
     }
 }).join('');
