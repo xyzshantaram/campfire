@@ -81,10 +81,10 @@ export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string,
     props: UnwrapStore<Deps>,
     opts: {
         event?: StoreEventFromObject<Deps> & { triggeredBy: string },
-        builder: Omit<NuBuilder<Elem, Deps>, "children" | "done" | "ref" | "on" | "gimme" | "deps">,
+        builder: Omit<NuBuilder<Elem, Deps, string>, "children" | "done" | "ref" | "on" | "gimme" | "deps">,
         elt: Elem
     }
-) => string | NuBuilder<Elem, Deps>;
+) => string | NuBuilder<Elem, Deps, string>;
 
 export type StringStyleProps = keyof {
     [K in keyof CSSStyleDeclaration as CSSStyleDeclaration[K] extends string ? K : never]: true
