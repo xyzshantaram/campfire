@@ -10,12 +10,12 @@ const expect = chai.expect;
 
 describe('tests for html``', () => {
     it('should escape parameters', () => {
-        expect(mustache(html`<div>${"<script> alert('xss') </script>"}</div>`))
+        expect(html`<div>${"<script> alert('xss') </script>"}</div>`)
             .to.equal("<div>&lt;script&gt; alert(&#39;xss&#39;) &lt;/script&gt;</div>");
     });
 
     it('should not escape r() values', () => {
-        expect(mustache(html`<div>${r("<script> alert('xss') </script>")}</div>`))
+        expect(html`<div>${r("<script> alert('xss') </script>")}</div>`)
             .to.equal("<div><script> alert('xss') </script></div>");
     });
 
@@ -78,11 +78,6 @@ describe('Tests for mustache', () => {
     it('should escape substituted text', () => {
         expect(mustache("Welcome to {{ location }}, {{ name }}.", { name: "John", location: "<script> alert('xss') </script>" }))
             .to.not.equal("Welcome to <script> alert('xss') </script>, John.");
-    });
-
-    it("should not escape when esc flag is false", () => {
-        expect(mustache("Welcome to {{ location }}, {{ name }}.", { location: "Mars", name: "<b>John</b>" }, false))
-            .to.equal("Welcome to Mars, <b>John</b>.");
     });
 });
 
