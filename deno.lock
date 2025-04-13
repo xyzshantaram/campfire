@@ -23,6 +23,8 @@
     }
   },
   "remote": {
+    "https://esm.sh/campfire.js@4.0.0-rc14": "7574afbb5ed9784fb17e19ad8662900fbc152916e6d823677526900b7050e999",
+    "https://esm.sh/campfire.js@4.0.0-rc14/denonext/campfire.mjs": "45bd9dfdf9b47b6c722d98c2eebef2759146a7e3963f8fa9b7a59aa5e07df3fc",
     "https://esm.sh/campfire.js@4.0.0-rc8": "b988777fea2aa0928504cdc14b4c3ff0ba23375609d61f75e6f26136e3a219c8",
     "https://esm.sh/campfire.js@4.0.0-rc8/denonext/campfire.mjs": "292e99c3daff389829f5b8d8db6e8ad282e7ef3db1804ce99931590b82025e30",
     "https://esm.sh/campfire.js@4.0.0-rc9": "15a1f42f2b04f19fa2a2b1c75b751245e6158413a671d01a35f0e5330f08320d",

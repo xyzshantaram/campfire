@@ -34,7 +34,7 @@ const tpl = template(`<!DOCTYPE html>
             for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
         </noscript>
 
-        {{ built }}
+        {{{ built }}}
 
         <div class='footer'>
             <a href='https://github.com/xyzshantaram/campfire'>Campfire on GitHub</a>
@@ -54,7 +54,7 @@ const tpl = template(`<!DOCTYPE html>
     <script defer type='module' src='site/main.js'></script>
 </body>
 
-</html>`, false);
+</html>`);
 
 const PageRenderer = {
     code: (code: Record<string, any>, _info: Record<string, any>, escaped: boolean) => {

@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-window no-window-prefix
-import cf from 'https://esm.sh/campfire.js@4.0.0-rc8';
+import cf from 'https://esm.sh/campfire.js@4.0.0-rc14';
 import { highlightAll, HL_KEYWORDS } from 'https://esm.sh/macrolight@1.5.0';
 import { editorReady } from "./editor.js";
 
