@@ -13,6 +13,8 @@
   elements
 - Added NuBuilder::html overload for it to be used as a string templating
   function
+- remove enumerate() - TIL Array::entries() exists
+- Add NuBuilder::cls
 
 ## 4.0.0-rc13
 

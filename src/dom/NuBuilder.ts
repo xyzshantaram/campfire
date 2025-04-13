@@ -100,9 +100,13 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
     }
 
     /**
-     * Set a class name. Pass on with a f
+     * Set a class name. Pass on with a falsy value to not apply the class.
+     * 
+     * @param name - The class name to add/remove
+     * @param on - Whether the class should be applied (true) or removed (false/falsy)
+     * @returns The builder instance for chaining
      */
-    cls(name: string, on: '' | boolean | 0 | null | undefined = true) {
+    cls(name: string, on: '' | boolean | 0 | null = true) {
         this.props.classes ??= {};
         this.props.classes[name] = !!on;
         return this;

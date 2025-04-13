@@ -38,6 +38,14 @@ const isValidRenderFn = <T extends HTMLElement, D extends Record<string, Store<a
     return true;
 };
 
+const reconcileClasses = (elt: HTMLElement, changed: Record<string, boolean>) => {
+    return Object.keys(changed)
+        .forEach(key => {
+            if (changed[key]) elt.classList.add(key);
+            else elt.classList.remove(key);
+        });
+}
+
 /**
  * Reconciles the properties from a NuBuilder to an existing element.
  * This applies the builder's properties to the element without replacing it.
@@ -45,18 +53,12 @@ const isValidRenderFn = <T extends HTMLElement, D extends Record<string, Store<a
  * @param elt The target element to update
  * @param builder The NuBuilder whose properties will be applied
  */
-const reconcileBuilderProps = <
+const reconcile = <
     T extends HTMLElement,
     D extends Record<string, Store<any>>
 >(elt: T, builder: RenderBuilder<T, D>) => {
     const { style = {}, attrs = {}, misc = {}, classes = {} } = builder.props;
-
-    const prev: typeof classes = {};
-    elt.classList.forEach(itm => prev[itm] = true);
-    for (const key in classes) {
-        prev[key] = classes[key];
-    }
-
+    reconcileClasses(elt, classes);
     Object.assign(elt.style, style);
     if (attrs) {
         Object.entries(attrs || {}).forEach(([key, value]) => {
@@ -101,11 +103,7 @@ export const extend = <
     } = args;
     let raw = !!r;
 
-    const existingClasses: typeof classes = {};
-    elt.classList.forEach(itm => existingClasses[itm] = true);
-    for (const key in classes) {
-        existingClasses[key] = classes[key];
-    }
+    reconcileClasses(elt, classes);
 
     let content = "";
     if (isValidRenderFn<T, D>(render)) {
@@ -127,7 +125,7 @@ export const extend = <
                     else {
                         const c = res.props.contents || '';
                         elt.innerHTML = res.props.raw ? c : escape(c);
-                        reconcileBuilderProps(elt, res);
+                        reconcile(elt, res);
                     }
                     reactiveChildren.forEach(([slot, ref]) => {
                         elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
@@ -149,7 +147,7 @@ export const extend = <
             if (result instanceof NuBuilder) {
                 raw = !!result.props.raw;
                 content = result.props.contents || '';
-                reconcileBuilderProps(elt, result);
+                reconcile(elt, result);
             }
         }
     } else if (typeof contents === "string") {
