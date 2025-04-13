@@ -48,7 +48,8 @@
     "test": "npx tsc --noEmit && pnpm coverage",
     "mkdocs": "npx typedoc src/campfire.ts src/types.ts --cleanOutputDir --out site/docs/ --darkHighlightTheme monokai --customCss site/tsdoc_style.css && cp campfire.png site/docs/campfire.png",
     "build": "npx tsc && pnpm mocha && node esbuild.config.js && pnpm mkdocs",
-    "build-site": "deno run -A site/build.ts ./site/sections ./index.html"
+    "build-site": "deno run -A site/build.ts ./site/sections ./index.html",
+    "size": "node scripts/size-estimate.js"
   },
   "repository": {
     "type": "git",
