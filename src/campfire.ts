@@ -4,7 +4,7 @@ import { NuBuilder } from "./dom/NuBuilder.ts"
 import { ListStore, MapStore, Store, store } from "./stores/mod.ts"
 import { html, r } from "./templating/html.ts"
 import { mustache, template } from "./templating/mustache.ts"
-import { seq, escape, unescape, callbackify, poll } from './utils.ts'
+import { seq, escape, unescape, callbackify, poll, ids } from './utils.ts'
 import { CfDom } from "./dom/mod.ts";
 
 import type { SelectParams } from "./dom/mod.ts";
@@ -33,7 +33,8 @@ export default {
     seq,
     CfDom,
     callbackify,
-    poll
+    poll,
+    ids
 }
 
 export {
@@ -57,7 +58,8 @@ export {
     seq,
     CfDom,
     callbackify,
-    poll
+    poll,
+    ids
 }
 
 export type {
