@@ -1,5 +1,9 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc15
+
+- Add `ids()` generator function
+
 ## 4.0.0-rc14
 
 - Added new `render()` method to NuBuilder for more flexible reactive content
