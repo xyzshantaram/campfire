@@ -8,9 +8,6 @@ import { escape, unescape, seq } from './utils.ts';
 
 const expect = chai.expect;
 
-// Testing fmtNode and initMutationObserver requires a DOM environment
-// We'll use mocking to test these functions
-
 describe('Additional tests for utility functions', () => {
   describe('escape and unescape edge cases', () => {
     it('should handle null or undefined input for escape', () => {

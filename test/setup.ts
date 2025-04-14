@@ -35,6 +35,5 @@ CfDom.configure({
 
 defineGlobal('Event', window.Event);
 defineGlobal('MouseEvent', window.MouseEvent);
-defineGlobal('MutationObserver', window.MutationObserver);
 
 use(chaiDom);

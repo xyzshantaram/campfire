@@ -61,44 +61,6 @@ export const seq = (...args: number[]) => {
     return result;
 }
 
-const fmtNode = (node: CfHTMLElementInterface) => {
-    const result = ['<'];
-    result.push(node.tagName.toLowerCase());
-    if (node.id) result.push(`#${node.id}`);
-    if (node.className.trim()) result.push(`.${node.className.split(' ').join('.')}`);
-    result.push(...Array.from(node.attributes)
-        .map(attr => `${attr.name}="${attr.value}"`)
-        .slice(0, 3) // limit to 3 attributes
-        .join(' '));
-    return result.join('');
-}
-
-export const initMutationObserver = () => {
-    if (!CfDom.isBrowser()) return;
-    const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-            mutation.addedNodes.forEach(node => {
-                if (!CfDom.isHTMLElement(node)) return;
-
-                // Check parent is reactive
-                const parent = mutation.target as HTMLElement;
-                if (!parent.hasAttribute('data-cf-deps')) return;
-                if (parent.hasAttribute('data-cf-fg-updates')) return;
-
-                // Check if added node (or its children) are also reactive
-                const reactiveChildren = node.querySelectorAll?.('[data-cf-deps]').length ?? 0;
-                if (!node.hasAttribute('data-cf-deps') && reactiveChildren === 0) return;
-
-                console.warn(`[Campfire] ⚠️ A reactive node ${fmtNode(node)} was inserted into a reactive ` +
-                    `container ${fmtNode(parent)} This may cause it to be wiped on re-render.`);
-            });
-        }
-    });
-
-    if (!CfDom.body.hasAttribute('cf-disable-mo'))
-        observer.observe(CfDom.body, { childList: true, subtree: true });
-}
-
 /**
  * Represents a Node-style callback function that receives either an error or a result.
  * @template U The type of the successful result

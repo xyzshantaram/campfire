@@ -1,19 +1,9 @@
 import type { Store } from "../stores/mod.ts";
 import type { ElementProperties, InferElementType, RenderBuilder, RenderFunction, UnwrapStore } from "../types.ts";
-import { escape, initMutationObserver } from "../utils.ts";
+import { escape } from "../utils.ts";
 import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
 import { CfDom } from "./config.ts";
-
-if (CfDom.isBrowser()) {
-    if ("MutationObserver" in globalThis) initMutationObserver();
-    else {
-        console.warn(
-            "MutationObserver was not found in your browser. Campfire will",
-            "not be able to warn you of destructive mutations!",
-        );
-    }
-}
 
 const unwrapDeps = <D extends Record<string, Store<any>>>(
     deps: D
