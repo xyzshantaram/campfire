@@ -198,3 +198,15 @@ export const poll = (fn: () => void, interval: number, callNow = false) => {
         if (timeout !== null) clearTimeout(timeout);
     }
 }
+
+const generateId = (prefix = 'cf') => `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
+
+export const ids = (prefix?: string) => {
+    const existing = new Set<string>();
+    return () => {
+        let id = generateId(prefix);
+        while (existing.has(id)) id = generateId(prefix);
+        existing.add(id);
+        return id;
+    }
+}

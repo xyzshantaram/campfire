@@ -1,14 +1,7 @@
 import type { EventSubscriber, EventType, StoreEvent, AnySubscriber } from "../types.ts";
+import { ids } from "../utils.ts";
 
-const storeIds = new Set<string>();
-const genId = () => 'cf-' + Math.random().toString(36).slice(2, 8);
-
-const storeId = () => {
-    let id = genId();
-    while (storeIds.has(id)) id = genId();
-    storeIds.add(id);
-    return id;
-}
+const storeId = ids('cf-store');
 
 /**
  * A simple reactive store.
