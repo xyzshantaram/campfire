@@ -3,19 +3,18 @@ import type { ElementProperties, InferElementType, RenderBuilder, RenderFunction
 import { escape } from "../utils.ts";
 import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
-import { CfDom } from "./config.ts";
+import { CfDom, CfHTMLElementInterface } from "./config.ts";
+import { StoreEventFromObject } from "../types.ts";
 
-const unwrapDeps = <D extends Record<string, Store<any>>>(
+const unwrap = <D extends Record<string, Store<any>>>(
     deps: D
 ): UnwrapStore<D> => {
     const result: any = {};
     for (const key in deps) {
         const value = deps[key].value;
-        if (value instanceof Map) {
-            result[key] = Object.fromEntries(value.entries());
-        } else {
-            result[key] = value.valueOf();
-        }
+        result[key] = value instanceof Map ?
+            Object.fromEntries(value.entries()) :
+            value?.valueOf();
     }
     return result;
 };
@@ -29,11 +28,9 @@ const isValidRenderFn = <T extends HTMLElement, D extends Record<string, Store<a
 };
 
 const reconcileClasses = (elt: HTMLElement, changed: Record<string, boolean>) => {
-    return Object.keys(changed)
-        .forEach(key => {
-            if (changed[key]) elt.classList.add(key);
-            else elt.classList.remove(key);
-        });
+    return Object.keys(changed).forEach(
+        key => changed[key] ? elt.classList.add(key) : elt.classList.remove(key)
+    );
 }
 
 /**
@@ -63,6 +60,74 @@ const reconcile = <
     if (misc) Object.assign(elt, misc);
     return elt;
 };
+
+const extractReactiveChildren = (elt: HTMLElement) =>
+    select({ s: '[data-cf-slot]', all: true, from: elt })
+        .map(elt => [elt.getAttribute('data-cf-slot'), elt] as [string, HTMLElement])
+        .reduce((prev, [slot, elt]) => {
+            prev[slot] ??= [];
+            prev[slot].push(elt);
+            return prev;
+        }, {} as Record<string, HTMLElement[]>)
+
+const setupDeps = <
+    T extends HTMLElement, D extends Record<string, Store<any>>
+>({ elt, render, deps }: {
+    elt: T,
+    render: RenderFunction<T, D>,
+    deps: D
+}) => {
+    Object.entries(deps).forEach(([name, dep]) => dep.any((evt) => {
+        const builder = new NuBuilder<T, D, string>(elt);
+        const res = render(unwrap(deps), {
+            event: { ...(evt as StoreEventFromObject<D>), triggeredBy: name },
+            elt,
+            b: builder as NuBuilder<T, any, string>
+        });
+
+        const children = extractReactiveChildren(elt);
+        if (typeof res === 'string') {
+            elt.innerHTML = res;
+        }
+        else if (res instanceof NuBuilder) {
+            const c = res.props.contents || '';
+            elt.innerHTML = res.props.raw ? c : escape(c);
+            reconcile(elt, res);
+        }
+        else return;
+
+        for (const key in children) {
+            const [slot] = select({ s: `cf-slot[name='${key}']`, from: elt });
+            if (!slot) continue;
+            const list = children[key] || [];
+            const fragment = CfDom.createDocumentFragment();
+            list.forEach(elt => fragment.appendChild(elt))
+            slot.replaceWith(fragment);
+        }
+    })
+    );
+}
+
+const setupReactiveChildren = <T extends HTMLElement>(
+    elt: T,
+    children: Record<string, CfHTMLElementInterface | CfHTMLElementInterface[]>
+) => {
+    elt.querySelectorAll('cf-slot[name]').forEach(itm => {
+        const name = itm.getAttribute('name');
+        if (!name) return;
+        if (Object.hasOwn(children, name)) {
+            const val = children[name];
+            const replacement: Node = Array.isArray(val) ?
+                CfDom.createDocumentFragment() : val;
+            if (Array.isArray(val)) val.forEach(item => {
+                replacement.appendChild(item);
+                item.setAttribute('data-cf-slot', name);
+            });
+            else val.setAttribute('data-cf-slot', name);
+            itm.replaceWith(replacement);
+        }
+    });
+}
 
 /**
  * Takes an existing element and modifies its properties.
@@ -97,35 +162,9 @@ export const extend = <
 
     let content = "";
     if (isValidRenderFn<T, D>(render)) {
-        Object.entries(deps).forEach(([name, dep]) => {
-            dep.any((evt) => {
-                const builder = new NuBuilder<T, D, string>(elt);
-                const res = render(unwrapDeps(deps), {
-                    event: { ...evt, triggeredBy: name },
-                    elt,
-                    b: builder as NuBuilder<T, any, string>
-                });
-
-                if (res !== undefined) {
-                    const reactiveChildren = select({ s: '[data-cf-slot]', all: true, from: elt })
-                        .map(elt => [elt.getAttribute('data-cf-slot'), elt]) as [string, HTMLElement][];
-                    if (typeof res === 'string') {
-                        elt.innerHTML = res;
-                    }
-                    else {
-                        const c = res.props.contents || '';
-                        elt.innerHTML = res.props.raw ? c : escape(c);
-                        reconcile(elt, res);
-                    }
-                    reactiveChildren.forEach(([slot, ref]) => {
-                        elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
-                    });
-                }
-            });
-        });
-
-        const result = render(unwrapDeps(deps), {
-            elt, b: new NuBuilder<T, D, string>(elt) as any
+        setupDeps({ elt, render, deps });
+        const result = render(unwrap(deps), {
+            elt, b: new NuBuilder<T, D, string>(elt)
         });
 
         if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
@@ -146,22 +185,8 @@ export const extend = <
 
     if (content?.trim()) {
         elt.innerHTML = raw ? content : escape(content);
-        elt.querySelectorAll('cf-slot[name]').forEach(itm => {
-            const name = itm.getAttribute('name');
-            if (!name) return;
-            if (name in children) {
-                const val = children[name];
-                const [child] = Array.isArray(val) ? val : [val];
-                if (!child) return;
-                itm.replaceWith(child);
-                child.setAttribute('data-cf-slot', name);
-            }
-        });
+        setupReactiveChildren(elt, children);
     }
-
-    const depIds = Object.values(deps).map((dep) => dep.id);
-    if (depIds.length) elt.setAttribute("data-cf-reactive", "true");
-    else elt.removeAttribute("data-cf-reactive");
 
     if (misc) Object.assign(elt, misc);
     if (style) Object.assign(elt.style, style);

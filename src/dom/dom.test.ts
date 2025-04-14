@@ -194,18 +194,18 @@ describe('Tests for NuBuilder', () => {
         }).done();
 
         expect(parent.innerHTML).to.equal(
-            `<div>Parent: Hello</div><span data-cf-reactive="true" data-cf-slot="to">Child: World</span>`
+            `<div>Parent: Hello</div><span data-cf-slot="to">Child: World</span>`
         );
 
         // Update parent store – child should stay untouched
         greeting.update('Hi');
         expect(parent.innerHTML).to.equal(
-            `<div>Parent: Hi</div><span data-cf-reactive="true" data-cf-slot="to">Child: World</span>`
+            `<div>Parent: Hi</div><span data-cf-slot="to">Child: World</span>`
         );
 
         to.update('Universe');
         expect(parent.innerHTML).to.equal(
-            `<div>Parent: Hi</div><span data-cf-reactive="true" data-cf-slot="to">Child: Universe</span>`
+            `<div>Parent: Hi</div><span data-cf-slot="to">Child: Universe</span>`
         );
     });
 
@@ -225,10 +225,23 @@ describe('Tests for NuBuilder', () => {
             children: { child: singleChild }
         }).done();
 
-        expect(parent.innerHTML).to.contain('<span data-cf-reactive="true" data-cf-slot="child">Child Content</span>');
+        expect(parent.innerHTML).to.contain('<span data-cf-slot="child">Child Content</span>');
 
         value.update('New Content');
-        expect(parent.innerHTML).to.contain('<span data-cf-reactive="true" data-cf-slot="child">New Content</span>');
+        expect(parent.innerHTML).to.contain('<span data-cf-slot="child">New Content</span>');
+    });
+
+    it('should support multiple elements as children', () => {
+        const items = seq(3).map(n => nu('li').content(`${n}`).ref());
+        const [parent] = nu('ul')
+            .html`<cf-slot name="items"></cf-slot>`
+            .children({ items })
+            .done();
+
+        expect(parent.children.length).to.equal(3);
+        expect(Array.from(parent.children).every(itm =>
+            itm.getAttribute('data-cf-slot') === 'items'
+        )).to.be.true;
     });
 });
 
