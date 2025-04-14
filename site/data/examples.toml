@@ -7,7 +7,7 @@ let count = cf.store({ value: 0 });
 
 const btn = cf.nu("button#id.some-class.other-class")
     .deps({ count })
-    .content(({ count }) => count === 0 ? "I have not been clicked." :
+    .render(({ count }) => count === 0 ? "I have not been clicked." :
         `I have been clicked ${count} times.`)
     .attr('data-some-attribute', 42)
     .on('click', () => count.update(count.value + 1))
@@ -42,7 +42,7 @@ const value = cf.store({ value: 0 }); // initial value
 
 const [result] = cf.nu() // defaults to div
     .deps({ value })
-    .content(({ value }) => {
+    .render(({ value }) => {
         switch(Number(value)) {
             case 54:
                 return "The correct answer.";
@@ -56,7 +56,7 @@ const [result] = cf.nu() // defaults to div
 
 const [last] = cf.nu('#last')
     .deps({ value })
-    .content(({ value }) => `Current value: ${value}`)
+    .render(({ value }) => `Current value: ${value}`)
     .done();
 
 const [container] = cf.select({ s: '#container' });
@@ -116,7 +116,7 @@ const form = cf.nu('div')
     .done();
 
 const TodoItem = (store, event) => cf.nu('li.todo-item')
-    .html(() => cf.html`
+    .render((_, { b }) => b.html`
         <span>${event.value.name}</span>
         <cf-slot name='remove'></cf-slot>
     `)
@@ -130,13 +130,13 @@ const TodoItem = (store, event) => cf.nu('li.todo-item')
                     store.set(idx, { done: true, name: event.value.name })
                 }
             )
-            .done()
+            .ref()
     })
     .done()
 
 const todos = cf.nu('ul')
     .deps({ items: store })
-    .content(({ items }, { event, elt }) => {
+    .render(({ items }, { event, elt }) => {
         if (!event) return;
         // fine-grained update
         switch (event.type) {
@@ -171,7 +171,7 @@ const todos = cf.nu('ul')
 
 const app = cf.nu("#app")
     .deps({ store })
-    .html(({ store }) => cf.html`
+    .render(({ store }, { b }) => b.html`
         <h1>To-do list</h1>
         <div><em>${store.length.toString()} items</em></div>
         <cf-slot name='form'></cf-slot>

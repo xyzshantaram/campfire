@@ -43,7 +43,7 @@ const iframeContentTemplate = cf.template(cf.html`\
 <body>
     {{ html }}
     <script type='module'>
-        import cf from 'https://esm.sh/campfire.js@4.0.0-rc9';
+        import cf from 'https://esm.sh/campfire.js@4.0.0-rc14';
         window.onload = function() {
             {{ javascript }}
         }

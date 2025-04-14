@@ -50,7 +50,6 @@ const tpl = template(`<!DOCTYPE html>
         <span>loading...</span>
     </div>
 
-
     <script defer type='module' src='site/main.js'></script>
 </body>
 
