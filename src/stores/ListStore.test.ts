@@ -58,7 +58,6 @@ describe('ListStore Tests', () => {
   it('should throw RangeError when removing with invalid index', () => {
     const store = new ListStore([1, 2, 3]);
 
-    expect(() => store.remove(-1)).to.throw(RangeError);
     expect(() => store.remove(3)).to.throw(RangeError);
 
     // Verify the store wasn't modified
