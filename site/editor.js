@@ -1,5 +1,4 @@
-import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc9';
-import toml from 'https://esm.sh/toml@3.0.0';
+import * as cf from 'http://localhost:5500/dist/campfire.js';
 
 const iframeContentTemplate = cf.template(cf.html`\
 <html>
@@ -41,11 +40,11 @@ const iframeContentTemplate = cf.template(cf.html`\
     </style>
 </head>
 <body>
-    {{ html }}
+    {{{ html }}}
     <script type='module'>
-        import cf from 'http://localhost:5500/dist/campfire.esm.min.js';
+        import cf from 'http://localhost:5500/dist/campfire.js';
         window.onload = function() {
-            {{ javascript }}
+            {{{ javascript }}}
         }
     </script>
 </body>
@@ -124,9 +123,10 @@ export const editorReady = () => {
         cf.insert(frame, { into: editorConfigs.output.elt });
     }
 
-    currentEditorStore.on('change', (event) => {
+    currentEditorStore.on('update', (event) => {
         const val = event.value;
-        Array.from(document.querySelectorAll('.editor-wrapper > :not(.switcher)')).forEach(elem => elem.style.display = 'none');
+        Array.from(document.querySelectorAll('.editor-wrapper > :not(.switcher)'))
+            .forEach(elem => elem.style.display = 'none');
         editorConfigs[val].elt.style.display = 'block';
         editorConfigs[val].editor?.resize();
         document.querySelector(`.switcher>button.active`)?.classList.remove('active');
@@ -136,7 +136,7 @@ export const editorReady = () => {
         }
     }, true);
 
-    const setActivePlaygroundDemo = (obj) => {
+    const setActiveDemo = (obj) => {
         obj.html = obj.html || "<!-- This demo has no HTML! -->";
         obj.css = obj.css || "/* This demo has no CSS! */";
         obj.javascript = obj.javascript || "/* This demo has no JavaScript! */";
@@ -144,33 +144,12 @@ export const editorReady = () => {
         for (const str of ['html', 'javascript', 'css']) {
             editorConfigs[str].editor.setValue(obj[str]);
         }
+
+        currentEditorStore.update('output');
     }
 
     const list = document.querySelector("#playground-demo-list");
 
-    fetch('examples/dir.json').then(res => res.json()).then(parsed => {
-        console.log(parsed);
-        for (const example of parsed.examples) {
-            const file = (name) => `examples/${example.path}/${name}`;
-            const b = cf.nu('li')
-                .html`<a href='javascript:void(0)'>${example.title}</a>`
-                .on('click', async _ => {
-                    const contents = Object.fromEntries(await Promise.all(
-                        ['index.html', 'style.css', 'main.js'].map(async name => {
-                            const res = await fetch(file(name));
-                            const text = res.ok ? await res.text() : '';
-                            return [name.split('.').at(-1), text];
-                        })
-                    ));
-
-                    console.log(example, contents);
-                });
-            console.log(b);
-            const [item] = b.done();
-            cf.insert(item, { into: list });
-
-        }
-    })
 
     const clearBtn = document.querySelector("#cf-editor-clear");
     const dlBtn = document.querySelector("#cf-editor-dl");
@@ -189,4 +168,30 @@ export const editorReady = () => {
         }
         generateOutput();
     }
+
+    const cached = new Map();
+
+    fetch('examples/dir.json').then(res => res.json()).then(parsed => {
+        for (const example of parsed.examples) {
+            const file = (name) => `examples/${example.path}/${name}`;
+            const [item] = cf.nu('li')
+                .html`<a href='javascript:void(0)'>${example.title}</a>`
+                .on('click', async _ => {
+                    let files = cached.get(example.path);
+                    if (!files) files = Object.fromEntries(await Promise.all(
+                        ['index.html', 'style.css', 'main.js'].map(async name => {
+                            const res = await fetch(file(name));
+                            const text = res.ok ? await res.text() : '';
+                            return [name.split('.').at(-1), text];
+                        })
+                    ));
+
+                    cached.set(example.path, files);
+
+                    setActiveDemo({ html: files.html, css: files.css, javascript: files.js })
+                })
+                .done();
+            cf.insert(item, { into: list });
+        }
+    })
 }
