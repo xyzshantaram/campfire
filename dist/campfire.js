@@ -894,6 +894,9 @@ var MapStore = class extends Store {
   entries() {
     return Object.entries(this.value);
   }
+  get size() {
+    return Object.keys(this.value).length;
+  }
 };
 
 // src/stores/mod.ts

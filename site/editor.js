@@ -1,4 +1,4 @@
-import * as cf from 'http://localhost:5500/dist/campfire.js';
+import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc15';
 
 const iframeContentTemplate = cf.template(cf.html`\
 <html>
@@ -42,7 +42,7 @@ const iframeContentTemplate = cf.template(cf.html`\
 <body>
     {{{ html }}}
     <script type='module'>
-        import cf from 'http://localhost:5500/dist/campfire.js';
+        import cf from import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc15';
         window.onload = function() {
             {{{ javascript }}}
         }

@@ -51,4 +51,5 @@ export declare class MapStore<T> extends Store<Record<string, T>> {
     get(key: string): T;
     has(key: string): boolean;
     entries(): [string, T][];
+    get size(): number;
 }

@@ -90,4 +90,8 @@ export class MapStore<T> extends Store<Record<string, T>> {
     entries() {
         return Object.entries(this.value);
     }
+
+    get size() {
+        return Object.keys(this.value).length;
+    }
 }
