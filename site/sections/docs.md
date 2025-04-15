@@ -49,10 +49,12 @@ const role = cf.store({ value: "User" });
 const [profile] = cf.nu("div.profile")
   .deps({ name, role })
   // render function runs again whenever name/role change
-  .render(({ name, role }, { b }) =>
+  .render(({ name, role }, { b, first }) =>
     b
       .html`<h2>${name}</h2><p>Role: ${role}</p>`
       .style("color", role === "Admin" ? "red" : "blue")
+      // can detect if this is first render or a re-render
+      .attr("data-initialized", first ? "initializing" : "updated")
   )
   .done();
 ```
@@ -126,6 +128,28 @@ const [parent] = cf.nu("section", {
 }).done();
 ```
 
+##### Compose with multiple reactive children in a single slot
+
+```js
+const items = cf.store({ type: "list", value: ["Item 1", "Item 2", "Item 3"] });
+
+// Create multiple listItem components
+const listItems = items.value.map((text) =>
+  cf.nu("li")
+    .content(text)
+    .done()
+);
+
+// Create container and insert children
+const [container] = cf.nu("div")
+  .html`
+    <h3>Item List</h3>
+    <ul><cf-slot name="items"></cf-slot></ul>
+  `
+  .children({ listItems })
+  .done();
+```
+
 ##### Using an existing element with nu()
 
 ```js
@@ -170,6 +194,25 @@ const [button] = cf.nu("button")
   .done();
 ```
 
+##### Track elements for global access
+
+```js
+// Create and globally track an element by ID
+const [modal] = cf.nu("div.modal")
+  .content("Modal Content")
+  .track("app-modal") // Register with global tracking system
+  .done();
+
+// Later, retrieve the element from anywhere
+const elt = cf.tracked("app-modal");
+if (elt) {
+  elt.style.display = "block";
+}
+
+// when done
+cf.untrack("app-modal");
+```
+
 </details>
 
 <details>
@@ -182,7 +225,7 @@ Creates reactive data stores to manage state with automatic UI updates.
 ```js
 const counter = cf.store({ value: 0 });
 counter.update(5); // Sets value to 5
-counter.value; // Gets current value (5)
+counter.current(); // Gets current value (5)
 ```
 
 ##### Subscribe to changes
@@ -191,6 +234,11 @@ counter.value; // Gets current value (5)
 counter.on("change", (event) => {
   console.log(`Value changed to ${event.value}`);
 });
+
+// Optionally trigger the callback immediately with current value
+counter.on("change", (event) => {
+  console.log(`Value changed to ${event.value}`);
+}, true); // Pass true to call immediately
 ```
 
 ##### List store for arrays
@@ -220,6 +268,31 @@ user.clear(); // Empty the map
 todoList.any((event) => {
   console.log(`Event type: ${event.type}`);
 });
+```
+
+##### Update values with a transform function
+
+```js
+const counter = cf.store({ value: 10 });
+
+// Using a value directly
+counter.update(20);
+
+// Using a transform function
+counter.update((currentValue) => currentValue + 5); // Increments by 5
+
+// More complex transformations
+const user = cf.store({
+  type: "map",
+  value: { name: "John", visits: 0, lastVisit: null },
+});
+
+// Update multiple properties based on current value
+user.update((current) => ({
+  ...current,
+  visits: current.visits + 1,
+  lastVisit: new Date(),
+}));
 ```
 
 </details>
@@ -568,6 +641,61 @@ cf.seq(5).forEach((i) => {
     .done();
   cf.insert(item, { into: listElement });
 });
+```
+
+</details>
+
+<details>
+<summary><code>ids()</code> - unique ID generator</summary>
+
+Generates unique IDs with an optional prefix. Useful for creating HTML element
+IDs.
+
+##### Basic usage
+
+```js
+const generateId = cf.ids(); // Default prefix is 'cf-'
+const id1 = generateId(); // e.g. "cf-a1b2c3"
+
+// With custom prefix
+const generateButtonId = cf.ids("btn");
+const buttonId = generateButtonId(); // e.g. "btn-g7h8i9"
+```
+
+##### Creating elements with unique IDs
+
+```js
+const idGenerator = cf.ids("form-field");
+
+cf.seq(3).forEach(() => {
+  const fieldId = idGenerator();
+  const [field, label] = cf.nu("div.form-field")
+    .html`
+      <label for="${fieldId}">Field</label>
+      <input id="${fieldId}" type="text">
+    `
+    .gimme("label", "input")
+    .done();
+});
+```
+
+##### Connected form elements with unique IDs
+
+```js
+const getId = cf.ids("profile");
+
+const LabeledInput = (labelText, type = "text") => {
+  const fieldId = getId();
+  return cf.nu("div.form-group")
+    .html`
+      <label for="${fieldId}">${labelText}</label>
+      <input id="${fieldId}" type="${type}">
+    `
+    .done();
+};
+
+const [emailGroup] = LabeledInput("Username", "email");
+```
 ```
 
 </details>
