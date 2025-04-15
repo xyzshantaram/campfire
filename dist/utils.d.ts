@@ -20,7 +20,6 @@ export declare const escape: (str: string) => string;
  */
 export declare const unescape: (str: string) => string;
 export declare const seq: (...args: number[]) => number[];
-export declare const initMutationObserver: () => void;
 /**
  * Represents a Node-style callback function that receives either an error or a result.
  * @template U The type of the successful result
@@ -94,3 +93,21 @@ export declare const callbackify: <T extends any[], U = unknown, E = any>(fn: (.
  * ```
  */
 export declare const poll: (fn: () => void, interval: number, callNow?: boolean) => () => void;
+/**
+ * Returns a function that generates a random 6-character alphanumeric ID,
+ * optionally prefixed. The generated IDs are guaranteed to be unique within
+ * the scope of the returned function.
+ *
+ * Note: This function is not suitable for generating IDs that require
+ * high entropy or cryptographic security.
+ * @example
+ * ```ts
+ * const genId = ids();
+ * const todoId = ids('todo');
+ * console.log(genId()) // cf-k9yh28
+ * console.log(todoId()) // todo-hv9p4y
+ * ```
+ * @param prefix The prefix to use. Defaults to 'cf-'.
+ * @returns A function that generates a unique ID.
+ */
+export declare const ids: (prefix?: string) => () => string;

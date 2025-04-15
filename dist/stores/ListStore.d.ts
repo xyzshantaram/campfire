@@ -45,6 +45,10 @@ export declare class ListStore<T> extends Store<T[]> {
      *   - `idx`: The index of the modified element
      */
     set(idx: number, value: T): void;
+    [Symbol.iterator](): ArrayIterator<T>;
+    map: (...args: Parameters<T[]['map']>) => ReturnType<T[]['map']>;
+    forEach: (...args: Parameters<T[]['forEach']>) => ReturnType<T[]['forEach']>;
+    findIndex: (...args: Parameters<T[]['findIndex']>) => ReturnType<T[]['findIndex']>;
     /**
      * Utility accessor to find the length of the store.
      */

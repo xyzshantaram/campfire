@@ -3,9 +3,16 @@
 ## 4.0.0-rc15
 
 - Add `ids()` generator function
+- Allow passing an array with multiple sibling reactive children to .children()
+  and have them all be stably mounted to the parent in the slot.
+- add .track() system to NuBuilder - can now call .track(id) on an element being
+  built and get it back later with cf.tracked(id).
 - Store::update() now optionally accepts a function to transform a store's
   existing value.
 - Store::value is now protected - use .current() to get the value.
+- Render functions now receive a boolean `first` argument in the `opts`
+  parameter, so they can conditionally change their output depending on if the
+  component is mounting or just re-rendering
 
 ## 4.0.0-rc14
 
@@ -28,7 +35,6 @@
   - inverted sections (`{{^section}}content when false{{/section}}`)
   - array iteration with automatic context switching
   - support for nested sections
-  - Added escaping of mustache syntax with backslash
 - Add NuBuilder::cls
 
 ## 4.0.0-rc13

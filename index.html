@@ -50,10 +50,12 @@ const reactiveMap = cf.store({ type: &quot;map&quot;, value: { key: &quot;value&
 
 // Use stores with reactive elements
 const [div] = cf.nu(&quot;div&quot;)
-  .content(({ name }) =&gt;
-    `Hello, ${name}! My favourite numbers are ${reactiveList.join(&quot;,&quot;)}`
-  )
   .deps({ name, reactiveList })
+  .render(({ name, reactiveList }) =&gt;
+    `Hello, ${name}! My favourite numbers are ${reactiveList.join(&quot;,&quot;)}`
+    // escaped by default, re-renders whenever either name
+    // or reactiveList change
+  )
   .done();
 
 // Or do your own thing!
@@ -732,7 +734,6 @@ const cleanup = () =&gt; {
     <div id='mask'>
         <span>loading...</span>
     </div>
-
 
     <script defer type='module' src='site/main.js'></script>
 </body>

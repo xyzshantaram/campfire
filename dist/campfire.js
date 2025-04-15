@@ -196,32 +196,6 @@ var seq = (...args) => {
   }
   return result;
 };
-var fmtNode = (node) => {
-  const result = ["<"];
-  result.push(node.tagName.toLowerCase());
-  if (node.id) result.push(`#${node.id}`);
-  if (node.className.trim()) result.push(`.${node.className.split(" ").join(".")}`);
-  result.push(...Array.from(node.attributes).map((attr) => `${attr.name}="${attr.value}"`).slice(0, 3).join(" "));
-  return result.join("");
-};
-var initMutationObserver = () => {
-  if (!CfDom.isBrowser()) return;
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      mutation.addedNodes.forEach((node) => {
-        if (!CfDom.isHTMLElement(node)) return;
-        const parent = mutation.target;
-        if (!parent.hasAttribute("data-cf-deps")) return;
-        if (parent.hasAttribute("data-cf-fg-updates")) return;
-        const reactiveChildren = node.querySelectorAll?.("[data-cf-deps]").length ?? 0;
-        if (!node.hasAttribute("data-cf-deps") && reactiveChildren === 0) return;
-        console.warn(`[Campfire] \u26A0\uFE0F A reactive node ${fmtNode(node)} was inserted into a reactive container ${fmtNode(parent)} This may cause it to be wiped on re-render.`);
-      });
-    }
-  });
-  if (!CfDom.body.hasAttribute("cf-disable-mo"))
-    observer.observe(CfDom.body, { childList: true, subtree: true });
-};
 var callbackify = (fn) => {
   return (cb, ...args) => {
     fn(...args).then((v) => cb(null, v)).catch((err) => cb(err, null));
@@ -240,6 +214,16 @@ var poll = (fn, interval, callNow = false) => {
   else timeout = setTimeout(handler, interval);
   return () => {
     if (timeout !== null) clearTimeout(timeout);
+  };
+};
+var generateId = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
+var ids = (prefix = "cf-") => {
+  const existing = /* @__PURE__ */ new Set();
+  return () => {
+    let id = generateId(prefix);
+    while (existing.has(id)) id = generateId(prefix);
+    existing.add(id);
+    return id;
   };
 };
 
@@ -457,27 +441,35 @@ var NuBuilder = class {
     this.props.children = children;
     return this;
   }
+  /**
+   * Mark the element for tracking, so it can be retrieved later by calling
+   * `cf.tracked(id)`.
+   * @param id The id to track the element by.
+   */
+  track(id) {
+    console.log(id);
+    this.props.track = id;
+    return this;
+  }
+};
+
+// src/dom/tracking.ts
+var elements = /* @__PURE__ */ new Map();
+var track = (id, elt) => {
+  elements.set(id, elt);
+};
+var untrack = (id) => {
+  elements.delete(id);
+};
+var tracked = (id) => {
+  return elements.get(id) || null;
 };
 
 // src/dom/nu.ts
-if (CfDom.isBrowser()) {
-  if ("MutationObserver" in globalThis) initMutationObserver();
-  else {
-    console.warn(
-      "MutationObserver was not found in your browser. Campfire will",
-      "not be able to warn you of destructive mutations!"
-    );
-  }
-}
-var unwrapDeps = (deps) => {
+var unwrap = (deps) => {
   const result = {};
   for (const key in deps) {
-    const value = deps[key].value;
-    if (value instanceof Map) {
-      result[key] = Object.fromEntries(value.entries());
-    } else {
-      result[key] = value.valueOf();
-    }
+    result[key] = deps[key].current();
   }
   return result;
 };
@@ -487,10 +479,9 @@ var isValidRenderFn = (fn) => {
   return true;
 };
 var reconcileClasses = (elt, changed) => {
-  return Object.keys(changed).forEach((key) => {
-    if (changed[key]) elt.classList.add(key);
-    else elt.classList.remove(key);
-  });
+  return Object.keys(changed).forEach(
+    (key) => changed[key] ? elt.classList.add(key) : elt.classList.remove(key)
+  );
 };
 var reconcile = (elt, builder) => {
   const { style = {}, attrs = {}, misc = {}, classes = {} } = builder.props;
@@ -508,6 +499,56 @@ var reconcile = (elt, builder) => {
   if (misc) Object.assign(elt, misc);
   return elt;
 };
+var extractReactiveChildren = (elt) => select({ s: "[data-cf-slot]", all: true, from: elt }).map((elt2) => [elt2.getAttribute("data-cf-slot"), elt2]).reduce((prev, [slot, elt2]) => {
+  prev[slot] ?? (prev[slot] = []);
+  prev[slot].push(elt2);
+  return prev;
+}, {});
+var setupDeps = ({ elt, render: render2, deps }) => {
+  Object.entries(deps).forEach(
+    ([name, dep]) => dep.any((evt) => {
+      const builder = new NuBuilder(elt);
+      const res = render2(unwrap(deps), {
+        elt,
+        event: { ...evt, triggeredBy: name },
+        b: builder,
+        first: false
+      });
+      const children = extractReactiveChildren(elt);
+      if (typeof res === "string") {
+        elt.innerHTML = res;
+      } else if (res instanceof NuBuilder) {
+        const c = res.props.contents || "";
+        elt.innerHTML = res.props.raw ? c : escape(c);
+        reconcile(elt, res);
+      } else return;
+      for (const key in children) {
+        const [slot] = select({ s: `cf-slot[name='${key}']`, from: elt });
+        if (!slot) continue;
+        const list = children[key] || [];
+        const fragment = CfDom.createDocumentFragment();
+        list.forEach((elt2) => fragment.appendChild(elt2));
+        slot.replaceWith(fragment);
+      }
+    })
+  );
+};
+var setupReactiveChildren = (elt, children) => {
+  elt.querySelectorAll("cf-slot[name]").forEach((itm) => {
+    const name = itm.getAttribute("name");
+    if (!name) return;
+    if (Object.hasOwn(children, name)) {
+      const val = children[name];
+      const replacement = Array.isArray(val) ? CfDom.createDocumentFragment() : val;
+      if (Array.isArray(val)) val.forEach((item) => {
+        replacement.appendChild(item);
+        item.setAttribute("data-cf-slot", name);
+      });
+      else val.setAttribute("data-cf-slot", name);
+      itm.replaceWith(replacement);
+    }
+  });
+};
 var extend = (elt, args = {}) => {
   const {
     contents,
@@ -520,71 +561,36 @@ var extend = (elt, args = {}) => {
     classes = {},
     gimme = [],
     deps = {},
-    children = {}
+    children = {},
+    track: track2
   } = args;
   let raw = !!r2;
+  if (track2) track(track2, elt);
   reconcileClasses(elt, classes);
-  let content = "";
+  const setHtml = (str) => elt.innerHTML = raw ? str : escape(str);
   if (isValidRenderFn(render2)) {
-    Object.entries(deps).forEach(([name, dep]) => {
-      dep.any((evt) => {
-        const builder = new NuBuilder(elt);
-        const res = render2(unwrapDeps(deps), {
-          event: { ...evt, triggeredBy: name },
-          elt,
-          b: builder
-        });
-        if (res !== void 0) {
-          const reactiveChildren = select({ s: "[data-cf-slot]", all: true, from: elt }).map((elt2) => [elt2.getAttribute("data-cf-slot"), elt2]);
-          if (typeof res === "string") {
-            elt.innerHTML = res;
-          } else {
-            const c = res.props.contents || "";
-            elt.innerHTML = res.props.raw ? c : escape(c);
-            reconcile(elt, res);
-          }
-          reactiveChildren.forEach(([slot, ref]) => {
-            elt.querySelector(`cf-slot[name='${slot}']`)?.replaceWith(ref);
-          });
-        }
-      });
-    });
-    const result = render2(unwrapDeps(deps), {
+    setupDeps({ elt, render: render2, deps });
+    const result = render2(unwrap(deps), {
       elt,
-      b: new NuBuilder(elt)
+      b: new NuBuilder(elt),
+      first: true
     });
     if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
     else {
       elt.removeAttribute("data-cf-fg-updates");
       if (typeof result === "string") {
-        content = result;
+        setHtml(result);
       }
       if (result instanceof NuBuilder) {
         raw = !!result.props.raw;
-        content = result.props.contents || "";
+        setHtml(result.props.contents || "");
         reconcile(elt, result);
       }
     }
   } else if (typeof contents === "string") {
-    content = contents;
+    setHtml(contents);
   }
-  if (content?.trim()) {
-    elt.innerHTML = raw ? content : escape(content);
-    elt.querySelectorAll("cf-slot[name]").forEach((itm) => {
-      const name = itm.getAttribute("name");
-      if (!name) return;
-      if (name in children) {
-        const val = children[name];
-        const [child] = Array.isArray(val) ? val : [val];
-        if (!child) return;
-        itm.replaceWith(child);
-        child.setAttribute("data-cf-slot", name);
-      }
-    });
-  }
-  const depIds = Object.values(deps).map((dep) => dep.id);
-  if (depIds.length) elt.setAttribute("data-cf-reactive", "true");
-  else elt.removeAttribute("data-cf-reactive");
+  setupReactiveChildren(elt, children);
   if (misc) Object.assign(elt, misc);
   if (style) Object.assign(elt.style, style);
   Object.entries(on).forEach(([evt, listener]) => CfDom.addElEventListener(elt, evt, listener));
@@ -607,15 +613,8 @@ var nu = (elt = "div", args = {}) => {
 };
 
 // src/stores/Store.ts
-var storeIds = /* @__PURE__ */ new Set();
-var genId = () => "cf-" + Math.random().toString(36).slice(2, 8);
-var storeId = () => {
-  let id = genId();
-  while (storeIds.has(id)) id = genId();
-  storeIds.add(id);
-  return id;
-};
-var Store = class {
+var storeId = ids("cf-store");
+var Store = class _Store {
   /**
    * Creates an instance of Store.
    * @param value - The initial value of the store.
@@ -644,25 +643,26 @@ var Store = class {
     this.value = value;
   }
   /**
-  * Add an event listener to the store.
-  * @param type The type of event to listen for.
-  *   Supported event types include:
-  *   - `update`: Triggered when the store's value is updated via `update()`.
-  *   - `append`: For `ListStore` - Triggered when an item is added to the list.
-  *   - `deletion`: For `ListStore`/`MapStore` - Triggered when an item is removed.
-  *   - `change`: For `ListStore`/`MapStore`: Triggered when an item at an index/key
-  *     has its value set via the corresponding store's set() method.
-  *   - 'clear': Triggered when the store is cleared.
-  * @param fn A callback function that will be invoked when the specified event occurs.
-  *   The function receives a `StoreEvent` object with details about the event.
-  * @returns A unique subscriber ID that can be used to unsubscribe the listener.
-  */
-  on(type, fn) {
+   * Add an event listener to the store.
+   * @param type The type of event to listen for.
+   *   Supported event types include:
+   *   - `update`: Triggered when the store's value is updated via `update()`.
+   *   - `append`: For `ListStore` - Triggered when an item is added to the list.
+   *   - `deletion`: For `ListStore`/`MapStore` - Triggered when an item is removed.
+   *   - `change`: For `ListStore`/`MapStore`: Triggered when an item at an index/key
+   *     has its value set via the corresponding store's set() method.
+   *   - 'clear': Triggered when the store is cleared.
+   * @param fn A callback function that will be invoked when the specified event occurs.
+   *   The function receives a `StoreEvent` object with details about the event.
+   * @returns A unique subscriber ID that can be used to unsubscribe the listener.
+   */
+  on(type, fn, callNow) {
     var _a, _b;
     (_a = this._subscriberCounts)[type] ?? (_a[type] = 0);
     (_b = this._subscribers)[type] ?? (_b[type] = {});
     const id = this._subscriberCounts[type]++;
     this._subscribers[type][id] = fn;
+    if (type === "update" && callNow) fn({ type: "update", value: this.value });
     return this._subscriberCounts[type]++;
   }
   /**
@@ -689,16 +689,20 @@ var Store = class {
   unsubscribe(type, id) {
     delete this._subscribers[type]?.[id];
   }
-  /**
-   * Updates the store's value and notifies all subscribers.
-   * @param value The new value to set for the store.
-   * @emits 'change' event with the new value when successfully updated.
-   * @note No-op if the store has been disposed via `dispose()`.
-   */
+  static isUpdater(val) {
+    return typeof val === "function";
+  }
   update(value) {
-    if (this._dead) return;
-    this.value = value;
-    this._sendEvent({ type: "update", value });
+    if (this._dead) return null;
+    let updated;
+    if (_Store.isUpdater(value)) {
+      updated = value(this.value);
+    } else {
+      updated = value;
+    }
+    this.value = updated;
+    this._sendEvent({ type: "update", value: updated });
+    return updated;
   }
   /**
    * Sends an event to all subscribers if the store has not been disposed of.
@@ -720,6 +724,9 @@ var Store = class {
     this._subscribers = {};
     this._subscriberCounts = {};
   }
+  current() {
+    return structuredClone(this.value);
+  }
   valueOf() {
     return structuredClone(this.value);
   }
@@ -729,6 +736,15 @@ var Store = class {
 var ListStore = class extends Store {
   constructor(ls) {
     super(ls || []);
+    this.map = (...args) => {
+      return this.value.map(...args);
+    };
+    this.forEach = (...args) => {
+      return this.value.forEach(...args);
+    };
+    this.findIndex = (...args) => {
+      return this.value.findIndex(...args);
+    };
   }
   /**
    * Clears all elements from the store.
@@ -761,7 +777,8 @@ var ListStore = class extends Store {
    *   - `idx`: The index from which the item was removed
    */
   remove(idx) {
-    if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
+    if (idx < 0) return;
+    if (idx >= this.value.length) throw new RangeError("Invalid index.");
     this._sendEvent({
       type: "deletion",
       idx,
@@ -792,6 +809,9 @@ var ListStore = class extends Store {
     this.value[idx] = value;
     this._sendEvent({ type: "change", value, idx });
   }
+  [Symbol.iterator]() {
+    return this.value[Symbol.iterator]();
+  }
   /**
    * Utility accessor to find the length of the store.
    */
@@ -808,9 +828,9 @@ var MapStore = class extends Store {
    * @param init Initial key-value pairs to populate the store.
    */
   constructor(init) {
-    super(/* @__PURE__ */ new Map());
+    super({});
     for (const [k, v] of Object.entries(init || {})) {
-      this.value.set(k, v);
+      this.value[k] = v;
     }
   }
   /**
@@ -822,7 +842,7 @@ var MapStore = class extends Store {
    *   - `value`: The new value associated with the key
    */
   set(key, value) {
-    this.value.set(key, value);
+    this.value[key] = value;
     this._sendEvent({ key, value, type: "change" });
   }
   /**
@@ -833,9 +853,9 @@ var MapStore = class extends Store {
    *   - `value`: The current state of the map after deletion
    */
   remove(key) {
-    const value = this.value.get(key);
-    if (!value) return;
-    this.value.delete(key);
+    const value = this.value[key];
+    if (value === null || typeof value === "undefined") return;
+    delete this.value[key];
     this._sendEvent({ key, value, type: "deletion" });
   }
   /**
@@ -843,7 +863,7 @@ var MapStore = class extends Store {
    * @emits 'clear' event indicating the store has been emptied.
    */
   clear() {
-    this.value = /* @__PURE__ */ new Map();
+    this.value = {};
     this._sendEvent({ type: "clear" });
   }
   /**
@@ -854,7 +874,7 @@ var MapStore = class extends Store {
    * @emits 'change' event with the transformed value (via internal `set` method)
    */
   transform(key, fn) {
-    const old = this.value.get(key);
+    const old = this.value[key];
     if (!old) throw new Error(`ERROR: key ${key} does not exist in store!`);
     const transformed = fn(old);
     this.set(key, transformed);
@@ -866,13 +886,13 @@ var MapStore = class extends Store {
    * @returns The value associated with the key, or undefined if the key does not exist.
    */
   get(key) {
-    return this.value.get(key);
+    return structuredClone(this.value[key]);
   }
   has(key) {
-    return this.value.has(key);
+    return Object.hasOwn(this.value, key);
   }
   entries() {
-    return this.value.entries();
+    return Object.entries(this.value);
   }
 };
 
@@ -1003,7 +1023,11 @@ var campfire_default = {
   seq,
   CfDom,
   callbackify,
-  poll
+  poll,
+  ids,
+  track,
+  tracked,
+  untrack
 };
 export {
   CfDom,
@@ -1016,6 +1040,7 @@ export {
   escape,
   extend,
   html,
+  ids,
   insert,
   mustache,
   nu,
@@ -1027,6 +1052,9 @@ export {
   seq,
   store,
   template,
-  unescape
+  track,
+  tracked,
+  unescape,
+  untrack
 };
 //# sourceMappingURL=campfire.js.map

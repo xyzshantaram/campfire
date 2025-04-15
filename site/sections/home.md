@@ -27,10 +27,12 @@ to make development easier.
 
   // Use stores with reactive elements
   const [div] = cf.nu("div")
-    .content(({ name }) =>
-      `Hello, ${name}! My favourite numbers are ${reactiveList.join(",")}`
-    )
     .deps({ name, reactiveList })
+    .render(({ name, reactiveList }) =>
+      `Hello, ${name}! My favourite numbers are ${reactiveList.join(",")}`
+      // escaped by default, re-renders whenever either name
+      // or reactiveList change
+    )
     .done();
 
   // Or do your own thing!

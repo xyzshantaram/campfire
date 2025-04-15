@@ -130,7 +130,10 @@ export declare class NuBuilder<Elem extends HTMLElement, Deps extends Record<str
      * Unsafely set the html of the object. This is equivalent to calling
      * .content(...).raw(true) and is meant to be used with a templating function
      * like `cf.html`.
-     * @param value The content function / string to set.
+     *
+     * Can also be used as a templating function: nu().html`<b>${name}</b>` will
+     * cause name to be escaped and interpolated.
+     * @param value The string to set.
      * @returns The builder for chaining.
      */
     html(value: string): NuBuilder<Elem, Deps, Info>;
@@ -142,5 +145,11 @@ export declare class NuBuilder<Elem extends HTMLElement, Deps extends Record<str
      * of cf-slot elements in the parent's innerHTML.
      * @returns The builder object for chaining.
      */
-    children(children: Record<string, HTMLElement>): this;
+    children(children: Record<string, HTMLElement | HTMLElement[]>): this;
+    /**
+     * Mark the element for tracking, so it can be retrieved later by calling
+     * `cf.tracked(id)`.
+     * @param id The id to track the element by.
+     */
+    track(id: string): this;
 }

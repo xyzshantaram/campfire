@@ -6,7 +6,7 @@ import { Store } from "./Store.ts";
  * set() sends a "change" event, remove() sends a "deletion" event, clear() sends a "clear" event,
  * and transform() sends a "change" event.
  */
-export declare class MapStore<T> extends Store<Map<string, T>> {
+export declare class MapStore<T> extends Store<Record<string, T>> {
     /**
      * Constructor for MapStore.
      * Initializes the store with the provided initial key-value pairs.
@@ -48,7 +48,7 @@ export declare class MapStore<T> extends Store<Map<string, T>> {
      * @param key The key to look up.
      * @returns The value associated with the key, or undefined if the key does not exist.
      */
-    get(key: string): T | undefined;
+    get(key: string): T;
     has(key: string): boolean;
-    entries(): MapIterator<[string, T]>;
+    entries(): [string, T][];
 }
