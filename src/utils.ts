@@ -189,3 +189,42 @@ export const ids = (prefix = 'cf-') => {
         return id;
     }
 }
+
+export const deepishClone = <T>(value: T, seen = new WeakMap()): T => {
+    // Handle primitives and functions (can't/shouldn't clone)
+    if (value === null || typeof value !== 'object') return value;
+    if (typeof value === 'function') return value;
+
+    // Handle cyclic references
+    if (seen.has(value)) return seen.get(value);
+
+    try {
+        if (Array.isArray(value)) {
+            const copy: any[] = [];
+            seen.set(value, copy);
+            for (const item of value) {
+                copy.push(deepishClone(item, seen));
+            }
+            return copy as T;
+        }
+
+        // Plain objects
+        if (Object.getPrototypeOf(value) === Object.prototype) {
+            const copy: Record<string, any> = {};
+            seen.set(value, copy);
+            for (const key in value) {
+                if (Object.hasOwn(value, key)) {
+                    copy[key] = deepishClone(value[key], seen);
+                }
+            }
+            return copy as T;
+        }
+
+        // Date, RegExp, Map, Set, etc — skip cloning, return reference
+        return value;
+
+    } catch (_) {
+        // Fallback on error (e.g., circular refs, DOM nodes, etc.)
+        return value;
+    }
+}

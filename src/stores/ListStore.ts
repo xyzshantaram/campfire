@@ -28,7 +28,12 @@ export class ListStore<T> extends Store<T[]> {
      */
     push(val: T) {
         this.value.push(val);
-        this._sendEvent({ type: "append", value: val, idx: this.value.length - 1 });
+        // Send a copy in the event
+        this._sendEvent({
+            type: "append",
+            value: Object.freeze(val),
+            idx: this.value.length - 1
+        });
         return this.value.length;
     }
 
@@ -58,7 +63,7 @@ export class ListStore<T> extends Store<T[]> {
      */
     get(idx: number) {
         if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
-        return this.value[idx];
+        return Object.freeze(this.value[idx]);
     }
 
     /**
@@ -73,7 +78,10 @@ export class ListStore<T> extends Store<T[]> {
     set(idx: number, value: T) {
         if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
         this.value[idx] = value;
-        this._sendEvent({ type: "change", value, idx });
+        // Send a copy in the event
+        this._sendEvent({
+            type: "change", value: Object.freeze(value), idx
+        });
     }
 
     [Symbol.iterator]() {

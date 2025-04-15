@@ -17,9 +17,10 @@ export class MapStore<T> extends Store<Record<string, T>> {
     constructor(init?: Record<string, T>) {
         super({});
 
-        // Populates the store with initial key-value pairs.
-        for (const [k, v] of Object.entries(init || {})) {
-            this.value[k] = v;
+        if (!init) return;
+
+        for (const [k, v] of Object.entries(init)) {
+            this.value[k] = Object.freeze(v);
         }
     }
 
@@ -32,7 +33,7 @@ export class MapStore<T> extends Store<Record<string, T>> {
      *   - `value`: The new value associated with the key
      */
     set(key: string, value: T) {
-        this.value[key] = value;
+        this.value[key] = Object.freeze(value);
         this._sendEvent({ key, value, type: 'change' });
     }
 
@@ -47,7 +48,7 @@ export class MapStore<T> extends Store<Record<string, T>> {
         const value = this.value[key];
         if (value === null || typeof value === 'undefined') return;
         delete this.value[key];
-        this._sendEvent({ key, value, type: 'deletion' });
+        this._sendEvent({ key, value: value, type: 'deletion' });
     }
 
     /**
@@ -69,7 +70,7 @@ export class MapStore<T> extends Store<Record<string, T>> {
     transform(key: string, fn: (val: T) => T) {
         const old = this.value[key];
         if (!old) throw new Error(`ERROR: key ${key} does not exist in store!`);
-        const transformed = fn(old);
+        const transformed = Object.freeze(fn(old));
         this.set(key, transformed);
         this._sendEvent({ type: "change", value: transformed, key });
     }
@@ -80,7 +81,7 @@ export class MapStore<T> extends Store<Record<string, T>> {
      * @returns The value associated with the key, or undefined if the key does not exist.
      */
     get(key: string) {
-        return structuredClone(this.value[key]);
+        return this.value[key];
     }
 
     has(key: string): boolean {
