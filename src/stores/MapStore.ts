@@ -7,7 +7,7 @@ import { Store } from "./Store.ts";
  * set() sends a "change" event, remove() sends a "deletion" event, clear() sends a "clear" event,
  * and transform() sends a "change" event.
  */
-export class MapStore<T> extends Store<Map<string, T>> {
+export class MapStore<T> extends Store<Record<string, T>> {
 
     /**
      * Constructor for MapStore.
@@ -15,11 +15,11 @@ export class MapStore<T> extends Store<Map<string, T>> {
      * @param init Initial key-value pairs to populate the store.
      */
     constructor(init?: Record<string, T>) {
-        super(new Map());
+        super({});
 
         // Populates the store with initial key-value pairs.
         for (const [k, v] of Object.entries(init || {})) {
-            this.value.set(k, v);
+            this.value[k] = v;
         }
     }
 
@@ -32,7 +32,7 @@ export class MapStore<T> extends Store<Map<string, T>> {
      *   - `value`: The new value associated with the key
      */
     set(key: string, value: T) {
-        this.value.set(key, value);
+        this.value[key] = value;
         this._sendEvent({ key, value, type: 'change' });
     }
 
@@ -44,9 +44,9 @@ export class MapStore<T> extends Store<Map<string, T>> {
      *   - `value`: The current state of the map after deletion
      */
     remove(key: string) {
-        const value = this.value.get(key);
-        if (!value) return;
-        this.value.delete(key);
+        const value = this.value[key];
+        if (value === null || typeof value === 'undefined') return;
+        delete this.value[key];
         this._sendEvent({ key, value, type: 'deletion' });
     }
 
@@ -55,7 +55,7 @@ export class MapStore<T> extends Store<Map<string, T>> {
      * @emits 'clear' event indicating the store has been emptied.
      */
     clear() {
-        this.value = new Map();
+        this.value = {};
         this._sendEvent({ type: 'clear' });
     }
 
@@ -67,7 +67,7 @@ export class MapStore<T> extends Store<Map<string, T>> {
      * @emits 'change' event with the transformed value (via internal `set` method)
      */
     transform(key: string, fn: (val: T) => T) {
-        const old = this.value.get(key);
+        const old = this.value[key];
         if (!old) throw new Error(`ERROR: key ${key} does not exist in store!`);
         const transformed = fn(old);
         this.set(key, transformed);
@@ -80,14 +80,14 @@ export class MapStore<T> extends Store<Map<string, T>> {
      * @returns The value associated with the key, or undefined if the key does not exist.
      */
     get(key: string) {
-        return this.value.get(key);
+        return structuredClone(this.value[key]);
     }
 
     has(key: string): boolean {
-        return this.value.has(key);
+        return Object.hasOwn(this.value, key);
     }
 
     entries() {
-        return this.value.entries();
+        return Object.entries(this.value);
     }
 }

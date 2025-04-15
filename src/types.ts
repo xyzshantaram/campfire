@@ -2,12 +2,6 @@ import { NuBuilder } from "./campfire.ts";
 import { CfHTMLElementInterface } from "./dom/config.ts";
 import { Store } from "./stores/mod.ts";
 
-type StoreValue<ST> =
-    ST extends Store<infer T> ?
-    (T extends Map<string, infer M> ? M
-        : (T extends (infer L)[] ? L : T))
-    : never;
-
 export interface UpdateEvent<ST> {
     type: "update";
     value: ST extends Store<infer T> ? T : never;
@@ -21,7 +15,7 @@ export type AppendEvent<ST> =
 
 export type ChangeEvent<ST> =
     ST extends Store<infer T> ? (
-        T extends Map<string, infer M> ?
+        T extends Record<string, infer M> ?
         { type: "change"; value: M; key: string }
         : (
             T extends Array<infer L> ?
@@ -32,7 +26,7 @@ export type ChangeEvent<ST> =
 
 export type DeletionEvent<ST> =
     ST extends Store<infer T>
-    ? T extends Map<string, infer M>
+    ? T extends Record<string, infer M>
     ? { type: "deletion"; value: M; key: string }
     : T extends Array<infer L>
     ? { type: "deletion"; value: L; idx: number }
@@ -66,11 +60,7 @@ export type EventSubscriber<K extends EventType, ST> = (event: SubscriberTypeMap
 export type Template = (e: Record<string, any>) => string;
 
 export type UnwrapStore<D> = {
-    [K in keyof D]: D[K] extends Store<infer V>
-    ? V extends Map<any, any>
-    ? Record<string, any> // Loosen Map to a plain object
-    : V
-    : never;
+    [K in keyof D]: D[K] extends Store<infer V> ? V : never;
 };
 
 export type StoreEventFromObject<D> = {
