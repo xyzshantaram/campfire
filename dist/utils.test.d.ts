@@ -1,4 +1,4 @@
 /**
- * Tests for utility functions in Campfire.js
+ * Tests for additional utility functions in utils.ts
  */
 export {};

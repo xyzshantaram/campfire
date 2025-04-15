@@ -94,20 +94,24 @@ export declare const callbackify: <T extends any[], U = unknown, E = any>(fn: (.
  */
 export declare const poll: (fn: () => void, interval: number, callNow?: boolean) => () => void;
 /**
- * Returns a function that generates a random 6-character alphanumeric ID,
- * optionally prefixed. The generated IDs are guaranteed to be unique within
- * the scope of the returned function.
+ * Returns a function that generates random alphanumeric IDs with an optional prefix.
+ * Each generated ID is unique within the scope of the returned function.
+ *
+ * Useful for creating unique HTML element IDs, form field IDs, or any scenario
+ * where you need to generate multiple unique identifiers.
  *
  * Note: This function is not suitable for generating IDs that require
  * high entropy or cryptographic security.
+ *
  * @example
  * ```ts
  * const genId = ids();
- * const todoId = ids('todo');
  * console.log(genId()) // cf-k9yh28
+ * const todoId = ids('todo');
  * console.log(todoId()) // todo-hv9p4y
  * ```
  * @param prefix The prefix to use. Defaults to 'cf-'.
  * @returns A function that generates a unique ID.
  */
 export declare const ids: (prefix?: string) => () => string;
+export declare const deepishClone: <T>(value: T, seen?: WeakMap<object, any>) => T;

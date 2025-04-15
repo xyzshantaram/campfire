@@ -34,7 +34,7 @@ export declare class ListStore<T> extends Store<T[]> {
      * @returns The element at the specified index.
      * @throws {RangeError} If the index is out of bounds.
      */
-    get(idx: number): T;
+    get(idx: number): Readonly<T>;
     /**
      * Sets the value of an element at a specific index.
      * @param idx The index of the element to modify.

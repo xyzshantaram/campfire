@@ -226,6 +226,34 @@ var ids = (prefix = "cf-") => {
     return id;
   };
 };
+var deepishClone = (value, seen = /* @__PURE__ */ new WeakMap()) => {
+  if (value === null || typeof value !== "object") return value;
+  if (typeof value === "function") return value;
+  if (seen.has(value)) return seen.get(value);
+  try {
+    if (Array.isArray(value)) {
+      const copy = [];
+      seen.set(value, copy);
+      for (const item of value) {
+        copy.push(deepishClone(item, seen));
+      }
+      return copy;
+    }
+    if (Object.getPrototypeOf(value) === Object.prototype) {
+      const copy = {};
+      seen.set(value, copy);
+      for (const key in value) {
+        if (Object.hasOwn(value, key)) {
+          copy[key] = deepishClone(value[key], seen);
+        }
+      }
+      return copy;
+    }
+    return value;
+  } catch (_) {
+    return value;
+  }
+};
 
 // src/templating/html.ts
 var r = (val, options) => {
@@ -654,7 +682,21 @@ var Store = class _Store {
    *   - 'clear': Triggered when the store is cleared.
    * @param fn A callback function that will be invoked when the specified event occurs.
    *   The function receives a `StoreEvent` object with details about the event.
+   * @param callNow Optional parameter to immediately trigger the callback with current value
    * @returns A unique subscriber ID that can be used to unsubscribe the listener.
+   * @example
+   * ```ts
+   * // Subscribe to updates
+   * const counter = store({ value: 0 });
+   * counter.on("update", (event) => {
+   *   console.log(`Counter updated to: ${event.value}`);
+   * });
+   * 
+   * // Subscribe and trigger immediately with current value
+   * counter.on("update", (event) => {
+   *   console.log(`Current value: ${event.value}`);
+   * }, true);
+   * ```
    */
   on(type, fn, callNow) {
     var _a, _b;
@@ -666,13 +708,13 @@ var Store = class _Store {
     return this._subscriberCounts[type]++;
   }
   /**
-       * Subscribes the provided function to all store events.
-       * This is a convenience method that registers the function for 'change',
-       * 'append', 'clear', and 'deletion' events.
-       * 
-       * @param fn A callback function that will be called for all store events
-       * @returns void
-       */
+   * Subscribes the provided function to all store events.
+   * This is a convenience method that registers the function for 'change',
+   * 'append', 'clear', and 'deletion' events.
+   * 
+   * @param fn A callback function that will be called for all store events
+   * @returns void
+   */
   any(fn) {
     this.on("append", fn);
     this.on("change", fn);
@@ -689,6 +731,10 @@ var Store = class _Store {
   unsubscribe(type, id) {
     delete this._subscribers[type]?.[id];
   }
+  /**
+   * Utility method to check if a value is a transform function
+   * @internal
+   */
   static isUpdater(val) {
     return typeof val === "function";
   }
@@ -701,7 +747,7 @@ var Store = class _Store {
       updated = value;
     }
     this.value = updated;
-    this._sendEvent({ type: "update", value: updated });
+    this._sendEvent({ type: "update", value: Object.freeze(updated) });
     return updated;
   }
   /**
@@ -724,11 +770,27 @@ var Store = class _Store {
     this._subscribers = {};
     this._subscriberCounts = {};
   }
+  /**
+   * Get a deep clone of the current store value.
+   * 
+   * Added in 4.0.0-rc15 as the recommended way to access store values
+   * since the value property is now protected.
+   * 
+   * @returns A deep clone of the store's current value
+   * @example
+   * ```ts
+   * const user = store({ value: { name: "John", age: 30 } });
+   * const userData = user.current();  // { name: "John", age: 30 }
+   * ```
+   */
   current() {
-    return structuredClone(this.value);
+    return deepishClone(this.value);
   }
+  /**
+   * @deprecated Use current() instead
+   */
   valueOf() {
-    return structuredClone(this.value);
+    return deepishClone(this.value);
   }
 };
 
@@ -765,7 +827,11 @@ var ListStore = class extends Store {
    */
   push(val) {
     this.value.push(val);
-    this._sendEvent({ type: "append", value: val, idx: this.value.length - 1 });
+    this._sendEvent({
+      type: "append",
+      value: Object.freeze(val),
+      idx: this.value.length - 1
+    });
     return this.value.length;
   }
   /**
@@ -793,7 +859,7 @@ var ListStore = class extends Store {
    */
   get(idx) {
     if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
-    return this.value[idx];
+    return Object.freeze(this.value[idx]);
   }
   /**
    * Sets the value of an element at a specific index.
@@ -807,7 +873,11 @@ var ListStore = class extends Store {
   set(idx, value) {
     if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
     this.value[idx] = value;
-    this._sendEvent({ type: "change", value, idx });
+    this._sendEvent({
+      type: "change",
+      value: Object.freeze(value),
+      idx
+    });
   }
   [Symbol.iterator]() {
     return this.value[Symbol.iterator]();
@@ -829,8 +899,9 @@ var MapStore = class extends Store {
    */
   constructor(init) {
     super({});
-    for (const [k, v] of Object.entries(init || {})) {
-      this.value[k] = v;
+    if (!init) return;
+    for (const [k, v] of Object.entries(init)) {
+      this.value[k] = Object.freeze(v);
     }
   }
   /**
@@ -842,7 +913,7 @@ var MapStore = class extends Store {
    *   - `value`: The new value associated with the key
    */
   set(key, value) {
-    this.value[key] = value;
+    this.value[key] = Object.freeze(value);
     this._sendEvent({ key, value, type: "change" });
   }
   /**
@@ -876,7 +947,7 @@ var MapStore = class extends Store {
   transform(key, fn) {
     const old = this.value[key];
     if (!old) throw new Error(`ERROR: key ${key} does not exist in store!`);
-    const transformed = fn(old);
+    const transformed = Object.freeze(fn(old));
     this.set(key, transformed);
     this._sendEvent({ type: "change", value: transformed, key });
   }
@@ -886,7 +957,7 @@ var MapStore = class extends Store {
    * @returns The value associated with the key, or undefined if the key does not exist.
    */
   get(key) {
-    return structuredClone(this.value[key]);
+    return this.value[key];
   }
   has(key) {
     return Object.hasOwn(this.value, key);

@@ -1,5 +1,11 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc16
+
+- Stores now use a hybrid cloning approach and freeze values. They try to clone
+  primitives and simple objects/arrays but fall back to copying references
+  otherwise.
+
 ## 4.0.0-rc15
 
 - Add `ids()` generator function

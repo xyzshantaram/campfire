@@ -61,6 +61,38 @@ export type StoreEventFromObject<D> = {
 }[keyof D];
 type NuBuilderInstance<Elem extends HTMLElement, Deps extends Record<string, Store<any>>> = NuBuilder<Elem, Deps, string>;
 export type RenderBuilder<Elem extends HTMLElement, Deps> = Omit<NuBuilderInstance<Elem, Deps extends Record<string, Store<any>> ? Deps : never>, "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render">;
+/**
+ * Function signature for rendering reactive content.
+ *
+ * @template Elem The type of HTML element being rendered
+ * @template Deps The type of the dependencies object
+ *
+ * @param props The unwrapped values from the store dependencies
+ * @param opts Additional options and utilities for rendering:
+ *   - event: The event that triggered this render (if applicable)
+ *   - b: A builder instance for fluent element modification
+ *   - elt: Reference to the element being rendered
+ *   - first: Boolean flag indicating whether this is the first render (true) or a re-render (false)
+ *
+ * @returns A string, builder instance, or void
+ *
+ * @example
+ * ```js
+ * // Using the first parameter to conditionally render initial state
+ * const [element] = cf.nu("div")
+ *   .deps({ count: counterStore })
+ *   .render(({ count }, { b, first }) => {
+ *     // Do one-time setup on first render
+ *     if (first) {
+ *       b.attr("data-initialized", "true");
+ *       b.style("transition", "all 0.3s ease");
+ *     }
+ *
+ *     return b.content(`Count is: ${count}`);
+ *   })
+ *   .done();
+ * ```
+ */
 export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string, Store<any>>> = (props: UnwrapStore<Deps>, opts: {
     event?: StoreEventFromObject<Deps> & {
         triggeredBy: string;
@@ -85,7 +117,11 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
      * the args object passed as nu's second argument, escaping is disabled.
      */
     contents?: string;
-    /** Rendering function to use to update the element on redraws. */
+    /**
+     * Rendering function to use to update the element on redraws.
+     * As of 4.0.0-rc15, render functions receive a 'first' parameter in the opts
+     * object that indicates if this is the first render (true) or a re-render (false).
+     */
     render?: RenderFunction<T, D>;
     /**
      * Classes for the newly created element. Will be combined with whatever is
@@ -126,9 +162,12 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
      */
     deps?: D;
     /**
-     *  Children of the element to mount. They will be mounted into `cf-slot`s
+     * Children of the element to mount. They will be mounted into `cf-slot`s
      * corresponding to the Record's keys and preserved between re-renders of
      * the parent.
+     *
+     * As of 4.0.0-rc15, you can provide an array of elements for a slot, and they
+     * will all be mounted to that slot in order.
      *
      * Exercise caution when passing nu().done() directly - all children
      * returned will be mounted to the element.

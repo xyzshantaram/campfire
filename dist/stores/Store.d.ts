@@ -10,7 +10,10 @@ export declare class Store<T> {
      * @internal
      */
     id: string;
-    /**  The value of the store. */
+    /**
+     * The value of the store.
+     * @private As of 4.0.0-rc15, direct access is protected. Use current() instead.
+     */
     protected value: T;
     /**
      * The subscribers currently registered to the store.
@@ -46,17 +49,31 @@ export declare class Store<T> {
      *   - 'clear': Triggered when the store is cleared.
      * @param fn A callback function that will be invoked when the specified event occurs.
      *   The function receives a `StoreEvent` object with details about the event.
+     * @param callNow Optional parameter to immediately trigger the callback with current value
      * @returns A unique subscriber ID that can be used to unsubscribe the listener.
+     * @example
+     * ```ts
+     * // Subscribe to updates
+     * const counter = store({ value: 0 });
+     * counter.on("update", (event) => {
+     *   console.log(`Counter updated to: ${event.value}`);
+     * });
+     *
+     * // Subscribe and trigger immediately with current value
+     * counter.on("update", (event) => {
+     *   console.log(`Current value: ${event.value}`);
+     * }, true);
+     * ```
      */
     on<K extends EventType>(type: K, fn: EventSubscriber<K, Store<T>>, callNow?: true): number;
     /**
-         * Subscribes the provided function to all store events.
-         * This is a convenience method that registers the function for 'change',
-         * 'append', 'clear', and 'deletion' events.
-         *
-         * @param fn A callback function that will be called for all store events
-         * @returns void
-         */
+     * Subscribes the provided function to all store events.
+     * This is a convenience method that registers the function for 'change',
+     * 'append', 'clear', and 'deletion' events.
+     *
+     * @param fn A callback function that will be called for all store events
+     * @returns void
+     */
     any(fn: AnySubscriber<Store<T>>): void;
     /**
      * Removes a specific event listener from the store.
@@ -65,12 +82,36 @@ export declare class Store<T> {
      * @throws Will throw an error if the subscriber ID is invalid or not found.
      */
     unsubscribe(type: EventType, id: number): void;
+    /**
+     * Utility method to check if a value is a transform function
+     * @internal
+     */
     static isUpdater<T>(val: unknown): val is (arg: T) => T;
     /**
      * Updates the store's value and notifies all subscribers.
-     * @param value The new value to set for the store.
-     * @emits 'change' event with the new value when successfully updated.
-     * @note No-op if the store has been disposed via `dispose()`.
+     *
+     * As of 4.0.0-rc15, this method can also accept a transform function that
+     * receives the current value and returns a new value.
+     *
+     * @param value The new value to set for the store, or a transform function
+     * that takes the current value and returns a new value.
+     * @returns The updated value, or null if the store has been disposed.
+     * @emits 'update' event with the new value when successfully updated.
+     * @example
+     * ```ts
+     * // Direct update
+     * counter.update(5);
+     *
+     * // Update using a transform function
+     * counter.update(current => current + 1);
+     *
+     * // Complex transform
+     * userStore.update(user => ({
+     *   ...user,
+     *   visits: user.visits + 1,
+     *   lastVisit: new Date()
+     * }));
+     * ```
      */
     update(value: (arg: T) => T): T | null;
     update(value: T): T | null;
@@ -83,6 +124,22 @@ export declare class Store<T> {
      * Close the store so it no longer sends events.
      */
     dispose(): void;
+    /**
+     * Get a deep clone of the current store value.
+     *
+     * Added in 4.0.0-rc15 as the recommended way to access store values
+     * since the value property is now protected.
+     *
+     * @returns A deep clone of the store's current value
+     * @example
+     * ```ts
+     * const user = store({ value: { name: "John", age: 30 } });
+     * const userData = user.current();  // { name: "John", age: 30 }
+     * ```
+     */
     current(): T;
+    /**
+     * @deprecated Use current() instead
+     */
     valueOf(): T;
 }

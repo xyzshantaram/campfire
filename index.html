@@ -202,10 +202,12 @@ const role = cf.store({ value: &quot;User&quot; });
 const [profile] = cf.nu(&quot;div.profile&quot;)
   .deps({ name, role })
   // render function runs again whenever name/role change
-  .render(({ name, role }, { b }) =&gt;
+  .render(({ name, role }, { b, first }) =&gt;
     b
       .html`&lt;h2&gt;${name}&lt;/h2&gt;&lt;p&gt;Role: ${role}&lt;/p&gt;`
       .style(&quot;color&quot;, role === &quot;Admin&quot; ? &quot;red&quot; : &quot;blue&quot;)
+      // can detect if this is first render or a re-render
+      .attr(&quot;data-initialized&quot;, first ? &quot;initializing&quot; : &quot;updated&quot;)
   )
   .done();
 </code></pre>
@@ -266,6 +268,25 @@ const [parent] = cf.nu(&quot;section&quot;, {
   },
 }).done();
 </code></pre>
+<h5>Compose with multiple reactive children in a single slot</h5>
+<pre class="microlight"><code>const items = cf.store({ type: &quot;list&quot;, value: [&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;] });
+
+// Create multiple listItem components
+const listItems = items.value.map((text) =&gt;
+  cf.nu(&quot;li&quot;)
+    .content(text)
+    .done()
+);
+
+// Create container and insert children
+const [container] = cf.nu(&quot;div&quot;)
+  .html`
+    &lt;h3&gt;Item List&lt;/h3&gt;
+    &lt;ul&gt;&lt;cf-slot name=&quot;items&quot;&gt;&lt;/cf-slot&gt;&lt;/ul&gt;
+  `
+  .children({ listItems })
+  .done();
+</code></pre>
 <h5>Using an existing element with nu()</h5>
 <pre class="microlight"><code>// Get a reference to an existing element
 const existing = document.getElementById(&quot;my-element&quot;);
@@ -304,6 +325,22 @@ const [button] = cf.nu(&quot;button&quot;)
   .on(&quot;click&quot;, () =&gt; theme.update(theme.value === &quot;light&quot; ? &quot;dark&quot; : &quot;light&quot;))
   .done();
 </code></pre>
+<h5>Track elements for global access (see track() and untrack() below)</h5>
+<pre class="microlight"><code>// Create and globally track an element by ID
+const [modal] = cf.nu(&quot;div.modal&quot;)
+  .content(&quot;Modal Content&quot;)
+  .track(&quot;app-modal&quot;) // Register with global tracking system
+  .done();
+
+// Later, retrieve the element from anywhere
+const elt = cf.tracked(&quot;app-modal&quot;);
+if (elt) {
+  elt.style.display = &quot;block&quot;;
+}
+
+// when done
+cf.untrack(&quot;app-modal&quot;);
+</code></pre>
 </details>
 
 <details>
@@ -313,12 +350,17 @@ const [button] = cf.nu(&quot;button&quot;)
 <h5>A simple value store</h5>
 <pre class="microlight"><code>const counter = cf.store({ value: 0 });
 counter.update(5); // Sets value to 5
-counter.value; // Gets current value (5)
+counter.current(); // Gets current value (5)
 </code></pre>
 <h5>Subscribe to changes</h5>
 <pre class="microlight"><code>counter.on(&quot;change&quot;, (event) =&gt; {
   console.log(`Value changed to ${event.value}`);
 });
+
+// Optionally trigger the callback immediately with current value
+counter.on(&quot;change&quot;, (event) =&gt; {
+  console.log(`Value changed to ${event.value}`);
+}, true); // Pass true to call immediately
 </code></pre>
 <h5>List store for arrays</h5>
 <pre class="microlight"><code>const todoList = cf.store({ type: &quot;list&quot;, value: [&quot;Buy milk&quot;] });
@@ -339,6 +381,28 @@ user.clear(); // Empty the map
 <pre class="microlight"><code>todoList.any((event) =&gt; {
   console.log(`Event type: ${event.type}`);
 });
+</code></pre>
+<h5>Update values with a transform function</h5>
+<pre class="microlight"><code>const counter = cf.store({ value: 10 });
+
+// Using a value directly
+counter.update(20);
+
+// Using a transform function
+counter.update((currentValue) =&gt; currentValue + 5); // Increments by 5
+
+// More complex transformations
+const user = cf.store({
+  type: &quot;map&quot;,
+  value: { name: &quot;John&quot;, visits: 0, lastVisit: null },
+});
+
+// Update multiple properties based on current value
+user.update((current) =&gt; ({
+  ...current,
+  visits: current.visits + 1,
+  lastVisit: new Date(),
+}));
 </code></pre>
 </details>
 
@@ -581,6 +645,78 @@ unescape(&quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;
     .done();
   cf.insert(item, { into: listElement });
 });
+</code></pre>
+</details>
+
+<details>
+<summary><code>ids()</code> - unique ID generator</summary>
+
+<p>Generates unique IDs with an optional prefix. Useful for creating HTML element
+IDs.</p>
+<h5>Basic usage</h5>
+<pre class="microlight"><code>const generateId = cf.ids(); // Default prefix is &#39;cf-&#39;
+const id1 = generateId(); // e.g. &quot;cf-a1b2c3&quot;
+
+// With custom prefix
+const generateButtonId = cf.ids(&quot;btn&quot;);
+const buttonId = generateButtonId(); // e.g. &quot;btn-g7h8i9&quot;
+</code></pre>
+<h5>Creating elements with unique IDs</h5>
+<pre class="microlight"><code>const idGenerator = cf.ids(&quot;form-field&quot;);
+
+cf.seq(3).forEach(() =&gt; {
+  const fieldId = idGenerator();
+  const [field, label] = cf.nu(&quot;div.form-field&quot;)
+    .html`
+      &lt;label for=&quot;${fieldId}&quot;&gt;Field&lt;/label&gt;
+      &lt;input id=&quot;${fieldId}&quot; type=&quot;text&quot;&gt;
+    `
+    .gimme(&quot;label&quot;, &quot;input&quot;)
+    .done();
+});
+</code></pre>
+<h5>Connected form elements with unique IDs</h5>
+<pre class="microlight"><code>const getId = cf.ids(&quot;profile&quot;);
+
+const LabeledInput = (labelText, type = &quot;text&quot;) =&gt; {
+  const fieldId = getId();
+  return cf.nu(&quot;div.form-group&quot;)
+    .html`
+      &lt;label for=&quot;${fieldId}&quot;&gt;${labelText}&lt;/label&gt;
+      &lt;input id=&quot;${fieldId}&quot; type=&quot;${type}&quot;&gt;
+    `
+    .done();
+};
+
+const [emailGroup] = LabeledInput(&quot;Username&quot;, &quot;email&quot;);
+</code></pre>
+</details>
+
+<details>
+<summary><code>track()</code>, <code>tracked()</code>, and <code>untrack()</code> - element tracking</summary>
+
+<p>Provides a global registry to track and retrieve elements by custom IDs.</p>
+<h5>Track elements for later use</h5>
+<pre class="microlight"><code>// Create and track elements
+const [header] = cf.nu(&quot;header&quot;)
+  .content(&quot;App Header&quot;)
+  .done();
+
+// Track the element with a custom ID
+cf.track(&quot;main-header&quot;, header);
+
+// Later retrieve the element from anywhere in your code
+const retrievedHeader = cf.tracked(&quot;main-header&quot;);
+</code></pre>
+<h5>Cleanup tracked elements</h5>
+<pre class="microlight"><code>// Remove tracking when it&#39;s no longer needed
+function removeComponent() {
+  const component = cf.tracked(&quot;my-component&quot;);
+  if (component) {
+    cf.rm(component);
+    cf.untrack(&quot;my-component&quot;);
+  }
+}
 </code></pre>
 </details>
 
