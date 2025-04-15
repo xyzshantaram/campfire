@@ -81,7 +81,8 @@ const setupDeps = <
         const res = render(unwrap(deps), {
             elt,
             event: { ...(evt as StoreEventFromObject<D>), triggeredBy: name },
-            b: builder as NuBuilder<T, any, string>
+            b: builder as NuBuilder<T, any, string>,
+            first: false
         });
 
         const children = extractReactiveChildren(elt);
@@ -166,7 +167,9 @@ export const extend = <
     if (isValidRenderFn<T, D>(render)) {
         setupDeps({ elt, render, deps });
         const result = render(unwrap(deps), {
-            elt, b: new NuBuilder<T, D, string>(elt)
+            elt,
+            b: new NuBuilder<T, D, string>(elt),
+            first: true
         });
 
         if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");

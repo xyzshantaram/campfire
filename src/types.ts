@@ -79,7 +79,8 @@ export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string,
     opts: {
         event?: StoreEventFromObject<Deps> & { triggeredBy: string },
         b: RenderBuilder<Elem, Deps>,
-        elt: Elem
+        elt: Elem,
+        first: boolean
     }
 ) => string | RenderBuilder<Elem, Deps> | void;
 
