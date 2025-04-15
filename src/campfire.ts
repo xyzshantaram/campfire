@@ -11,6 +11,7 @@ import type { SelectParams } from "./dom/mod.ts";
 import type { RawHtmlOptions } from "./templating/html.ts";
 import type { ElementPosition, ElementProperties, AnySubscriber, EventSubscriber, Template } from "./types.ts"
 import type { Callback, Callbackified } from "./utils.ts";
+import { track, tracked, untrack } from "./dom/tracking.ts";
 
 export default {
     ListStore,
@@ -34,7 +35,10 @@ export default {
     CfDom,
     callbackify,
     poll,
-    ids
+    ids,
+    track,
+    tracked,
+    untrack
 }
 
 export {
@@ -59,7 +63,10 @@ export {
     CfDom,
     callbackify,
     poll,
-    ids
+    ids,
+    track,
+    tracked,
+    untrack
 }
 
 export type {
