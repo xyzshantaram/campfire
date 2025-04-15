@@ -57,11 +57,13 @@ export class Store<T> {
      *   The function receives a `StoreEvent` object with details about the event.
      * @returns A unique subscriber ID that can be used to unsubscribe the listener.
      */
-    on<K extends EventType>(type: K, fn: EventSubscriber<K, Store<T>>): number {
+    on<K extends EventType>(type: K, fn: EventSubscriber<K, Store<T>>, callNow?: true): number {
         this._subscriberCounts[type] ??= 0;
         this._subscribers[type] ??= {};
         const id = this._subscriberCounts[type]++;
         this._subscribers[type][id] = fn;
+        // @ts-ignore this is not a problem
+        if (type === 'update' && callNow) fn({ type: 'update', value: this.value });
         return this._subscriberCounts[type]++;
     }
 
@@ -112,6 +114,7 @@ export class Store<T> {
         else {
             updated = value;
         }
+        this.value = updated;
         this._sendEvent({ type: 'update', value: updated });
         return updated;
     }
