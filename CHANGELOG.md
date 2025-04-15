@@ -3,6 +3,9 @@
 ## 4.0.0-rc15
 
 - Add `ids()` generator function
+- Store::update() now optionally accepts a function to transform a store's
+  existing value.
+- Store::value is now protected - use .current() to get the value.
 
 ## 4.0.0-rc14
 

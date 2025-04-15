@@ -16,7 +16,7 @@ export class Store<T> {
     id = storeId();
 
     /**  The value of the store. */
-    value: T;
+    protected value: T;
     /** 
      * The subscribers currently registered to the store. 
      * @internal
@@ -44,19 +44,19 @@ export class Store<T> {
     }
 
     /**
- * Add an event listener to the store.
- * @param type The type of event to listen for.
- *   Supported event types include:
- *   - `update`: Triggered when the store's value is updated via `update()`.
- *   - `append`: For `ListStore` - Triggered when an item is added to the list.
- *   - `deletion`: For `ListStore`/`MapStore` - Triggered when an item is removed.
- *   - `change`: For `ListStore`/`MapStore`: Triggered when an item at an index/key
- *     has its value set via the corresponding store's set() method.
- *   - 'clear': Triggered when the store is cleared.
- * @param fn A callback function that will be invoked when the specified event occurs.
- *   The function receives a `StoreEvent` object with details about the event.
- * @returns A unique subscriber ID that can be used to unsubscribe the listener.
- */
+     * Add an event listener to the store.
+     * @param type The type of event to listen for.
+     *   Supported event types include:
+     *   - `update`: Triggered when the store's value is updated via `update()`.
+     *   - `append`: For `ListStore` - Triggered when an item is added to the list.
+     *   - `deletion`: For `ListStore`/`MapStore` - Triggered when an item is removed.
+     *   - `change`: For `ListStore`/`MapStore`: Triggered when an item at an index/key
+     *     has its value set via the corresponding store's set() method.
+     *   - 'clear': Triggered when the store is cleared.
+     * @param fn A callback function that will be invoked when the specified event occurs.
+     *   The function receives a `StoreEvent` object with details about the event.
+     * @returns A unique subscriber ID that can be used to unsubscribe the listener.
+     */
     on<K extends EventType>(type: K, fn: EventSubscriber<K, Store<T>>): number {
         this._subscriberCounts[type] ??= 0;
         this._subscribers[type] ??= {};
@@ -91,16 +91,29 @@ export class Store<T> {
         delete this._subscribers[type]?.[id];
     }
 
+    static isUpdater<T>(val: unknown): val is (arg: T) => T {
+        return typeof val === 'function';
+    }
+
     /**
      * Updates the store's value and notifies all subscribers.
      * @param value The new value to set for the store.
      * @emits 'change' event with the new value when successfully updated.
      * @note No-op if the store has been disposed via `dispose()`.
      */
-    update(value: T) {
-        if (this._dead) return;
-        this.value = value;
-        this._sendEvent({ type: 'update', value });
+    update(value: (arg: T) => T): T | null;
+    update(value: T): T | null;
+    update(value: T | ((arg: T) => T)): T | null {
+        if (this._dead) return null;
+        let updated: T;
+        if (Store.isUpdater<T>(value)) {
+            updated = value(this.value);
+        }
+        else {
+            updated = value;
+        }
+        this._sendEvent({ type: 'update', value: updated });
+        return updated;
     }
 
     /**
@@ -124,6 +137,10 @@ export class Store<T> {
         this._dead = true;
         this._subscribers = {};
         this._subscriberCounts = {};
+    }
+
+    current() {
+        return structuredClone(this.value);
     }
 
     valueOf() {

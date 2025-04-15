@@ -15,9 +15,9 @@ const expect = chai.expect;
 describe('Tests for stores', () => {
     it('Store should store and update values', () => {
         const s = cf.store({ value: 'test' });
-        expect(s.value).to.equal('test');
+        expect(s.current()).to.equal('test');
         s.update('new value');
-        expect(s.value).to.equal('new value');
+        expect(s.current()).to.equal('new value');
     });
 
     it('Store should notify subscribers of changes', () => {
@@ -30,11 +30,11 @@ describe('Tests for stores', () => {
 
     it('ListStore should handle array operations', () => {
         const ls = cf.store({ type: 'list', value: [1, 2, 3] });
-        expect(ls.value).to.deep.equal([1, 2, 3]);
+        expect(ls.current()).to.deep.equal([1, 2, 3]);
         const mockFn = sinon.spy();
         ls.on('append', mockFn);
         ls.push(4);
-        expect(ls.value).to.deep.equal([1, 2, 3, 4]);
+        expect(ls.current()).to.deep.equal([1, 2, 3, 4]);
         expect(mockFn.calledWith({ type: 'append', value: 4, idx: 3 })).to.be.true;
     });
 
