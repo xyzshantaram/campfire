@@ -41,7 +41,8 @@ export class ListStore<T> extends Store<T[]> {
      *   - `idx`: The index from which the item was removed
      */
     remove(idx: number) {
-        if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
+        if (idx < 0) return; // fail quietly incase findIndex() was passed
+        if (idx >= this.value.length) throw new RangeError("Invalid index.");
         this._sendEvent({
             type: 'deletion',
             idx,
@@ -74,6 +75,23 @@ export class ListStore<T> extends Store<T[]> {
         this.value[idx] = value;
         this._sendEvent({ type: "change", value, idx });
     }
+
+    [Symbol.iterator]() {
+        return this.value[Symbol.iterator]();
+    }
+
+    map: (...args: Parameters<T[]['map']>) => ReturnType<T[]['map']> = (...args) => {
+        return this.value.map(...args);
+    };
+
+    forEach: (...args: Parameters<T[]['forEach']>) => ReturnType<T[]['forEach']> = (...args) => {
+        return this.value.forEach(...args);
+    };
+
+
+    findIndex: (...args: Parameters<T[]['findIndex']>) => ReturnType<T[]['findIndex']> = (...args) => {
+        return this.value.findIndex(...args);
+    };
 
     /**
      * Utility accessor to find the length of the store.
