@@ -43,7 +43,7 @@ const iframeContentTemplate = cf.template(cf.html`\
 <body>
     {{ html }}
     <script type='module'>
-        import cf from 'https://esm.sh/campfire.js@4.0.0-rc14';
+        import cf from 'http://localhost:5500/dist/campfire.esm.min.js';
         window.onload = function() {
             {{ javascript }}
         }
@@ -63,7 +63,7 @@ export const editorReady = () => {
                 editor: null
             }]));
 
-    const wrapper = examples.querySelector('.editor-wrapper');
+    const wrapper = cf.select({ s: '.editor-wrapper', single: true });
     const [switcher] = cf.nu('div.switcher').done();
 
     cf.insert(switcher, { into: wrapper });
@@ -148,23 +148,29 @@ export const editorReady = () => {
 
     const list = document.querySelector("#playground-demo-list");
 
-    fetch("site/data/examples.toml").then(res => res.text()).then(text => {
-        const data = toml.parse(text);
-        for (const key of Object.keys(data)) {
-            const itm = data[key];
-            const [item] = cf.nu('li')
-                .content(`<a href='javascript:void(0)'>${itm.title}</a>`)
-                .on('click', _ => {
-                    setActivePlaygroundDemo(itm);
-                    currentEditorStore.update('output');
-                })
-                .raw(true)
-                .done();
+    fetch('examples/dir.json').then(res => res.json()).then(parsed => {
+        console.log(parsed);
+        for (const example of parsed.examples) {
+            const file = (name) => `examples/${example.path}/${name}`;
+            const b = cf.nu('li')
+                .html`<a href='javascript:void(0)'>${example.title}</a>`
+                .on('click', async _ => {
+                    const contents = Object.fromEntries(await Promise.all(
+                        ['index.html', 'style.css', 'main.js'].map(async name => {
+                            const res = await fetch(file(name));
+                            const text = res.ok ? await res.text() : '';
+                            return [name.split('.').at(-1), text];
+                        })
+                    ));
+
+                    console.log(example, contents);
+                });
+            console.log(b);
+            const [item] = b.done();
             cf.insert(item, { into: list });
+
         }
-    }).catch(err => {
-        list.appendChild(document.createTextNode(`Error loading demos: ${err}. The playground should still work, sorry for the inconvenience!`));
-    });
+    })
 
     const clearBtn = document.querySelector("#cf-editor-clear");
     const dlBtn = document.querySelector("#cf-editor-dl");

@@ -1,102 +1,10 @@
-[button]
-title = "Reactive button"
-
-javascript = """\
-// A button that keeps track of how many times it's been clicked
-let count = cf.store({ value: 0 });
-
-const btn = cf.nu("button#id.some-class.other-class")
-    .deps({ count })
-    .render(({ count }) => count === 0 ? "I have not been clicked." :
-        `I have been clicked ${count} times.`)
-    .attr('data-some-attribute', 42)
-    .on('click', () => count.update(count.value + 1))
-    .styles({
-        // Uses property names as specified in CSSStyleDeclaration.
-        background: "#007cdf",
-        color: "#f5f4f0",
-        fontWeight: "bold",
-        cursor: "pointer",
-        border: "2px solid white",
-    })
-    .misc('type', 'button')
-    .done()
-
-cf.insert(btn, { into: document.body })
-"""
-
-[answer]
-title = "What do you get when you multiply six by nine?"
-
-html = """\
-<div id=container>
-</div>
-"""
-
-css = """\
-
-"""
-
-javascript = """\
-const value = cf.store({ value: 0 }); // initial value
-
-const [result] = cf.nu() // defaults to div
-    .deps({ value })
-    .render(({ value }) => {
-        switch(Number(value)) {
-            case 54:
-                return "The correct answer.";
-            case 42:
-                return "Ah, I see you're a man of culture as well.";
-            default:
-                return `Hmm. ${value} isn't quite right.`;
-        }
-    })
-    .done();
-
-const [last] = cf.nu('#last')
-    .deps({ value })
-    .render(({ value }) => `Current value: ${value}`)
-    .done();
-
-const [container] = cf.select({ s: '#container' });
-cf.insert([last, result], { into: container });
-
-const [input] = cf.nu('input')
-    .misc('type', 'text')
-    .misc('placeholder', 'What is six by nine?')
-    .done();
-
-const [btn] = cf.nu('button')
-    .misc('type', 'button')
-    .content("Answer")
-    .on('click', () => {
-        const val = input.value.trim();
-        if (val) value.update(val);
-        else result.innerHTML = 'Type something first, ya numpty!';
-    })
-    .done()
-
-cf.insert([input, btn], { before: result });
-"""
-
-[todo]
-title = "To-do list app"
-
-css = """\
-.deleted {
-    text-decoration: line-through;
-}
-"""
-
-javascript = """\
 const store = new cf.store({ type: "list", value: [] });
 
 const [input] = cf.nu('input')
     .style('min-width', '20ch')
     .misc('type', 'text')
     .done();
-    
+
 const button = cf.nu("button")
     .misc('type', 'button')
     .on('click', () => {
@@ -125,7 +33,7 @@ const TodoItem = (store, event) => cf.nu('li.todo-item')
         remove: cf.nu('button')
             .content("Mark done")
             .on('click',
-                function() {
+                function () {
                     const idx = +this.parentElement.getAttribute('data-idx');
                     store.set(idx, { done: true, name: event.value.name })
                 }
@@ -136,7 +44,7 @@ const TodoItem = (store, event) => cf.nu('li.todo-item')
 
 const todos = cf.nu('ul')
     .deps({ items: store })
-    .render(({ items }, { event, elt }) => {
+    .render((_, { event, elt }) => {
         if (!event) return;
         // fine-grained update
         switch (event.type) {
@@ -148,9 +56,9 @@ const todos = cf.nu('ul')
                 const [li] = cf.select({ s: `li[data-idx="${event.idx}"]`, from: elt });
                 li.classList.add('deleted');
                 const [btn] = cf.select({ s: 'button', from: li });
-                cf.extend(btn, { 
-                    contents: "Delete", 
-                    on: { click: () => store.remove(Number(li.getAttribute('data-idx'))) } 
+                cf.extend(btn, {
+                    contents: "Delete",
+                    on: { click: () => store.remove(Number(li.getAttribute('data-idx'))) }
                 });
                 break;
             }
@@ -161,6 +69,7 @@ const todos = cf.nu('ul')
                 cf.select({ s: 'li.todo-item', from: elt, all: true }).forEach((elem, idx) => {
                     elem.setAttribute('data-idx', idx);
                 });
+                break;
             }
             default:
                 console.log(event);
@@ -182,4 +91,3 @@ const app = cf.nu("#app")
     .done();
 
 cf.insert(app, { into: document.body });
-"""
