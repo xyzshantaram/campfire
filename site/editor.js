@@ -1,197 +1,153 @@
-import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc15';
+import cf from 'https://esm.sh/campfire.js@4.0.0-rc15';
+import { FrameTemplate } from "./FrameTemplate.js";
 
-const iframeContentTemplate = cf.template(cf.html`\
-<html>
-<head>
-    <title>Campfire Playground</title>
-    <style>
-        body {
-            color: white;
-            line-height: 1.6;
-        }
-
-        input {
-            border-top: none;
-            border-left: none;
-            border-right: none;
-            border-bottom: 2px solid white;
-        }
-
-        button, input {
-            padding: 0.2rem;
-            font-size: inherit;
-            color: inherit;
-            background-color: transparent;
-            min-width: 10ch;
-            margin-top: 0.4rem;
-            margin-bottom: 0.4rem;
-        }
-
-        button {
-            margin-left: 0.4rem;
-            border-radius: 0.2rem;
-            border: 2px solid #ff9a00;
-        }
-
-        input:focus {
-            border-bottom-color: #ff9a00;
-        }
-        {{ css }}
-    </style>
-</head>
-<body>
-    {{{ html }}}
-    <script type='module'>
-        import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc15';
-        window.onload = function() {
-            {{{ javascript }}}
-        }
-    </script>
-</body>
-</html>`, false);
-
-export const editorReady = () => {
-    const [examples] = cf.select({ s: '.cf-site-div[data-heading="playground"]' });
-    if (!examples) return;
-
-    const editorConfigs = Object.fromEntries(
+const createEditorConfig = () => {
+    return Object.fromEntries(
         ['html', 'css', 'javascript', 'output']
             .map(itm => [itm, {
                 elt: cf.select({ s: '.cf-editor-' + itm, single: true }),
                 mode: itm === 'output' ? null : 'ace/mode/' + itm,
                 editor: null
-            }]));
+            }])
+    );
+};
 
-    const wrapper = cf.select({ s: '.editor-wrapper', single: true });
-    const [switcher] = cf.nu('div.switcher').done();
+const EditorButton = (key, currentEditor) => cf.nu('button')
+    .attr('type', 'button')
+    .content(key)
+    .attr('data-editor-view', key)
+    .on('click', () => currentEditor.update(key))
+    .ref();
 
-    cf.insert(switcher, { into: wrapper });
+const edit = (config) => ace.edit(config.elt, {
+    wrap: true,
+    fontSize: '1rem',
+    mode: config.mode,
+    theme: 'ace/theme/tomorrow_night_blue'
+})
 
-    const currentEditorStore = cf.store({ value: 'html' });
+const EditorSwitcher = (configs, currentEditor) => {
+    const switcher = cf.nu('div.switcher').ref();
 
-    for (const key in editorConfigs) {
+    for (const key in configs) {
         if (key === 'output') continue;
-        const current = editorConfigs[key];
-        if (!current.elt) continue;
+        if (!configs[key].elt) continue;
 
-        const [button] = cf.nu('button')
-            .attr('type', 'button')
-            .content(key)
-            .attr('data-editor-view', key)
-            .on('click', () => {
-                currentEditorStore.update(key);
-            })
-            .done();
-
+        const button = EditorButton(key, currentEditor);
         cf.insert(button, { into: switcher });
 
-        // Set up Ace Editor
-        current.editor = ace.edit(current.elt, {
-            mode: current.mode,
-            theme: 'ace/theme/tomorrow_night_blue',
-            fontSize: '1rem',
-            copyWithEmptySelection: 'true',
-            highlightActiveLine: true,
-            wrap: true
+        configs[key].editor = edit(configs[key]);
+    }
+
+    cf.insert(EditorButton('output', currentEditor), { into: switcher });
+    return switcher;
+};
+
+const OutputFrame = (contents) => cf.nu('iframe.cf-editor-output-iframe')
+    .style({ width: '100%', height: '100%', background: 'white' })
+    .misc('srcdoc', FrameTemplate(contents()))
+    .misc('sandbox', 'allow-modals allow-scripts')
+    .ref();
+
+const DemoListItem = (example, setActiveDemo, cache) => {
+    const file = (name) => `examples/${example.path}/${name}`;
+
+    return cf.nu('li')
+        .on('click', async () => {
+            let files = cache.get(example.path);
+            if (files) return setActiveDemo(files);
+
+            files = Object.fromEntries(await Promise.all(
+                ['index.html', 'style.css', 'main.js'].map(async name => {
+                    const res = await fetch(file(name));
+                    const text = res.ok ? await res.text() : '';
+                    return [name.split('.').at(-1), text];
+                })
+            ));
+            cache.set(example.path, files);
+            setActiveDemo(files);
+        })
+        .html`<a href='javascript:void(0)'>${example.title}</a>`
+        .ref();
+};
+
+export const editorReady = () => {
+    const [examples] = cf.select({ s: '.cf-site-div[data-heading="playground"]' });
+    if (!examples) return;
+
+    const configs = createEditorConfig();
+    const wrapper = cf.select({ s: '.editor-wrapper', single: true });
+    const currentEditor = cf.store({ value: 'html' });
+    const cache = new Map();
+
+    const getContent = () => Object.fromEntries(['html', 'css', 'javascript']
+        .map(itm => [itm, configs[itm].editor.getValue()]));
+
+    const generateOutput = () => {
+        cf.empty(configs.output.elt);
+        cf.insert(OutputFrame(getContent), { into: configs.output.elt });
+    };
+
+    const defaults = {
+        'html': '<!-- This demo has no HTML. -->',
+        'js': '/* This demo has no JavaScript. */',
+        'css': '/* This demo has no CSS. */'
+    }
+
+    const renderDemo = (obj) => {
+        ['html', 'javascript', 'css'].forEach(itm => {
+            const key = itm === 'javascript' ? 'js' : itm;
+            configs[itm].editor.setValue(obj[key] || defaults[key]);
         });
-    }
 
-    function getIframeContents() {
-        return iframeContentTemplate({
-            html: editorConfigs.html.editor.getValue().trim(),
-            css: editorConfigs.css.editor.getValue().trim(),
-            javascript: editorConfigs.javascript.editor.getValue().trim()
-        });
-    }
+        currentEditor.update('output');
+    };
 
-    const [outputButton] = cf.nu('button')
-        .attr('type', 'button')
-        .content('output')
-        .attr('data-editor-view', 'output')
-        .on('click', () => currentEditorStore.update('output'))
-        .done();
+    cf.insert(EditorSwitcher(configs, currentEditor), { into: wrapper });
 
-    cf.insert(outputButton, { into: switcher });
-
-    function generateOutput() {
-        cf.empty(editorConfigs.output.elt);
-        const [frame] = cf.nu('iframe.cf-editor-output-iframe')
-            .style({ width: '100%', height: '100%', background: 'white' })
-            .misc('srcdoc', getIframeContents())
-            .misc('sandbox', 'allow-modals allow-scripts')
-            .done();
-        cf.insert(frame, { into: editorConfigs.output.elt });
-    }
-
-    currentEditorStore.on('update', (event) => {
+    // Set up event handlers
+    currentEditor.on('update', (event) => {
         const val = event.value;
-        Array.from(document.querySelectorAll('.editor-wrapper > :not(.switcher)'))
+
+        // Update visibility
+        cf.select({ s: '.editor-wrapper > :not(.switcher)', all: true })
             .forEach(elem => elem.style.display = 'none');
-        editorConfigs[val].elt.style.display = 'block';
-        editorConfigs[val].editor?.resize();
-        document.querySelector(`.switcher>button.active`)?.classList.remove('active');
-        document.querySelector(`button[data-editor-view="${val}"]`)?.classList.add('active');
-        if (val === 'output') {
-            generateOutput();
-        }
+        configs[val].elt.style.display = 'block';
+        configs[val].editor?.resize();
+
+        // Update active button
+        cf.select({ s: `.switcher>button.active`, single: true })
+            ?.classList.remove('active');
+        cf.select({ s: `button[data-editor-view="${val}"]`, single: true })
+            ?.classList.add('active');
+
+        if (val === 'output') generateOutput();
     }, true);
 
-    const setActiveDemo = (obj) => {
-        obj.html = obj.html || "<!-- This demo has no HTML! -->";
-        obj.css = obj.css || "/* This demo has no CSS! */";
-        obj.javascript = obj.javascript || "/* This demo has no JavaScript! */";
+    const [list] = cf.select({ s: "#playground-demo-list" });
+    const [clearBtn] = cf.select({ s: "#cf-editor-clear" });
+    const [dlBtn] = cf.select({ s: "#cf-editor-dl" });
 
-        for (const str of ['html', 'javascript', 'css']) {
-            editorConfigs[str].editor.setValue(obj[str]);
-        }
-
-        currentEditorStore.update('output');
-    }
-
-    const list = document.querySelector("#playground-demo-list");
-
-
-    const clearBtn = document.querySelector("#cf-editor-clear");
-    const dlBtn = document.querySelector("#cf-editor-dl");
-
-    dlBtn.onclick = _ => {
-        const [link] = cf.nu('a')
+    dlBtn.onclick = () => {
+        const link = cf.nu('a')
             .attr('download', 'playground.html')
-            .attr('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(getIframeContents()))
-            .done();
+            .attr('href', 'data:text/html;charset=utf-8,' +
+                encodeURIComponent(FrameTemplate(getContent())))
+            .ref();
         link.click();
-    }
+    };
 
-    clearBtn.onclick = _ => {
+    clearBtn.onclick = () => {
         for (const str of ['html', 'javascript', 'css']) {
-            editorConfigs[str].editor.setValue("");
+            configs[str].editor.setValue("");
         }
         generateOutput();
-    }
+    };
 
-    const cached = new Map();
-
-    fetch('examples/dir.json').then(res => res.json()).then(parsed => {
-        for (const example of parsed.examples) {
-            const file = (name) => `examples/${example.path}/${name}`;
-            const [item] = cf.nu('li')
-                .html`<a href='javascript:void(0)'>${example.title}</a>`
-                .on('click', async _ => {
-                    let files = cached.get(example.path);
-                    if (!files) files = Object.fromEntries(await Promise.all(
-                        ['index.html', 'style.css', 'main.js'].map(async name => {
-                            const res = await fetch(file(name));
-                            const text = res.ok ? await res.text() : '';
-                            return [name.split('.').at(-1), text];
-                        })
-                    ));
-
-                    cached.set(example.path, files);
-
-                    setActiveDemo({ html: files.html, css: files.css, javascript: files.js })
-                })
-                .done();
-            cf.insert(item, { into: list });
-        }
-    })
-}
+    // Load examples
+    fetch('examples/dir.json')
+        .then(res => res.json())
+        .then(parsed => parsed.examples.forEach(itm => {
+            cf.insert(DemoListItem(itm, renderDemo, cache), { into: list });
+        }));
+};
