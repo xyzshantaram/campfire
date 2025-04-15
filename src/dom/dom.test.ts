@@ -8,6 +8,7 @@ import sinon from 'sinon';
 import { describe, it } from 'mocha';
 import { nu, extend, store, insert, seq, rm } from '../campfire.ts';
 import { CfDom } from "./config.ts";
+import { tracked } from './tracking.ts';
 
 // Setup chai
 chai.use(chaiDom);
@@ -242,6 +243,18 @@ describe('Tests for NuBuilder', () => {
         expect(Array.from(parent.children).every(itm =>
             itm.getAttribute('data-cf-slot') === 'items'
         )).to.be.true;
+    });
+    
+    it('should track an element with an ID', () => {
+        // Create an element with tracking
+        const [div] = nu('div')
+            .content('Tracked element')
+            .track('test-tracked-element')
+            .done();
+            
+        // Verify the element is tracked
+        const trackedElement = tracked('test-tracked-element');
+        expect(trackedElement).to.equal(div);
     });
 });
 

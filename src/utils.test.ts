@@ -1,10 +1,11 @@
 /**
- * Tests for utility functions in Campfire.js
+ * Tests for additional utility functions in utils.ts
  */
 
 import * as chai from 'chai';
-import { describe, it } from 'mocha';
-import { escape, unescape, seq } from './campfire.ts';
+import sinon from 'sinon';
+import { describe, it, beforeEach, afterEach } from 'mocha';
+import { callbackify, poll, seq, escape, unescape } from './utils.ts';
 
 const expect = chai.expect;
 
@@ -73,5 +74,144 @@ describe('tests for seq', () => {
 
     it('should work for negative ranges with a step', () => {
         expect(seq(-8, -4, 2)).to.deep.equal([-8, -6]);
+    });
+});
+
+describe('callbackify', () => {
+    it('should convert a Promise-returning function to a callback-style function', (done) => {
+        const promiseFn = (value: number) => Promise.resolve(value * 2);
+        const callbackFn = callbackify(promiseFn);
+
+        callbackFn((err: Error | null, result: number | null) => {
+            expect(err).to.be.null;
+            expect(result).to.equal(6);
+            done();
+        }, 3);
+    });
+
+    it('should pass errors to the callback', (done) => {
+        const error = new Error('Test error');
+        const promiseFn = () => Promise.reject(error);
+        const callbackFn = callbackify(promiseFn);
+
+        callbackFn((err: Error | null, result: null) => {
+            expect(err).to.equal(error);
+            expect(result).to.be.null;
+            done();
+        });
+    });
+
+    it('should pass all arguments to the original function', (done) => {
+        const promiseFn = (a: number, b: number, c: number) => Promise.resolve(a + b + c);
+        const callbackFn = callbackify(promiseFn);
+
+        callbackFn((err: Error | null, result: number | null) => {
+            expect(err).to.be.null;
+            expect(result).to.equal(6);
+            done();
+        }, 1, 2, 3);
+    });
+
+    it('should work with zero arguments', (done) => {
+        const promiseFn = () => Promise.resolve('test result');
+        const callbackFn = callbackify(promiseFn);
+
+        callbackFn((err: Error | null, result: string | null) => {
+            expect(err).to.be.null;
+            expect(result).to.equal('test result');
+            done();
+        });
+    });
+});
+
+describe('poll', () => {
+    let clock: sinon.SinonFakeTimers;
+
+    beforeEach(() => {
+        clock = sinon.useFakeTimers();
+    });
+
+    afterEach(() => {
+        clock.restore();
+    });
+
+    it('should call the function at specified intervals', () => {
+        const fn = sinon.spy();
+        poll(fn, 100, false);
+
+        expect(fn.callCount).to.equal(0);
+
+        clock.tick(100);
+        expect(fn.callCount).to.equal(1);
+
+        clock.tick(100);
+        expect(fn.callCount).to.equal(2);
+
+        clock.tick(200);
+        expect(fn.callCount).to.equal(4);
+    });
+
+    it('should call the function immediately when callNow is true', () => {
+        const fn = sinon.spy();
+        poll(fn, 100, true);
+
+        expect(fn.callCount).to.equal(1);
+
+        clock.tick(100);
+        expect(fn.callCount).to.equal(2);
+    });
+
+    it('should stop polling when the cancel function is called', () => {
+        const fn = sinon.spy();
+        const cancel = poll(fn, 100);
+
+        clock.tick(100);
+        expect(fn.callCount).to.equal(1);
+
+        cancel();
+
+        clock.tick(200);
+        expect(fn.callCount).to.equal(1); // Should still be 1 as we cancelled
+    });
+
+    it('should poll repeatedly', () => {
+        const fn = sinon.spy();
+        const cancel = poll(fn, 100);
+
+        // Should not have been called yet
+        expect(fn.callCount).to.equal(0);
+
+        // After time advances, should be called
+        clock.tick(100);
+        expect(fn.callCount).to.equal(1);
+
+        // After more time, should be called again
+        clock.tick(100);
+        expect(fn.callCount).to.equal(2);
+
+        // Clean up
+        cancel();
+    });
+
+    // Error handling test
+    it('should handle errors within the callback', () => {
+        const errorSpy = sinon.spy();
+        const fn = sinon.stub();
+        fn.onFirstCall().callsFake(() => {
+            errorSpy();
+        });
+
+        // No error should propagate out
+        poll(fn, 100, true);
+        expect(errorSpy.calledOnce).to.be.true;
+    });
+
+    it('should clean up timeout when cancelled', () => {
+        const fn = sinon.spy();
+        const cancel = poll(fn, 100);
+
+        cancel();
+        clock.tick(200);
+        expect(fn.callCount).to.equal(0);
     });
 });
