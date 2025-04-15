@@ -194,7 +194,7 @@ const [button] = cf.nu("button")
   .done();
 ```
 
-##### Track elements for global access
+##### Track elements for global access (see track() and untrack() below)
 
 ```js
 // Create and globally track an element by ID
@@ -696,6 +696,40 @@ const LabeledInput = (labelText, type = "text") => {
 
 const [emailGroup] = LabeledInput("Username", "email");
 ```
+
+</details>
+
+<details>
+<summary><code>track()</code>, <code>tracked()</code>, and <code>untrack()</code> - element tracking</summary>
+
+Provides a global registry to track and retrieve elements by custom IDs.
+
+##### Track elements for later use
+
+```js
+// Create and track elements
+const [header] = cf.nu("header")
+  .content("App Header")
+  .done();
+
+// Track the element with a custom ID
+cf.track("main-header", header);
+
+// Later retrieve the element from anywhere in your code
+const retrievedHeader = cf.tracked("main-header");
+```
+
+##### Cleanup tracked elements
+
+```js
+// Remove tracking when it's no longer needed
+function removeComponent() {
+  const component = cf.tracked("my-component");
+  if (component) {
+    cf.rm(component);
+    cf.untrack("my-component");
+  }
+}
 ```
 
 </details>
