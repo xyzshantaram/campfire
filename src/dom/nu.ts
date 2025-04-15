@@ -1,10 +1,12 @@
 import type { Store } from "../stores/mod.ts";
 import type { ElementProperties, InferElementType, RenderBuilder, RenderFunction, UnwrapStore } from "../types.ts";
+import type { CfHTMLElementInterface } from "./config.ts";
 import { escape } from "../utils.ts";
 import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
-import { CfDom, CfHTMLElementInterface } from "./config.ts";
-import { StoreEventFromObject } from "../types.ts";
+import { CfDom } from "./config.ts";
+import type { StoreEventFromObject } from "../types.ts";
+import * as tracking from './tracking.ts';
 
 const unwrap = <D extends Record<string, Store<any>>>(
     deps: D
@@ -77,8 +79,8 @@ const setupDeps = <
     Object.entries(deps).forEach(([name, dep]) => dep.any((evt) => {
         const builder = new NuBuilder<T, D, string>(elt);
         const res = render(unwrap(deps), {
-            event: { ...(evt as StoreEventFromObject<D>), triggeredBy: name },
             elt,
+            event: { ...(evt as StoreEventFromObject<D>), triggeredBy: name },
             b: builder as NuBuilder<T, any, string>
         });
 
@@ -151,13 +153,16 @@ export const extend = <
         classes = {},
         gimme = [],
         deps = ({} as D),
-        children = {}
+        children = {},
+        track
     } = args;
     let raw = !!r;
 
+    if (track) tracking.track(track, elt);
     reconcileClasses(elt, classes);
 
-    let content = "";
+    const setHtml = (str: string) => elt.innerHTML = raw ? str : escape(str);
+
     if (isValidRenderFn<T, D>(render)) {
         setupDeps({ elt, render, deps });
         const result = render(unwrap(deps), {
@@ -168,22 +173,19 @@ export const extend = <
         else {
             elt.removeAttribute("data-cf-fg-updates");
             if (typeof result === 'string') {
-                content = result;
+                setHtml(result);
             }
             if (result instanceof NuBuilder) {
                 raw = !!result.props.raw;
-                content = result.props.contents || '';
+                setHtml(result.props.contents || '');
                 reconcile(elt, result);
             }
         }
     } else if (typeof contents === "string") {
-        content = contents;
+        setHtml(contents);
     }
 
-    if (content?.trim()) {
-        elt.innerHTML = raw ? content : escape(content);
-        setupReactiveChildren(elt, children);
-    }
+    setupReactiveChildren(elt, children);
 
     if (misc) Object.assign(elt, misc);
     if (style) Object.assign(elt.style, style);

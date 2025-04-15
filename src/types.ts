@@ -1,5 +1,5 @@
-import { NuBuilder } from "./campfire.ts";
-import { CfHTMLElementInterface } from "./dom/config.ts";
+import { NuBuilder } from "./dom/NuBuilder.ts";
+import type { CfHTMLElementInterface } from "./dom/config.ts";
 import { Store } from "./stores/mod.ts";
 
 export interface UpdateEvent<ST> {
@@ -155,9 +155,17 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
     /**
      *  Children of the element to mount. They will be mounted into `cf-slot`s 
      * corresponding to the Record's keys and preserved between re-renders of 
-     * the parent. Only the first element returned by nu() will be appended.
+     * the parent. 
+     * 
+     * Exercise caution when passing nu().done() directly - all children 
+     * returned will be mounted to the element.
      */
     children?: Record<string, CfHTMLElementInterface | CfHTMLElementInterface[]>;
+
+    /**
+     * A user-supplied ID to track the element by its reference.
+     */
+    track?: string;
 }
 
 /**

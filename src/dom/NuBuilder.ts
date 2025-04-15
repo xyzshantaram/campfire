@@ -290,4 +290,15 @@ export class NuBuilder<Elem extends HTMLElement, Deps extends Record<string, Sto
         this.props.children = children;
         return this;
     }
+
+    /**
+     * Mark the element for tracking, so it can be retrieved later by calling
+     * `cf.tracked(id)`.
+     * @param id The id to track the element by.
+     */
+    track(id: string) {
+        console.log(id);
+        this.props.track = id;
+        return this;
+    }
 }
