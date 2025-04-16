@@ -1,991 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>campfire: a cozy web framework</title>
-        <link rel="stylesheet" href="site/style.css">
-        <link rel="shortcut icon" type="image/jpg" href="campfire.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap"
-            rel="stylesheet"
-        >
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.min.js"></script>
-        <script src="https://ace.c9.io/build/src/theme-tomorrow_night_blue.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-html.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-css.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-javascript.min.js"></script>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>campfire: a cozy web framework</title>
+    <link rel="stylesheet" href="site/style.css">
+    <link rel="shortcut icon" type="image/jpg" href="campfire.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.min.js"></script>
+    <script src="https://ace.c9.io/build/src/theme-tomorrow_night_blue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-javascript.min.js"></script>
+</head>
 
-    <body>
-        <div id="app">
-            <h1>campfire</h1>
-            <noscript>
-                I'd love to make this site work without JS enabled, but seeing as how this is meant to be a
-                demonstration for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
-            </noscript>
+<body>
+    <div id='app'>
+        <h1>campfire</h1>
+        <noscript>
+            I'd love to make this site work without JS enabled, but seeing as how this is meant to be a demonstration
+            for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
+        </noscript>
 
-            <div class="cf-site-div" data-heading="home">
-                <h3>campfire: a cozy web framework</h3>
-                <p>
-                    <strong>Campfire</strong> is a collection of small utilities to make developing with vanilla JS
-                    easy.
-                </p>
-                <p>
-                    It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development
-                    easier.
-                </p>
-                <h4>Features</h4>
-                <ul>
-                    <li>
-                        <strong>Small size, zero dependencies</strong>: 5kb compressed, no external dependencies
-                    </li>
-                    <li>
-                        <strong>Fluent Builder API</strong>: Create and configure DOM elements with a chainable
-                        syntax:<pre class="microlight">
-<code>const [button] = cf.nu(&quot;button#submit&quot;)
-  .content(&quot;Click me&quot;)
-  .attr(&quot;type&quot;, &quot;submit&quot;)
-  .on(&quot;click&quot;, handleClick)
+        <div class="cf-site-div" data-heading="home"><h3>campfire: a cozy web framework</h3>
+<p><strong>Campfire</strong> helps you write crisp, reactive UI with vanilla JS/TS—no build step, no boilerplate, no magic.</p>
+<h4>Why Campfire?</h4>
+<ul>
+<li><strong>Tiny footprint</strong> you can read and fit in your head.</li>
+<li><strong>Fluent builder API</strong> lets your markup flow:<pre class="microlight"><code>const [button] = cf.nu(&quot;button#go&quot;)
+  .content(&quot;Open!&quot;)
+  .on(&quot;click&quot;, launch)
   .done();
 </code></pre>
-                    </li>
-                    <li>
-                        <strong>Reactive Data System</strong>: Create reactive stores with automatic UI
-                        updates:<pre class="microlight">
-<code>// Create different types of stores
-const name = cf.store({ value: &quot;John&quot; });
-const reactiveList = cf.store({ type: &quot;list&quot;, value: [1, 2, 3] });
-const reactiveMap = cf.store({ type: &quot;map&quot;, value: { key: &quot;value&quot; } });
-
-// Use stores with reactive elements
-const [div] = cf.nu(&quot;div&quot;)
-  .deps({ name, reactiveList })
-  .render(({ name, reactiveList }) =&gt;
-    `Hello, ${name}! My favourite numbers are ${reactiveList.join(&quot;,&quot;)}`
-    // escaped by default, re-renders whenever either name
-    // or reactiveList change
-  )
+</li>
+<li><strong>Reactive state</strong> that connects to the DOM in just one line:<pre class="microlight"><code>const name = cf.store({ value: &quot;Sandy&quot; });
+const [greeting] = cf.nu(&quot;div&quot;)
+  .deps({ name })
+  .render(({ name }, { b }) =&gt; b.html`Hello &lt;b&gt;${name}&lt;/b&gt;!`)
   .done();
-
-// Or do your own thing!
-name.on(&quot;change&quot;, ({ value }) =&gt; {
-  greet(value);
-});
 </code></pre>
-                    </li>
-                    <li>
-                        <strong>Enhanced DOM Helpers</strong>: Easy-to-use DOM manipulation
-                        utilities:<pre class="microlight">
-<code>// Select elements (always returns an array)
-const [button] = cf.select({ s: &quot;#submit-button&quot; });
-const allButtons = cf.select({ s: &quot;button&quot;, all: true });
-
-// Insert elements
-cf.insert([elt], { into: container });
-cf.insert([elt], { into: container, at: &quot;start&quot; });
-cf.insert([elt], { before: sibling });
-</code></pre>
-                    </li>
-                    <li>
-                        <strong>TypeScript Support</strong>: First-class TypeScript integration with type inference for
-                        HTML elements
-                    </li>
-                </ul>
-                <h4>FAQs</h4>
-                <details>
-                    <summary>How does it compare to $framework?</summary>
-
-                    <p>
-                        It doesn&#39;t. Campfire and $framework have entirely different goals. Campfire is a library to
-                        make writing vanilla JS applications easier, if you don&#39;t want the level of abstraction (or
-                        the associated overhead) that comes with $framework. You can build entire applications with it
-                        or add it quickly to an existing project. You are afforded complete control over your project.
-                    </p>
-                    <p>
-                        The learning curve is minuscule and the possibilities are endless.
-                    </p>
-                </details>
-
-                <details>
-                    <summary>What about WebComponents?</summary>
-
-                    <p><a href="https://lit.dev">lit.dev</a></p>
-                </details>
-
-                <details>
-                    <summary>How do I create and share reusable components?</summary>
-
-                    <p>
-                        Campfire has no opinion on how you should do this. However, one option is to use a function that
-                        returns functions and stores to let you manipulate the element (and the created element itself).
-                    </p>
-                    <pre class="microlight">
-<code>// a reactive representation of a name badge
+</li>
+<li><strong>Just functions for components:</strong><pre class="microlight"><code>// A name badge component
 const NameBadge = () =&gt; {
   const name = cf.store({ value: &quot;&quot; });
-
-  const [badge] = cf.nu(&quot;div&quot;)
-    .content(({ name }) =&gt; `Hello! My name is ${name}`)
+  return cf.nu(&quot;div.badge&quot;)
     .deps({ name })
+    .render(({ name }, { b }) =&gt; b.content(`Hi, ${name}`));
+};
+</code></pre>
+</li>
+</ul>
+<h4>FAQ</h4>
+<ul>
+<li><p><strong>Is this a framework?</strong>
+Nope—just tools that make vanilla JS delightful.</p>
+</li>
+<li><p><strong>How do I make components?</strong>
+Return an element (or a function that returns one). That&#39;s it.</p>
+</li>
+<li><p><strong>Why are escape/unescape so simple?</strong>
+They’re for basic safety; bring your own sanitizer for anything fancy.</p>
+</li>
+</ul>
+<p><a href="/?tab=get">Get campfire today!</a></p>
+</div>
+<div class="cf-site-div" data-heading="get"><h3>turn your dumpster fire into a campfire today!</h3>
+<p>You can include campfire into your site with just an import statement, either from a location where you are hosting it,
+or from esm.sh / unkpg.</p>
+<pre class="microlight"><code>import cf from &quot;https://esm.sh/campfire.js@4&quot;;
+</code></pre>
+<p>or</p>
+<pre class="microlight"><code>import { ListStore, nu } from &quot;https://esm.sh/campfire.js@4&quot;;
+</code></pre>
+<p>If you use a bundler or want to write in TypeScript, you can install Campfire from npm. This gives you full TypeScript
+support as well as TSDoc comments.</p>
+<p>To install:</p>
+<pre class="microlight"><code>npm install --save-dev campfire.js
+</code></pre>
+<p>Then in your code:</p>
+<pre class="microlight"><code>import cf from &quot;campfire.js&quot;;
+</code></pre>
+<p>Good luck, and thank you for choosing Campfire!</p>
+</div>
+<div class="cf-site-div" data-heading="docs"><h3>using campfire 4.0.0</h3>
+<p>View the <a href="/site/docs/modules/campfire.html">full API reference</a> for detailed descriptions of the methods and classes
+provided by Campfire.</p>
+<h4>quick reference</h4>
+<p>Campfire provides the following methods and classes:</p>
+<details>
+<summary><code>nu()</code> - element creation helper</summary>
+
+<p>Create DOM elements with a readable, chainable builder pattern.</p>
+<pre class="microlight"><code>const [greeting] = cf.nu(&quot;h1&quot;)
+    .content(&quot;Hello, world!&quot;)
+    .attr(&quot;id&quot;, &quot;greeting&quot;)
     .done();
 
-  return [badge, name];
-};
-</code></pre>
-                    <p>
-                        With the new children API in v4, you can also use cf-slot elements to create composable
-                        components:
-                    </p>
-                    <pre class="microlight">
-<code>const Card = (title) =&gt; {
-  const [card] = cf.nu(&quot;div.card&quot;)
-    .html(`
-      &lt;h2&gt;${title}&lt;/h2&gt;
-      &lt;cf-slot name=&quot;content&quot;&gt;&lt;/cf-slot&gt;
-    `)
+const name = cf.store({ value: &quot;User&quot; });
+const [info] = cf.nu(&quot;div.info&quot;)
+    .deps({ name })
+    .render(({ name }, { b }) =&gt; b.html`Logged in as: &lt;strong&gt;${name}&lt;/strong&gt;`)
     .done();
+</code></pre>
+</details>
 
-  return card;
-};
+<details>
+<summary><code>store()</code> - reactive data stores</summary>
 
-// Usage
-const [content] = cf.nu(&quot;p&quot;).content(&quot;Card content&quot;).done();
-const [wrapper] = cf.nu(&quot;div&quot;)
-  .html(`&lt;cf-slot name=&quot;card&quot;&gt;&lt;/cf-slot&gt;`)
-  .children({ card: [Card(&quot;My Card&quot;)] })
-  .done();
-</code></pre>
-                </details>
+<p>Store state in a reactive scalar, array, or map.</p>
+<pre class="microlight"><code>const counter = cf.store({ value: 0 });
+counter.update((n) =&gt; n + 1);
+counter.on(&quot;update&quot;, (e) =&gt; console.log(e.value));
 
-                <details>
-                    <summary>Why are escape and unescape so basic?</summary>
+const todos = cf.store({ type: &quot;list&quot;, value: [&quot;A&quot;] });
+todos.push(&quot;B&quot;);
 
-                    <p>
-                        <code>escape</code> and <code>unescape</code> are intended as basic HTML sanitizers mainly for
-                        setting element contents, etc. You are encouraged to use a different HTML sanitizer if you need
-                        more functionality.
-                    </p>
-                    <ul>
-                        <li><a href="https://github.com/mathiasbynens/he">he</a></li>
-                        <li>
-                            <a href="https://github.com/apostrophecms/sanitize-html">html-sanitize</a>
-                        </li>
-                    </ul>
-                </details>
+const users = cf.store({ type: &quot;map&quot;, value: { sid: true } });
+users.set(&quot;alex&quot;, false);
+</code></pre>
+</details>
 
-                <p><a href="/?tab=get">Get campfire today!</a></p>
-            </div>
-            <div class="cf-site-div" data-heading="get">
-                <h3>turn your dumpster fire into a campfire today!</h3>
-                <p>
-                    You can include campfire into your site with just an import statement, either from a location where
-                    you are hosting it, or from esm.sh / unkpg.
-                </p>
-                <pre class="microlight">
-<code>import cf from &quot;https://esm.sh/campfire.js@4&quot;;
-</code></pre>
-                <p>or</p>
-                <pre class="microlight">
-<code>import { ListStore, nu } from &quot;https://esm.sh/campfire.js@4&quot;;
-</code></pre>
-                <p>
-                    If you use a bundler or want to write in TypeScript, you can install Campfire from npm. This gives
-                    you full TypeScript support as well as TSDoc comments.
-                </p>
-                <p>To install:</p>
-                <pre class="microlight">
-<code>npm install --save-dev campfire.js
-</code></pre>
-                <p>Then in your code:</p>
-                <pre class="microlight">
-<code>import cf from &quot;campfire.js&quot;;
-</code></pre>
-                <p>Good luck, and thank you for choosing Campfire!</p>
-            </div>
-            <div class="cf-site-div" data-heading="docs">
-                <h3>using campfire 4.0.0</h3>
-                <p>
-                    View the <a href="/site/docs/modules/campfire.html">full API reference</a> for detailed descriptions
-                    of the methods and classes provided by Campfire.
-                </p>
-                <h4>quick reference</h4>
-                <p>Campfire provides the following methods and classes:</p>
-                <details>
-                    <summary><code>nu()</code> - element creation helper</summary>
+<details>
+<summary><code>select()</code> - element selection</summary>
 
-                    <p>Creates a new DOM element with a fluent builder API.</p>
-                    <h5>Create a simple element</h5>
-                    <pre class="microlight">
-<code>const [div] = cf.nu(&quot;div&quot;)
-  .content(&quot;Hello World&quot;)
-  .attr(&quot;id&quot;, &quot;greeting&quot;)
-  .done();
+<p>Select DOM elements with a unified API.</p>
+<pre class="microlight"><code>const [header] = cf.select({ s: &quot;header&quot; });
+const buttons = cf.select({ s: &quot;button&quot;, all: true });
 </code></pre>
-                    <h5>Button with click handler</h5>
-                    <pre class="microlight">
-<code>const [button] = cf.nu(&quot;button#submit.primary&quot;)
-  .content(&quot;Submit&quot;)
-  .attr(&quot;type&quot;, &quot;submit&quot;)
-  .on(&quot;click&quot;, () =&gt; console.log(&quot;Clicked!&quot;))
-  .style(&quot;backgroundColor&quot;, &quot;blue&quot;)
-  .done();
-</code></pre>
-                    <h5>Element with classes</h5>
-                    <pre class="microlight">
-<code>const [card] = cf.nu(&quot;.card.shadow&quot;) // Creates div by default
-  .content(&quot;Card content&quot;)
-  .done();
-</code></pre>
-                    <h5>Element with reactive template using NuBuilder::html()</h5>
-                    <pre class="microlight">
-<code>const name = cf.store({ value: &quot;John&quot; });
-const role = cf.store({ value: &quot;User&quot; });
+</details>
 
-const [profile] = cf.nu(&quot;div.profile&quot;)
-  .deps({ name, role })
-  // render function runs again whenever name/role change
-  .render(({ name, role }, { b, first }) =&gt;
-    b
-      .html`&lt;h2&gt;${name}&lt;/h2&gt;&lt;p&gt;Role: ${role}&lt;/p&gt;`
-      .style(&quot;color&quot;, role === &quot;Admin&quot; ? &quot;red&quot; : &quot;blue&quot;)
-      // can detect if this is first render or a re-render
-      .attr(&quot;data-initialized&quot;, first ? &quot;initializing&quot; : &quot;updated&quot;)
-  )
-  .done();
-</code></pre>
-                    <h5>Reactive content with builder pattern</h5>
-                    <pre class="microlight">
-<code>const name = cf.store({ value: &quot;John&quot; });
-const admin = cf.store({ value: false });
+<details>
+<summary><code>insert()</code> - element insertion</summary>
 
-const [greeting] = cf.nu(&quot;h1&quot;)
-  .deps({ name, admin })
-  .render(({ name, admin }, { b }) =&gt; b
-    .content(`Hello, ${name}!`)
-    .style(&quot;color&quot;, admin ? &quot;red&quot; : &quot;black&quot;)
-    .attr(&quot;title&quot;, admin ? &quot;Administrator&quot; : &quot;User&quot;);
-  )
-  .done();
+<p>Insert elements anywhere in the DOM.</p>
+<pre class="microlight"><code>cf.insert(greeting, { into: document.body });
+cf.insert(info, { after: greeting });
 </code></pre>
-                    <h5>Direct HTML templating in render function</h5>
-                    <pre class="microlight">
-<code>const name = cf.store({ value: &quot;John&quot; });
+</details>
 
-const renderGreeting = (name: string) =&gt; 
-  cf.html`&lt;span&gt;Hello, ${name}&lt;/span&gt;`
+<details>
+<summary><code>html()</code> - HTML templating</summary>
 
-const [greeting] = cf.nu(&quot;h1&quot;)
-  .deps({ name })
-  // b.html() sets innerHTML without escaping
-  // use b.content() to do it safely
-  .render(({ name }, { b }) =&gt; b.html(renderGreeting(name)))
-  .done();
+<p>Escape content for the DOM and compose structured HTML.</p>
+<pre class="microlight"><code>const text = cf.html`A message for &lt;b&gt;${user}&lt;/b&gt;`;
+</code></pre>
+</details>
 
-// or you can disable escaping with nu(...).raw(true).done()
-</code></pre>
-                    <h5>Select multiple created elements with <code>.gimme()</code></h5>
-                    <pre class="microlight">
-<code>const [card, title, desc] = cf.nu(&quot;div.card&quot;)
-  .html(`
-    &lt;h2 class=&quot;title&quot;&gt;Card Title&lt;/h2&gt;
-    &lt;p class=&quot;desc&quot;&gt;Description&lt;/p&gt;
-  `)
-  .gimme(&quot;.title&quot;, &quot;.desc&quot;) // Variadic - pass any number of selectors
-  .done();
-</code></pre>
-                    <h5>Compose elements with reactive children</h5>
-                    <pre class="microlight">
-<code>const parentData = cf.store({ value: &quot;Parent content&quot; });
-const childData = cf.store({ value: &quot;Child content&quot; });
-// Parent with slots for child components
-const [parent] = cf.nu(&quot;section&quot;, {
-  deps: { data: parentData },
-  render: ({ data }) =&gt; `
-    &lt;h3&gt;${data}&lt;/h3&gt;
-    &lt;cf-slot name=&quot;child&quot;&gt;&lt;/cf-slot&gt;
-  `,
-  children: {
-    // Child components maintain independent reactivity
-    // and are preserved between re-renders of the parent
-    child: cf.nu(&quot;div&quot;)
-      .deps({ data: childData })
-      .render(({ data }) =&gt; data)
-      .done(),
-  },
-}).done();
-</code></pre>
-                    <h5>Compose with multiple reactive children in a single slot</h5>
-                    <pre class="microlight">
-<code>const items = cf.store({ type: &quot;list&quot;, value: [&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;] });
+<details>
+<summary><code>mustache()</code> & <code>template()</code> - string templates</summary>
 
-// Create multiple listItem components
-const listItems = items.value.map((text) =&gt;
-  cf.nu(&quot;li&quot;)
-    .content(text)
-    .done()
-);
+<pre class="microlight"><code>// Basic interpolation (auto-escaped)
+cf.mustache(&quot;Hello, {{name}}!&quot;, { name: &quot;&lt;b&gt;Alex&lt;/b&gt;&quot; }); // &quot;Hello, &amp;lt;b&amp;gt;Alex&amp;lt;/b&amp;gt;!&quot;
 
-// Create container and insert children
-const [container] = cf.nu(&quot;div&quot;)
-  .html`
-    &lt;h3&gt;Item List&lt;/h3&gt;
-    &lt;ul&gt;&lt;cf-slot name=&quot;items&quot;&gt;&lt;/cf-slot&gt;&lt;/ul&gt;
-  `
-  .children({ listItems })
-  .done();
-</code></pre>
-                    <h5>Clearing attributes and styles conditionally</h5>
-                    <pre class="microlight">
-<code>const disabled = cf.store({ value: false });
-const theme = cf.store({ value: &quot;light&quot; });
+// Unescaped HTML (triple braces)
+cf.mustache(&quot;Raw: {{{html}}}&quot;, { html: &quot;&lt;b&gt;bold&lt;/b&gt;&quot; }); // &quot;Raw: &lt;b&gt;bold&lt;/b&gt;&quot;
 
-const themes = {
-  dark: { backgroundColor: &quot;#303030&quot;, color: &quot;white&quot; },
-  light: { backgroundColor: &quot;#f5f4f0&quot;, color: &quot;#202020&quot; },
-};
+// Sections (conditional, loop)
+cf.mustache(
+    &quot;{{#items}}&lt;li&gt;{{.}}&lt;/li&gt;{{/items}}{{^items}}No items{{/items}}&quot;,
+    { items: [&quot;Red&quot;, &quot;Green&quot;] },
+); // &quot;&lt;li&gt;Red&lt;/li&gt;&lt;li&gt;Green&lt;/li&gt;&quot;
 
-const [button] = cf.nu(&quot;button&quot;)
-  .content(&quot;Click me&quot;)
-  .deps({ disabled, theme })
-  .render(({ disabled, theme }, { b }) =&gt; {
-    // Conditionally set or clear attributes (empty string clears)
-    b.attr(&quot;disabled&quot;, disabled ? &quot;disabled&quot; : &quot;&quot;);
+// Reusable (compiled) templates
+const hello = cf.template(&quot;Hello, {{who}}!&quot;);
+hello({ who: &quot;World&quot; }); // &quot;Hello, World!&quot;
+hello({ who: &quot;&lt;x&gt;&quot; }); // &quot;Hello, &amp;lt;x&amp;gt;!&quot;
+</code></pre>
+</details>
 
-    b.style(&quot;backgroundColor&quot;, themes[theme].backgroundColor);
-    b.style(&quot;color&quot;, themes[theme].color);
-    return b;
-  })
-  // assign click listener
-  .on(&quot;click&quot;, () =&gt; theme.update(theme.value === &quot;light&quot; ? &quot;dark&quot; : &quot;light&quot;))
-  .done();
-</code></pre>
-                    <h5>
-                        Track elements for global access (see track() and untrack() below)
-                    </h5>
-                    <pre class="microlight">
-<code>// Create and globally track an element by ID
-const [modal] = cf.nu(&quot;div.modal&quot;)
-  .content(&quot;Modal Content&quot;)
-  .track(&quot;app-modal&quot;) // Register with global tracking system
-  .done();
+<details>
+<summary><code>extend()</code> & <code>x()</code> - element modification</summary>
 
-// Later, retrieve the element from anywhere
-const elt = cf.tracked(&quot;app-modal&quot;);
-if (elt) {
-  elt.style.display = &quot;block&quot;;
-}
-
-// when done
-cf.untrack(&quot;app-modal&quot;);
-</code></pre>
-                </details>
-
-                <details>
-                    <summary><code>store()</code> - reactive data stores</summary>
-
-                    <p>
-                        Creates reactive data stores to manage state with automatic UI updates.
-                    </p>
-                    <h5>A simple value store</h5>
-                    <pre class="microlight">
-<code>const counter = cf.store({ value: 0 });
-counter.update(5); // Sets value to 5
-counter.current(); // Gets current value (5)
-</code></pre>
-                    <h5>Subscribe to changes</h5>
-                    <pre class="microlight">
-<code>counter.on(&quot;change&quot;, (event) =&gt; {
-  console.log(`Value changed to ${event.value}`);
-});
-
-// Optionally trigger the callback immediately with current value
-counter.on(&quot;change&quot;, (event) =&gt; {
-  console.log(`Value changed to ${event.value}`);
-}, true); // Pass true to call immediately
-</code></pre>
-                    <h5>List store for arrays</h5>
-                    <pre class="microlight">
-<code>const todoList = cf.store({ type: &quot;list&quot;, value: [&quot;Buy milk&quot;] });
-todoList.push(&quot;Walk dog&quot;); // Adds to the end
-todoList.remove(0); // Removes first item
-todoList.clear(); // Empties the list
-</code></pre>
-                    <h5>Map store for key-value data</h5>
-                    <pre class="microlight">
-<code>const user = cf.store({
-  type: &quot;map&quot;,
-  value: { name: &quot;John&quot;, age: 30 },
-});
-user.set(&quot;location&quot;, &quot;New York&quot;); // Add/update a property
-user.delete(&quot;age&quot;); // Remove a property
-user.clear(); // Empty the map
-</code></pre>
-                    <h5>Subscribe to all events with any()</h5>
-                    <pre class="microlight">
-<code>todoList.any((event) =&gt; {
-  console.log(`Event type: ${event.type}`);
-});
-</code></pre>
-                    <h5>Update values with a transform function</h5>
-                    <pre class="microlight">
-<code>const counter = cf.store({ value: 10 });
-
-// Using a value directly
-counter.update(20);
-
-// Using a transform function
-counter.update((currentValue) =&gt; currentValue + 5); // Increments by 5
-
-// More complex transformations
-const user = cf.store({
-  type: &quot;map&quot;,
-  value: { name: &quot;John&quot;, visits: 0, lastVisit: null },
-});
-
-// Update multiple properties based on current value
-user.update((current) =&gt; ({
-  ...current,
-  visits: current.visits + 1,
-  lastVisit: new Date(),
-}));
-</code></pre>
-                </details>
-
-                <details>
-                    <summary><code>select()</code> - element selection</summary>
-
-                    <p>Selects elements from the DOM with a unified API.</p>
-                    <h5>Select a single element (returns an array with one item)</h5>
-                    <pre class="microlight">
-<code>const [header] = cf.select({ s: &quot;#page-header&quot; });
-// or if you need the ref for passing somewhere:
-const header = cf.select({ s: &quot;#page-header&quot;, single: true });
-</code></pre>
-                    <h5>Select from a specific parent element</h5>
-                    <pre class="microlight">
-<code>const [submitButton] = cf.select({
-  s: &#39;button[type=&quot;submit&quot;]&#39;,
-  from: formElement,
-});
-</code></pre>
-                    <h5>Select multiple elements</h5>
-                    <pre class="microlight">
-<code>const paragraphs = cf.select({
-  s: &quot;p&quot;,
-  all: true,
-});
-</code></pre>
-                    <h5>Combining with other operations</h5>
-                    <pre class="microlight">
-<code>cf.select({ s: &quot;.cards&quot;, all: true }).forEach((card) =&gt; {
-  cf.extend(card, { style: { border: &quot;1px solid black&quot; } });
-});
-</code></pre>
-                </details>
-
-                <details>
-                    <summary><code>insert()</code> - element insertion</summary>
-
-                    <p>Inserts elements into the DOM at specific positions.</p>
-                    <h5>Insert at the end of a container</h5>
-                    <pre class="microlight">
-<code>cf.insert([elt], { into: container });
-</code></pre>
-                    <h5>Insert at the start of a container</h5>
-                    <pre class="microlight">
-<code>cf.insert([elt], { into: container, at: &quot;start&quot; });
-</code></pre>
-                    <h5>Insert before (as siblings of) another element</h5>
-                    <pre class="microlight">
-<code>cf.insert([elt], { before: referenceElement });
-</code></pre>
-                    <h5>
-                        Insert multiple elements after (as siblings of) another element
-                    </h5>
-                    <pre class="microlight">
-<code>cf.insert([elt1, elt2], { after: referenceElement });
-</code></pre>
-                    <h5>Create and insert in one step</h5>
-                    <pre class="microlight">
-<code>cf.insert(cf.nu().content(&quot;New content&quot;).done(), { into: document.body });
-</code></pre>
-                </details>
-
-                <details>
-                    <summary>
-                        <code>html()</code> - auto-escaping template literal and element builder method
-                    </summary>
-
-                    <p>
-                        Creates HTML strings with automatic escaping of interpolated values.
-                    </p>
-                    <h5>Basic usage with automatic escaping</h5>
-                    <pre class="microlight">
-<code>const username = &#39;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;&#39;;
-const greeting = cf.html`Hello, ${username}!`;
-// Result: &quot;Hello, &amp;lt;script&amp;gt;alert(&quot;XSS&quot;)&amp;lt;/script&amp;gt;!&quot;
-</code></pre>
-                    <h5>Use r() to disable escaping for trusted content</h5>
-                    <pre class="microlight">
-<code>const trusted = cf.r(&#39;&quot;&lt;b&gt;Bold text&lt;/b&gt;&quot;&#39;);
-const message = cf.html`Safe message: ${trusted}`;
-// Result: &quot;Safe message: &quot;&lt;b&gt;Bold text&lt;/b&gt;&quot;&quot;
-</code></pre>
-                    <h5>Use with element creation</h5>
-                    <pre class="microlight">
-<code>const [div] = cf.nu(&quot;div&quot;)
-  .deps({ user })
-  // .html() is equivalent to .content().raw(true)
-  .html(({ user }) =&gt; cf.html`&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;${user}&lt;/p&gt;`)
-  .done();
-</code></pre>
-                </details>
-
-                <details>
-                    <summary>
-                        <code>mustache()</code> and <code>template()</code> - reusable and composable string templates
-                    </summary>
-
-                    <p>
-                        A lightweight implementation of the Mustache templating system for string interpolation.
-                    </p>
-                    <h5>Basic variable interpolation (escaped by default)</h5>
-                    <pre class="microlight">
-<code>const result = cf.mustache(&quot;Hello, {{ name }}!&quot;, { name: &quot;John&quot; });
-// Result: &quot;Hello, John!&quot;
-</code></pre>
-                    <h5>Unescaped HTML content</h5>
-                    <pre class="microlight">
-<code>const result = cf.mustache(&quot;Welcome, {{{ userHtml }}}!&quot;, {
-  userHtml: &quot;&lt;b&gt;Admin&lt;/b&gt;&quot;,
-});
-// Result: &quot;Welcome, &lt;b&gt;Admin&lt;/b&gt;!&quot;
-</code></pre>
-                    <h5>Sections - conditionally show content</h5>
-                    <pre class="microlight">
-<code>const result = cf.mustache(
-  &quot;{{#loggedIn}}Welcome back!{{/loggedIn}}{{^loggedIn}}Please log in.{{/loggedIn}}&quot;,
-  { loggedIn: true },
-);
-// Result: &quot;Welcome back!&quot;
-</code></pre>
-                    <h5>Array iteration with sections</h5>
-                    <pre class="microlight">
-<code>const result = cf.mustache(
-  &quot;&lt;ul&gt;{{#items}}&lt;li&gt;{{name}}&lt;/li&gt;{{/items}}&lt;/ul&gt;&quot;,
-  { items: [{ name: &quot;Item 1&quot; }, { name: &quot;Item 2&quot; }] },
-);
-</code></pre>
-                    <h5>Working with primitive arrays</h5>
-                    <pre class="microlight">
-<code>const result = cf.mustache(
-  &quot;Numbers: {{#numbers}}{{.}}, {{/numbers}}&quot;,
-  { numbers: [1, 2, 3] },
-);
-// Result: &quot;Numbers: 1, 2, 3, &quot;
-</code></pre>
-                    <h5>Context changes with object values</h5>
-                    <pre class="microlight">
-<code>const result = cf.mustache(
-  &quot;{{#user}}Name: {{name}}, Age: {{age}}{{/user}}&quot;,
-  { user: { name: &quot;John&quot;, age: 30 } },
-);
-// Result: &quot;Name: John, Age: 30&quot;
-</code></pre>
-                    <h5>Nested sections</h5>
-                    <pre class="microlight">
-<code>const result = cf.mustache(
-  &quot;{{#user}}{{name}} {{#admin}}(Admin){{/admin}}{{^admin}}(User){{/admin}}{{/user}}&quot;,
-  { user: { name: &quot;John&quot;, admin: true } },
-);
-// Result: &quot;John (Admin)&quot;
-</code></pre>
-                    <h5>Escaping mustache syntax</h5>
-                    <pre class="microlight">
-<code>const result = cf.mustache(
-  &quot;This is not a variable: \\{{ name }}&quot;,
-  { name: &quot;John&quot; },
-);
-// Result: &quot;This is not a variable: {{ name }}&quot;
-</code></pre>
-                    <h5>
-                        Create reusable template function (compile once, render many times)
-                    </h5>
-                    <pre class="microlight">
-<code>// Compile template once
-const greet = cf.template(&quot;Hello, {{ name }}!&quot;);
-
-// Use multiple times with different data
-const aliceGreeting = greet({ name: &quot;Alice&quot; }); // &quot;Hello, Alice!&quot;
-const bobGreeting = greet({ name: &quot;Bob&quot; }); // &quot;Hello, Bob!&quot;
-</code></pre>
-                </details>
-
-                <details>
-                    <summary><code>extend()</code> - element modification</summary>
-
-                    <p>
-                        Modifies existing DOM elements with the same options as <code>nu()</code>.<br>New in
-                        v4.0.0-rc17: x(), an alias for nu() that uses the same builder API.
-                    </p>
-                    <h5>Basic usage</h5>
-                    <pre class="microlight">
-<code>const element = document.querySelector(&quot;#my-element&quot;);
-cf.extend(element, {
-  contents: &quot;New content&quot;,
-  style: { color: &quot;red&quot;, fontSize: &quot;16px&quot; },
-});
-
-// or
-cf.x(element)
-  .content(&quot;New content&quot;)
-  .style({ color: &quot;red&quot;, fontSize: &quot;16px&quot; })
-  .done();
-</code></pre>
-                    <h5>With reactive data</h5>
-                    <pre class="microlight">
-<code>const title = cf.store({ value: &quot;Initial Title&quot; });
-
-cf.extend(header, {
-  render: ({ title }) =&gt; `Page: ${title}`,
-  deps: { title },
-});
-
-// or
-
-cf.x(header)
-  .deps({ title })
-  .render(({ title }) =&gt; `Page: ${title}`)
-  .done();
-</code></pre>
-                </details>
-
-                <details>
-                    <summary>
-                        <code>empty()</code> and <code>rm()</code> - element cleanup
-                    </summary>
-
-                    <p>Remove elements or their contents from the DOM.</p>
-                    <h5>Empty an element (removes all children)</h5>
-                    <pre class="microlight">
-<code>cf.empty(container);
-</code></pre>
-                    <h5>Remove element entirely</h5>
-                    <pre class="microlight">
-<code>cf.rm(element);
-</code></pre>
-                </details>
-
-                <details>
-                    <summary>
-                        <code>escape()</code> and <code>unescape()</code> - string sanitization
-                    </summary>
-
-                    <p>
-                        Simple HTML escaping and unescaping utilities. These are the bare minimum for inserting text
-                        into the DOM - you should look to a different library for more complex needs.
-                    </p>
-                    <pre class="microlight">
-<code>escape(&quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;); // &quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;&quot;
-
-// Unescape previously escaped strings
-unescape(&quot;&amp;lt;script&amp;gt;alert(&#39;XSS&#39;)&amp;lt;/script&amp;gt;&quot;); // &quot;&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;&quot;
-</code></pre>
-                </details>
-
-                <details>
-                    <summary><code>onload()</code> - DOM ready handler</summary>
-
-                    <p>Executes code when the DOM is fully loaded.</p>
-                    <pre class="microlight">
-<code>cf.onload(() =&gt; {
-  // Initialize application
-  const [app] = cf.nu(&quot;div#app&quot;).done();
-  cf.insert(app, { into: document.body });
-});
-</code></pre>
-                </details>
-
-                <details>
-                    <summary><code>seq()</code> - sequence generator</summary>
-
-                    <p>Generates numerical sequences for iteration.</p>
-                    <h5>Range from 0 to 5 (exclusive)</h5>
-                    <pre class="microlight">
-<code>cf.seq(5); // [0, 1, 2, 3, 4]
-</code></pre>
-                    <h5>Range from 2 to 7 (exclusive)</h5>
-                    <pre class="microlight">
-<code>cf.seq(2, 7); // [2, 3, 4, 5, 6]
-</code></pre>
-                    <h5>Range with custom step</h5>
-                    <pre class="microlight">
-<code>cf.seq(1, 10, 2); // [1, 3, 5, 7, 9]
-</code></pre>
-                    <h5>Creating multiple elements with seq</h5>
-                    <pre class="microlight">
-<code>cf.seq(5).forEach((i) =&gt; {
-  const [item] = cf.nu(&quot;li&quot;)
-    .content(`Item ${i + 1}`)
+<p>Modify or enhance any DOM element with props, reactivity, and more. Use the builder for clarity.</p>
+<pre class="microlight"><code>cf.x(header)
+    .content(&quot;Page Header&quot;)
+    .style(&quot;fontWeight&quot;, &quot;bold&quot;)
     .done();
-  cf.insert(item, { into: listElement });
+</code></pre>
+</details>
+
+<details>
+<summary><code>empty()</code> and <code>rm()</code> - element cleanup</summary>
+
+<p>Clear an element or remove it from the DOM.</p>
+<pre class="microlight"><code>cf.empty(container);
+cf.rm(header);
+</code></pre>
+</details>
+
+<details>
+<summary><code>seq()</code> & <code>ids()</code> - ranges and unique ids</summary>
+
+<pre class="microlight"><code>cf.seq(3).forEach((i) =&gt; {
+    const id = cf.ids(&quot;item&quot;)();
+    cf.nu(&quot;div.item&quot;).attr(&quot;id&quot;, id).content(`Item #${i + 1}`).done();
 });
 </code></pre>
-                </details>
+</details>
+</div>
+<div class="cf-site-div" data-heading="playground"><h3>try before you buy</h3>
+<p>Try one of these demos, or do your own thing!</p>
+<ul id='playground-demo-list'>
+</ul>
 
-                <details>
-                    <summary><code>ids()</code> - unique ID generator</summary>
+<div id='cf-editor-controls'>
+  <a href='javascript:void(0)' id='cf-editor-clear'>Clear All</a>
+  <a href='javascript:void(0)' id='cf-editor-dl'>Download</a>
+</div>
 
-                    <p>
-                        Generates unique IDs with an optional prefix. Useful for creating HTML element IDs.
-                    </p>
-                    <h5>Basic usage</h5>
-                    <pre class="microlight">
-<code>const generateId = cf.ids(); // Default prefix is &#39;cf-&#39;
-const id1 = generateId(); // e.g. &quot;cf-a1b2c3&quot;
+<div class='editor-wrapper'>
+  <div class='cf-editor-html'></div>
+  <div class='cf-editor-css'></div>
+  <div class='cf-editor-javascript'></div>
+  <div class='cf-editor-output'></div>
+</div>
+</div>
 
-// With custom prefix
-const generateButtonId = cf.ids(&quot;btn&quot;);
-const buttonId = generateButtonId(); // e.g. &quot;btn-g7h8i9&quot;
-</code></pre>
-                    <h5>Creating elements with unique IDs</h5>
-                    <pre class="microlight">
-<code>const idGenerator = cf.ids(&quot;form-field&quot;);
-
-cf.seq(3).forEach(() =&gt; {
-  const fieldId = idGenerator();
-  const [field, label] = cf.nu(&quot;div.form-field&quot;)
-    .html`
-      &lt;label for=&quot;${fieldId}&quot;&gt;Field&lt;/label&gt;
-      &lt;input id=&quot;${fieldId}&quot; type=&quot;text&quot;&gt;
-    `
-    .gimme(&quot;label&quot;, &quot;input&quot;)
-    .done();
-});
-</code></pre>
-                    <h5>Connected form elements with unique IDs</h5>
-                    <pre class="microlight">
-<code>const getId = cf.ids(&quot;profile&quot;);
-
-const LabeledInput = (labelText, type = &quot;text&quot;) =&gt; {
-  const fieldId = getId();
-  return cf.nu(&quot;div.form-group&quot;)
-    .html`
-      &lt;label for=&quot;${fieldId}&quot;&gt;${labelText}&lt;/label&gt;
-      &lt;input id=&quot;${fieldId}&quot; type=&quot;${type}&quot;&gt;
-    `
-    .done();
-};
-
-const [emailGroup] = LabeledInput(&quot;Username&quot;, &quot;email&quot;);
-</code></pre>
-                </details>
-
-                <details>
-                    <summary>
-                        <code>track()</code>, <code>tracked()</code>, and <code>untrack()</code> - element tracking
-                    </summary>
-
-                    <p>
-                        Provides a global registry to track and retrieve elements by custom IDs.
-                    </p>
-                    <h5>Track elements for later use</h5>
-                    <pre class="microlight">
-<code>// Create and track elements
-const [header] = cf.nu(&quot;header&quot;)
-  .content(&quot;App Header&quot;)
-  .done();
-
-// Track the element with a custom ID
-cf.track(&quot;main-header&quot;, header);
-
-// Later retrieve the element from anywhere in your code
-const retrievedHeader = cf.tracked(&quot;main-header&quot;);
-</code></pre>
-                    <h5>Cleanup tracked elements</h5>
-                    <pre class="microlight">
-<code>// Remove tracking when it&#39;s no longer needed
-function removeComponent() {
-  const component = cf.tracked(&quot;my-component&quot;);
-  if (component) {
-    cf.rm(component);
-    cf.untrack(&quot;my-component&quot;);
-  }
-}
-</code></pre>
-                </details>
-
-                <details>
-                    <summary>
-                        <code>callbackify()</code> - convert Promise-based functions to callback style
-                    </summary>
-
-                    <p>
-                        Converts a function that returns a Promise into a function that accepts a Node-style callback.
-                        Especially useful for using async operations in Store event handlers.
-                    </p>
-                    <h5>Using with Store event handlers</h5>
-                    <pre class="microlight">
-<code>// Store event handlers are expected to be synchronous
-// This pattern enables async operations without marking the handler as async
-
-// Define an async operation
-const loadEditorAsync = async (postId) =&gt; {
-  const content = await fetchPostContent(postId);
-  const [element, editor] = await createEditor(content);
-  return { element, editor };
-};
-
-// In a store subscription:
-postStore.on(&quot;update&quot;, (event) =&gt; {
-  // Launch the async operation properly
-  callbackify(loadEditorAsync)(
-    (err, result) =&gt; {
-      if (err) {
-        console.error(&quot;Failed to load editor:&quot;, err);
-        return;
-      }
-
-      // Handle the result when the async operation completes
-      const { element, editor } = result;
-      cf.insert(element, { into: container });
-      postStore.set(&quot;editor&quot;, editor);
-    },
-    event.value,
-  );
-});
-</code></pre>
-                    <h5>Integrating with callback-based APIs</h5>
-                    <pre class="microlight">
-<code>// Original async function
-const getUser = async (userId) =&gt; {
-  const response = await fetch(`/api/users/${userId}`);
-  return response.json();
-};
-
-// Convert to callback style
-const getUserCb = cf.callbackify(getUser);
-
-// Use with a callback
-getUserCb((err, data) =&gt; {
-  if (err) {
-    console.error(&quot;Error:&quot;, err);
-    return;
-  }
-  console.log(&quot;User data:&quot;, data);
-}, &quot;12345&quot;);
-</code></pre>
-                    <h5>Error handling with callbackify</h5>
-                    <pre class="microlight">
-<code>const processItems = async (items) =&gt; {
-  // This might throw errors
-  const results = await Promise.all(items.map(processItem));
-  return results;
-};
-
-// Safe error handling with callbackify
-cf.store({ value: [] }).on(&quot;update&quot;, (event) =&gt; {
-  cf.callbackify(processItems)(
-    (error, results) =&gt; {
-      if (error) {
-        errorStore.update(`Processing failed: ${error.message}`);
-        return;
-      }
-      resultStore.update(results);
-    },
-    event.value,
-  );
-});
-</code></pre>
-                </details>
-
-                <details>
-                    <summary>
-                        <code>poll()</code> - execute a function at regular intervals
-                    </summary>
-
-                    <p>
-                        Repeatedly executes a function at specified intervals with proper cleanup.
-                    </p>
-                    <h5>Basic polling example</h5>
-                    <pre class="microlight">
-<code>// Check for updates every 5 seconds, starting 5 seconds from now
-const stopPolling = cf.poll(() =&gt; checkMessages(user), 5000);
-
-// Or call immediately:
-const stopPolling = cf.poll(
-  () =&gt; checkMessages(user),
-  5000,
-  /* callNow */ true,
-);
-
-// Later, when you want to stop polling:
-stopPolling();
-</code></pre>
-                    <h5>Passing messages out of poll()</h5>
-                    <p>
-                        You can use stores to pass messages out of the poll function, aside from just using good
-                        old-fashioned closures:
-                    </p>
-                    <pre class="microlight">
-<code>const messages = cf.store({ type: &quot;list&quot;, value: [] });
-
-const stopMessagePolling = cf.poll(
-  () =&gt; {
-    fetch(&quot;/api/messages&quot;)
-      .then((response) =&gt; response.json())
-      .then((data) =&gt; messages.update(data));
-  },
-  10000,
-  true,
-);
-
-// Cancel polling when component is removed
-const cleanup = () =&gt; {
-  stopMessagePolling();
-  messages.dispose();
-};
-</code></pre>
-                </details>
-            </div>
-            <div class="cf-site-div" data-heading="playground">
-                <h3>try before you buy</h3>
-                <p>Try one of these demos, or do your own thing!</p>
-                <ul id="playground-demo-list"></ul>
-
-                <div id="cf-editor-controls">
-                    <a href="javascript:void(0)" id="cf-editor-clear">Clear All</a>
-                    <a href="javascript:void(0)" id="cf-editor-dl">Download</a>
-                </div>
-
-                <div class="editor-wrapper">
-                    <div class="cf-editor-html"></div>
-                    <div class="cf-editor-css"></div>
-                    <div class="cf-editor-javascript"></div>
-                    <div class="cf-editor-output"></div>
-                </div>
-            </div>
-
-            <div class="footer">
-                <a href="https://github.com/xyzshantaram/campfire">Campfire on GitHub</a>
-                <a href="https://github.com/xyzshantaram/campfire/blob/main/index.html">This site on GitHub</a>
-                <p>
-                    Campfire is free, open-source software available under <a
-                        href="https://github.com/xyzshantaram/campfire/blob/main/LICENSE"
-                    >the MIT License</a>.
-                </p>
-            </div>
+        <div class='footer'>
+            <a href='https://github.com/xyzshantaram/campfire'>Campfire on GitHub</a>
+            <a href='https://github.com/xyzshantaram/campfire/blob/main/index.html'>This site on GitHub</a>
+            <p>
+                Campfire is free, open-source software available under <a
+                    href='https://github.com/xyzshantaram/campfire/blob/main/LICENSE'>the MIT License</a>.
+            </p>
         </div>
+    </div>
 
-        <div id="mask">
-            <span>loading...</span>
-        </div>
+    <div id='mask'>
+        <span>loading...</span>
+    </div>
 
-        <script defer type="module" src="site/main.js"></script>
-    </body>
+    <script defer type='module' src='site/main.js'></script>
+</body>
+
 </html>

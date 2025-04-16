@@ -1,127 +1,42 @@
 ### campfire: a cozy web framework
 
-**Campfire** is a collection of small utilities to make developing with vanilla JS easy.
+**Campfire** helps you write crisp, reactive UI with vanilla JS/TS—no build step, no boilerplate, no magic.
 
-It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development easier.
+#### Why Campfire?
 
-#### Features
-
-- **Small size, zero dependencies**: 5kb compressed, no external dependencies
-- **Fluent Builder API**: Create and configure DOM elements with a chainable syntax:
+- **Tiny (5KB!) footprint** you can read and fit in your head.
+- **Fluent builder API** Create and configure DOM elements with a chainable syntax:
   ```js
-  const [button] = cf.nu("button#submit")
-      .content("Click me")
-      .attr("type", "submit")
-      .on("click", handleClick)
+  const [button] = cf.nu("button#go")
+      .content("Open!")
+      .on("click", launch)
       .done();
   ```
-- **Reactive Data System**: Create reactive stores with automatic UI updates:
+- **Reactive state** that connects to the DOM in just one line:
   ```js
-  // Create different types of stores
-  const name = cf.store({ value: "John" });
-  const reactiveList = cf.store({ type: "list", value: [1, 2, 3] });
-  const reactiveMap = cf.store({ type: "map", value: { key: "value" } });
-
-  // Use stores with reactive elements
-  const [div] = cf.nu("div")
-      .deps({ name, reactiveList })
-      .render(({ name, reactiveList }) => `Hello, ${name}! My favourite numbers are ${reactiveList.join(",")}` // escaped by default, re-renders whenever either name
-          // or reactiveList change
-      )
+  const name = cf.store({ value: "Sandy" });
+  const [greeting] = cf.nu("div")
+      .deps({ name })
+      .render(({ name }, { b }) => b.html`Hello <b>${name}</b>!`)
       .done();
-
-  // Or do your own thing!
-  name.on("change", ({ value }) => {
-      greet(value);
-  });
   ```
-- **Enhanced DOM Helpers**: Easy-to-use DOM manipulation utilities:
+- **Just functions for components:**
   ```js
-  // Select elements (always returns an array)
-  const [button] = cf.select({ s: "#submit-button" });
-  const allButtons = cf.select({ s: "button", all: true });
-
-  // Insert elements
-  cf.insert([elt], { into: container });
-  cf.insert([elt], { into: container, at: "start" });
-  cf.insert([elt], { before: sibling });
+  // A name badge component
+  const NameBadge = () => {
+      const name = cf.store({ value: "" });
+      return cf.nu("div.badge")
+          .deps({ name })
+          .render(({ name }, { b }) => b.content(`Hi, ${name}`));
+  };
   ```
-- **TypeScript Support**: First-class TypeScript integration with type inference for HTML elements
 
-#### FAQs
+#### FAQ
 
-<details>
-<summary>How does it compare to $framework?</summary>
+- **Is this a framework?** Nope—just tools that make vanilla JS delightful.
 
-It doesn't. Campfire and $framework have entirely different goals. Campfire is a library to make writing vanilla JS
-applications easier, if you don't want the level of abstraction (or the associated overhead) that comes with $framework.
-You can build entire applications with it or add it quickly to an existing project. You are afforded complete control
-over your project.
+- **How do I make components?** Return an element (or a function that returns one). That's it.
 
-The learning curve is minuscule and the possibilities are endless.
-
-</details>
-
-<details>
-<summary>What about WebComponents?</summary>
-
-[lit.dev](https://lit.dev)
-
-</details>
-
-<details>
-<summary>How do I create and share reusable components?</summary>
-
-Campfire has no opinion on how you should do this. However, one option is to use a function that returns functions and
-stores to let you manipulate the element (and the created element itself).
-
-```js
-// a reactive representation of a name badge
-const NameBadge = () => {
-    const name = cf.store({ value: "" });
-
-    const [badge] = cf.nu("div")
-        .content(({ name }) => `Hello! My name is ${name}`)
-        .deps({ name })
-        .done();
-
-    return [badge, name];
-};
-```
-
-With the new children API in v4, you can also use cf-slot elements to create composable components:
-
-```js
-const Card = (title) => {
-    const [card] = cf.nu("div.card")
-        .html(`
-      <h2>${title}</h2>
-      <cf-slot name="content"></cf-slot>
-    `)
-        .done();
-
-    return card;
-};
-
-// Usage
-const [content] = cf.nu("p").content("Card content").done();
-const [wrapper] = cf.nu("div")
-    .html(`<cf-slot name="card"></cf-slot>`)
-    .children({ card: [Card("My Card")] })
-    .done();
-```
-
-</details>
-
-<details>
-<summary>Why are escape and unescape so basic?</summary>
-
-`escape` and `unescape` are intended as basic HTML sanitizers mainly for setting element contents, etc. You are
-encouraged to use a different HTML sanitizer if you need more functionality.
-
-- [he](https://github.com/mathiasbynens/he)
-- [html-sanitize](https://github.com/apostrophecms/sanitize-html)
-
-</details>
+- **Why are escape/unescape so simple?** They’re for basic safety; bring your own sanitizer for anything fancy.
 
 [Get campfire today!](/?tab=get)

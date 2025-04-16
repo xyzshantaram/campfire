@@ -1,11 +1,31 @@
 import { Store } from "./Store.ts";
 
 /**
- * A reactive map store.
- * Implements set(key, value), remove(key), clear(), transform(key, fn), has(key), entries(),
- * and get(key).
- * set() sends a "change" event, remove() sends a "deletion" event, clear() sends a "clear" event,
- * and transform() sends a "change" event.
+ * Reactive store for string-keyed maps, with fast lookup, granular change events,
+ * and ergonomic transform/clear/has/entries helpers.
+ *
+ * You can treat `MapStore` almost like an object/Map but with integrated reactivity:
+ *
+ * Example:
+ * ```ts
+ * import { store } from "campfire";
+ * const users = store({ type: "map", value: { foo: { id: 1 } } });
+ * users.set("bar", { id: 2 });          // Add/replace by key
+ * users.transform("foo", u => ({...u, id: 99 }));
+ * users.entries().forEach(([k, v]) => ...); // JS-style Map iteration
+ * users.remove("bar");                  // Remove entry & event
+ * users.clear();                         // Remove all
+ * users.has("foo");                     // Check presence
+ * users.get("foo").id;                  // Get value
+ * users.size;                            // Number of keys, always up to date
+ * ```
+ *
+ * Events:
+ * - `change`: After `set` or `transform`, with key and value
+ * - `deletion`: After `remove`, with key and removed value
+ * - `clear`: After `clear`
+ *
+ * All standard Store events (`on`, `any`, etc.) are available.
  */
 export class MapStore<T> extends Store<Record<string, T>> {
     /**

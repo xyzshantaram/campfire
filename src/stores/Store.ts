@@ -4,9 +4,27 @@ import { deepishClone, ids } from "../utils.ts";
 const storeId = ids("cf-store");
 
 /**
- * A simple reactive store.
- * @class Store
- * @public
+ * The primitive observable container. Store is the base class for all reactive state in Campfire.
+ *
+ * Stores emit events when changed and support granular subscriptions. There are helpers for updating,
+ * transforming, cloning, and explicit disposal. See also: ListStore, MapStore for array/object variants.
+ *
+ * Example:
+ * ```ts
+ * import { store } from "campfire";
+ * const state = store({ value: { open: false } });
+ * state.on("update", e => console.log(e.value.open)); // Subscribe
+ * state.update(x => ({ ...x, open: true }));
+ * const snapshot = state.current();
+ * state.dispose(); // Free resources & stop all events
+ * ```
+ *
+ * Supported events:
+ * - `update`: When value changes (all Stores)
+ * - `append`, `deletion`, `clear`, `change`: ListStore/MapStore only (see their docs)
+ *
+ * Subscribing: Use `.on(event, fn)` for one event, `.any(fn)` for all, and `.unsubscribe()` to remove listeners.
+ * Disposing: `.dispose()` shuts down event delivery and clears all subscribers.
  */
 export class Store<T> {
     /**
