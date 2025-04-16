@@ -42,6 +42,22 @@ export const unescape = (str: string) => {
     return str.replace(expr, (entity) => entities[entity] || "'");
 };
 
+/**
+ * Generates a range of numbers as an array, similar to Python's `range()`.
+ *
+ * @example
+ * ```ts
+ * import { seq } from "@/campfire.ts";
+ * seq(3) // [0, 1, 2]
+ * seq(1, 5) // [1, 2, 3, 4]
+ * seq(0, 10, 2) // [0, 2, 4, 6, 8]
+ * ```
+ *
+ * @param startOrStop Either the stop (if single argument) or start of the range
+ * @param stop If provided, the end (exclusive) of the range
+ * @param step Optional step to increment by, default is 1
+ * @returns Array of numbers forming the range
+ */
 export const seq = (...args: number[]) => {
     let start = 0, stop = args[0], step = 1;
     if (typeof args[1] !== "undefined") {
@@ -192,6 +208,25 @@ export const ids = (prefix = "cf") => {
     };
 };
 
+/**
+ * Creates a deeply-cloned version of a value, but only for plain objects and arrays.
+ *
+ * - Functions, Dates, RegExps, Maps, Sets etc. are not cloned—references are returned for these, as are primitives.
+ * - Cyclic references are preserved via a WeakMap (safe for objects/arrays).
+ * - This is **not** a full/robust deep clone (for edge cases, use a specialized library).
+ *
+ * @example
+ * ```ts
+ * import { deepishClone } from "@/campfire.ts";
+ * const original = { a: [1, { b: 2 }] };
+ * const copy = deepishClone(original);
+ * copy.a[1].b = 33;
+ * console.log(original.a[1].b); // 2
+ * ```
+ *
+ * @param value The value to deep-clone (array or plain object recommended)
+ * @returns A recursively cloned copy, or original for non-objects/functions.
+ */
 export const deepishClone = <T>(value: T, seen = new WeakMap()): T => {
     // Handle primitives and functions (can't/shouldn't clone)
     if (value === null || typeof value !== "object") return value;

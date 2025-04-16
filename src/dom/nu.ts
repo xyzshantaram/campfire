@@ -222,30 +222,43 @@ export const extend = <
 };
 
 /**
- * An element creation helper.
- * @param info Basic information about the element.
- * `eltInfo` should be a string of the format `tagName#id.class1.class2`.
- * Each part (tag name, id, classes) is optional, and an infinite number of
- * classes is allowed. When `eltInfo` is an empty string, the tag name is assumed to be
- * `div`.
- * @param args Optional extra properties for the created element.
- * @returns The newly created DOM element and any other elements requested in the
- * `gimme` parameter specified in args.
+ * Element creation/build helper. Creates a new DOM element (optionally with tag, id, and classes)
+ * and returns a chainable NuBuilder for ergonomic Campfire props and child/slot/reactivity management.
+ *
+ * Accepts a tag string like `div#main.foo.bar`, or just `div`, `#id`, or `.classA`.
+ *
  * @example
- * ```
- * cf.nu(`elt#id.class1`, {
- *  raw: true,
- *  c: html`<span class=some-span>foo bar</span>`,
- *  gimme: ['.some-span']
- * }) // Output: [<elt#id.class1>, <the span some-span>]
+ * ```ts
+ * import { nu, html } from "@/campfire.ts";
+ * // Using builder API for a div with classes and content
+ * const [first] = nu("div.my-class").content("Hello!").done();
+ * // Using builder API to create a div with raw HTML content
+ * const [second] = nu("div").raw(true).content(html`<b>bold!</b>`).done();
+ *
+ * // Store reactivity, builder API style:
+ * import { store } from "@/campfire.ts";
+ * const count = store({ value: 1 });
+ * const reactiv = nu("span")
+ *   .render(({ count }) => `The count is ${count}`)
+ *   .deps({ count })
+ *   .ref(); // .ref() returns the element directly instead of an array.
+ *           // Helpful for when you want to pass the result of a nu()
+ *           // call to another function.
+ * count.update((n) => n + 1); // the span updates automatically!
  * ```
  * @example
+ * ```ts
+ * // Creating multiple sub-elements with gimme:
+ * const [container, child] = nu("div", {
+ *   contents: html`<span class='foo'>hi!</span>`,
+ *   gimme: [".foo"]
+ * }).done();
+ * // Now 'child' is the inner .foo element.
  * ```
- * cf.nu(`span.some-span`, {
- *  // properties...
- *  // no gimme specified
- * }) // Output is still a list [<span.some-span>]
- * ```
+ *
+ * @param info String describing the element. Format: `tag#id.class1.class2` or variant.
+ * @param args Optional Campfire props/config.
+ * @returns A NuBuilder instance for fluid/chained configuration.
  */
 export const nu = <
     const Info extends string,
@@ -257,6 +270,36 @@ export const nu = <
 ): NuBuilder<Elem, Deps, Info> => {
     return new NuBuilder<Elem, Deps, Info>(elt, args);
 };
+
+/**
+ * Like `nu()`, but for existing elements—make any element reactive and
+ * ergonomic.
+ *
+ * `x()` allows you to enhance any pre-existing DOM element with Campfire's props,
+ * reactivity, and child management API, using the builder interface.
+ * Use this instead of `nu()` when you already have an element, such as
+ * one you created yourself, fetched from a library, or selected from the DOM.
+ *
+ * @example
+ * ```ts
+ * // Enhance a DOM-created element with Campfire's reactive/class/attr API:
+ * import * as cf from "@/campfire.ts";
+ * const btn = document.createElement('button');
+ * const count = cf.store({ value: 0 });
+ * cf.x(btn)
+ *  .cls('text-lg')
+ *  .on('click', () => count.update(n => n + 1))
+ *  .misc('type', 'button') // set btn.type = 'button'. Different from attr()
+ *  .render(({ count }, { b }) => b.content(`Clicked ${count} times`))
+ *  .done();
+ * // The button is still a plain HTML element, but reactive as long as
+ * // `count` is in scope!
+ * ```
+ *
+ * @param elt An *existing* HTMLElement instance to enhance
+ * @param args Campfire props/children/render/etc. to apply
+ * @returns A NuBuilder instance wrapping the same element
+ */
 
 export const x = <
     Elem extends InferElementType<Info>,
