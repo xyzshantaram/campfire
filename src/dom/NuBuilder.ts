@@ -318,7 +318,6 @@ export class NuBuilder<
      * @param id The id to track the element by.
      */
     track(id: string) {
-        console.log(id);
         this.props.track = id;
         return this;
     }
