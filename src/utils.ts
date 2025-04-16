@@ -182,7 +182,7 @@ const generateId = (prefix: string) => `${prefix}-${Math.random().toString(36).s
  * @param prefix The prefix to use. Defaults to 'cf-'.
  * @returns A function that generates a unique ID.
  */
-export const ids = (prefix = "cf-") => {
+export const ids = (prefix = "cf") => {
     const existing = new Set<string>();
     return () => {
         let id = generateId(prefix);
