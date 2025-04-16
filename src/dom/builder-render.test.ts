@@ -7,10 +7,10 @@ import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("Builder-style render function tests", (t) => {
+Deno.test("Builder-style render function tests", async (t) => {
     // Basic functionality tests
-    t.step("Basic functionality", (t) => {
-        t.step("should accept a render function that returns a string", () => {
+    await t.step("Basic functionality", async (t) => {
+        await t.step("should accept a render function that returns a string", () => {
             const count = store({ value: 0 });
             const [div] = nu("div", {
                 deps: { count },
@@ -23,7 +23,7 @@ Deno.test("Builder-style render function tests", (t) => {
             expect(div.innerHTML).to.equal("Count: 1");
         });
 
-        t.step("should accept a render function that returns a builder", () => {
+        await t.step("should accept a render function that returns a builder", () => {
             const count = store({ value: 0 });
             const [div] = nu("div", {
                 deps: { count },
@@ -38,9 +38,9 @@ Deno.test("Builder-style render function tests", (t) => {
             expect(div.innerHTML).to.equal("Count: 1");
         });
 
-        t.step(
+        await t.step(
             "should escape content unless render function returns NuBuilder",
-            (t) => {
+            () => {
                 const [div] = nu("div", {
                     render: () => `<span>Hello</span>`,
                 }).done();
@@ -51,8 +51,8 @@ Deno.test("Builder-style render function tests", (t) => {
     });
 
     // Property reconciliation tests
-    t.step("Property reconciliation", (t) => {
-        t.step("should reconcile style properties from builder", () => {
+    await t.step("Property reconciliation", async (t) => {
+        await t.step("should reconcile style properties from builder", () => {
             const color = store({ value: "red" });
             const [div] = nu("div", {
                 deps: { color },
@@ -72,7 +72,7 @@ Deno.test("Builder-style render function tests", (t) => {
             expect(div.style.fontWeight).to.equal("bold"); // Should still be preserved
         });
 
-        t.step("should clear a style when empty string is provided", () => {
+        await t.step("should clear a style when empty string is provided", () => {
             const useStyle = store({ value: true });
             const [div] = nu("div", {
                 style: { color: "red", fontSize: "20px", fontWeight: "bold" },
@@ -104,7 +104,7 @@ Deno.test("Builder-style render function tests", (t) => {
             expect(div.style.fontWeight).to.equal("bold");
         });
 
-        t.step("should reconcile attributes from builder", () => {
+        await t.step("should reconcile attributes from builder", () => {
             const disabled = store({ value: false });
             const [button] = nu("button", {
                 deps: { isDisabled: disabled },
@@ -127,7 +127,7 @@ Deno.test("Builder-style render function tests", (t) => {
             expect(button).to.have.attr("aria-disabled", "true");
         });
 
-        t.step("should clear an attribute when empty string is provided", () => {
+        await t.step("should clear an attribute when empty string is provided", () => {
             const showAttr = store({ value: true });
 
             const [div] = nu("div", {
@@ -161,7 +161,7 @@ Deno.test("Builder-style render function tests", (t) => {
             expect(div).to.have.attr("data-persist", "always-here");
         });
 
-        t.step("should reconcile misc properties from builder", () => {
+        await t.step("should reconcile misc properties from builder", () => {
             const isChecked = store({ value: false });
             const [checkbox] = nu("input", {
                 attrs: { type: "checkbox" },
@@ -184,8 +184,8 @@ Deno.test("Builder-style render function tests", (t) => {
     });
 
     // Multiple re-renders and updates
-    t.step("Multiple re-renders", (t) => {
-        t.step("should handle multiple store updates correctly", () => {
+    await t.step("Multiple re-renders", async (t) => {
+        await t.step("should handle multiple store updates correctly", () => {
             const count = store({ value: 0 });
             const color = store({ value: "red" });
             const size = store({ value: "12px" });
@@ -231,9 +231,9 @@ Deno.test("Builder-style render function tests", (t) => {
             expect(div.style.fontSize).to.equal("20px");
         });
 
-        t.step(
+        await t.step(
             "should properly update content and properties based on conditions",
-            (t) => {
+            () => {
                 const mode = store({ value: "normal" }); // Can be 'normal', 'warning', 'error'
 
                 const [div] = nu("div", {
@@ -287,8 +287,8 @@ Deno.test("Builder-style render function tests", (t) => {
     });
 
     // Event handler behavior
-    t.step("Event handlers", (t) => {
-        t.step("should not duplicate event handlers during re-renders", () => {
+    await t.step("Event handlers", async (t) => {
+        await t.step("should not duplicate event handlers during re-renders", () => {
             const clickHandler = sinon.spy();
             const count = store({ value: 0 });
 
@@ -315,8 +315,8 @@ Deno.test("Builder-style render function tests", (t) => {
     });
 
     // Edge cases
-    t.step("Edge cases", (t) => {
-        t.step("should handle falsy attribute values correctly", () => {
+    await t.step("Edge cases", async (t) => {
+        await t.step("should handle falsy attribute values correctly", () => {
             // Create a simple element with various attribute values
             const [div] = nu("div")
                 .content("Testing")
@@ -335,7 +335,7 @@ Deno.test("Builder-style render function tests", (t) => {
             expect(div).to.have.attr("data-test", "test");
         });
 
-        t.step("should handle undefined/null results from render", () => {
+        await t.step("should handle undefined/null results from render", () => {
             const attr = store({ value: "something" });
             const [div] = nu("div")
                 .content("Visible content")
@@ -350,8 +350,8 @@ Deno.test("Builder-style render function tests", (t) => {
     });
 
     // Builder with existing element
-    t.step("Using builder with existing element", (t) => {
-        t.step("should use builder with an existing element", () => {
+    await t.step("Using builder with existing element", async (t) => {
+        await t.step("should use builder with an existing element", () => {
             // First create an element
             const [existingDiv] = nu("div")
                 .attr("id", "existing-element")

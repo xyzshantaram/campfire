@@ -3,26 +3,25 @@
  */
 
 import sinon from "sinon";
-import { describe, it } from "jsr:@std/testing/bdd";
 import { MapStore } from "./MapStore.ts";
 import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("MapStore Tests", (t) => {
-    t.step("should initialize with empty map when no input is provided", (t) => {
+Deno.test("MapStore Tests", async (t) => {
+    await t.step("should initialize with empty map when no input is provided", () => {
         const store = new MapStore();
         expect(store.size).to.equal(0);
     });
 
-    t.step("should initialize with provided key-value pairs", (t) => {
+    await t.step("should initialize with provided key-value pairs", () => {
         const store = new MapStore({ name: "John", age: 30 });
         expect(store.get("name")).to.equal("John");
         expect(store.get("age")).to.equal(30);
         expect(store.size).to.equal(2);
     });
 
-    t.step("should set values and emit change event", (t) => {
+    await t.step("should set values and emit change event", () => {
         const store = new MapStore<string | number>();
         const spy = sinon.spy();
         store.on("change", spy);
@@ -38,7 +37,7 @@ Deno.test("MapStore Tests", (t) => {
         });
     });
 
-    t.step("should remove values and emit deletion event", (t) => {
+    await t.step("should remove values and emit deletion event", () => {
         const store = new MapStore({ name: "John", age: 30 });
         const spy = sinon.spy();
         store.on("deletion", spy);
@@ -55,7 +54,7 @@ Deno.test("MapStore Tests", (t) => {
         });
     });
 
-    t.step("should do nothing when removing non-existent key", (t) => {
+    await t.step("should do nothing when removing non-existent key", () => {
         const store = new MapStore({ name: "John" });
         const spy = sinon.spy();
         store.on("deletion", spy);
@@ -66,7 +65,7 @@ Deno.test("MapStore Tests", (t) => {
         expect(store.size).to.equal(1);
     });
 
-    t.step("should clear all values and emit clear event", (t) => {
+    await t.step("should clear all values and emit clear event", () => {
         const store = new MapStore({ name: "John", age: 30 });
         const spy = sinon.spy();
         store.on("clear", spy);
@@ -80,7 +79,7 @@ Deno.test("MapStore Tests", (t) => {
         });
     });
 
-    t.step("should transform values and emit change event", (t) => {
+    await t.step("should transform values and emit change event", () => {
         const store = new MapStore({ count: 5 });
         const spy = sinon.spy();
         store.on("change", spy);
@@ -91,21 +90,21 @@ Deno.test("MapStore Tests", (t) => {
         expect(spy.calledTwice).to.be.true; // Once from set() and once from transform()
     });
 
-    t.step("should throw error when transforming non-existent key", (t) => {
+    await t.step("should throw error when transforming non-existent key", () => {
         const store = new MapStore<number>();
 
         expect(() => store.transform("nonexistent", (val) => val + 1))
             .to.throw(/key nonexistent does not exist/);
     });
 
-    t.step("should check if key exists with has()", (t) => {
+    await t.step("should check if key exists with has()", () => {
         const store = new MapStore({ name: "John" });
 
         expect(store.has("name")).to.be.true;
         expect(store.has("age")).to.be.false;
     });
 
-    t.step("should return entries iterator", (t) => {
+    await t.step("should return entries iterator", () => {
         const store = new MapStore({ name: "John", age: 30 });
         const entries = Array.from(store.entries());
 

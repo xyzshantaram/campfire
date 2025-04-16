@@ -10,16 +10,16 @@ import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("Tests for nu", (t) => {
-    t.step("should create a div when no args are passed", (t) => {
+Deno.test("Tests for nu", async (t) => {
+    await t.step("should create a div when no args are passed", () => {
         expect(nu().ref().tagName).to.equal("DIV");
     });
 
-    t.step("the new div must be empty", (t) => {
+    await t.step("the new div must be empty", () => {
         expect(nu().ref()).to.be.empty;
     });
 
-    t.step("should parse element string correctly", (t) => {
+    await t.step("should parse element string correctly", () => {
         const [elt] = nu("button#click-me.btn.cls").done();
         expect(elt).to.have.class("btn");
         expect(elt).to.have.class("cls");
@@ -28,8 +28,8 @@ Deno.test("Tests for nu", (t) => {
     });
 });
 
-Deno.test("Tests for extend", (t) => {
-    t.step("should work properly with nu", (t) => {
+Deno.test("Tests for extend", async (t) => {
+    await t.step("should work properly with nu", () => {
         const [elt] = nu("#id", {
             style: { textAlign: "center" },
             attrs: { "data-an-attribute": 32 },
@@ -40,25 +40,25 @@ Deno.test("Tests for extend", (t) => {
         expect(elt).to.have.attr("data-an-attribute", "32");
     });
 
-    t.step("should add styles", (t) => {
+    await t.step("should add styles", () => {
         const [elt] = nu().done();
         extend(elt, { style: { margin: 0 } });
         expect(elt).to.have.attr("style", "margin: 0px;");
     });
 
-    t.step("should escape and set contents", (t) => {
+    await t.step("should escape and set contents", () => {
         const [elt] = nu().done();
         extend(elt, { contents: "<b> bold </b>" });
         expect(elt.innerHTML).to.equal("&lt;b&gt; bold &lt;/b&gt;");
     });
 
-    t.step("should not escape contents with raw flag", (t) => {
+    await t.step("should not escape contents with raw flag", () => {
         const [elt] = nu().done();
         extend(elt, { contents: "<b> bold </b>", raw: true });
         expect(elt.innerHTML).to.equal("<b> bold </b>");
     });
 
-    t.step("should return elements passed in gimme param", (t) => {
+    await t.step("should return elements passed in gimme param", () => {
         const [elt, span] = nu(`div#container`, {
             raw: true,
             contents: `<span class=some-span>42</span>`,
@@ -71,15 +71,15 @@ Deno.test("Tests for extend", (t) => {
     });
 });
 
-Deno.test("Tests for NuBuilder", (t) => {
-    t.step("should support fluent method chaining", (t) => {
+Deno.test("Tests for NuBuilder", async (t) => {
+    await t.step("should support fluent method chaining", () => {
         const [btn] = nu("button")
             .content("Click me")
             .attr("type", "submit")
             .style("backgroundColor", "blue")
             .style("color", "white")
             .attr("data-test", "test-button")
-            .on("click", () => {})
+            .on("click", () => { })
             .done();
 
         expect(btn.tagName).to.equal("BUTTON");
@@ -90,7 +90,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         expect(btn.style.color).to.equal("white");
     });
 
-    t.step("should support multiple style setting via styles method", (t) => {
+    await t.step("should support multiple style setting via styles method", () => {
         const [div] = nu("div")
             .styles({
                 color: "red",
@@ -104,7 +104,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         expect(div.style.marginTop).to.equal("10px");
     });
 
-    t.step("should support multiple attribute setting via attrs method", (t) => {
+    await t.step("should support multiple attribute setting via attrs method", () => {
         const [input] = nu("input")
             .attrs({
                 type: "text",
@@ -118,7 +118,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         expect(input).to.have.attr("required", "true");
     });
 
-    t.step("should support raw HTML content", (t) => {
+    await t.step("should support raw HTML content", () => {
         const [div] = nu("div")
             .content("<span>Hello</span>")
             .raw(true)
@@ -128,7 +128,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         expect(div.firstChild?.nodeName).to.equal("SPAN");
     });
 
-    t.step("should support multiple event listeners", (t) => {
+    await t.step("should support multiple event listeners", () => {
         const clickHandler = sinon.spy();
         const mouseoverHandler = sinon.spy();
 
@@ -145,7 +145,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         expect(mouseoverHandler.calledOnce).to.be.true;
     });
 
-    t.step("should support querying multiple elements with gimme", (t) => {
+    await t.step("should support querying multiple elements with gimme", () => {
         const html = `
             <h2 class="title">Hello</h2>
             <p class="content">Paragraph 1</p>
@@ -163,7 +163,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         expect(second.innerHTML).to.equal("Paragraph 2");
     });
 
-    t.step("should handle misc properties", (t) => {
+    await t.step("should handle misc properties", () => {
         const [checkbox] = nu("input").done();
 
         extend(checkbox, {
@@ -175,7 +175,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         expect(checkbox.disabled).to.be.false;
     });
 
-    t.step("Slotted children should be preserved across parent updates", (t) => {
+    await t.step("Slotted children should be preserved across parent updates", () => {
         const greeting = store({ value: "Hello" });
         const to = store({ value: "World" });
 
@@ -208,7 +208,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         );
     });
 
-    t.step("should support a single element as a child", (t) => {
+    await t.step("should support a single element as a child", () => {
         const value = store({ value: "Child Content" });
 
         // Get a single element
@@ -233,7 +233,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         );
     });
 
-    t.step("should support multiple elements as children", (t) => {
+    await t.step("should support multiple elements as children", () => {
         const items = seq(3).map((n) => nu("li").content(`${n}`).ref());
         const [parent] = nu("ul")
             .html`<cf-slot name="items"></cf-slot>`
@@ -246,7 +246,7 @@ Deno.test("Tests for NuBuilder", (t) => {
         ).to.be.true;
     });
 
-    t.step("should track an element with an ID", (t) => {
+    await t.step("should track an element with an ID", () => {
         // Create an element with tracking
         const [div] = nu("div")
             .content("Tracked element")
@@ -259,8 +259,8 @@ Deno.test("Tests for NuBuilder", (t) => {
     });
 });
 
-Deno.test("Tests for insert()", (t) => {
-    t.step("should insert a single element", (t) => {
+Deno.test("Tests for insert()", async (t) => {
+    await t.step("should insert a single element", () => {
         const [container] = nu().done();
         insert(container, { into: CfDom.document!.body });
 
@@ -274,7 +274,7 @@ Deno.test("Tests for insert()", (t) => {
         rm(container);
     });
 
-    t.step("should insert an array of elements", (t) => {
+    await t.step("should insert an array of elements", () => {
         const [container] = nu().done();
         insert(container, { into: CfDom.document!.body });
 
@@ -288,7 +288,7 @@ Deno.test("Tests for insert()", (t) => {
         rm(container);
     });
 
-    t.step("should insert a single element before another element", (t) => {
+    await t.step("should insert a single element before another element", () => {
         const [container] = nu().done();
         insert(container, { into: CfDom.document!.body });
 
@@ -305,7 +305,7 @@ Deno.test("Tests for insert()", (t) => {
         rm(container);
     });
 
-    t.step("should insert a single element after another element", (t) => {
+    await t.step("should insert a single element after another element", () => {
         const [container] = nu().done();
         insert(container, { into: CfDom.document!.body });
 
@@ -322,7 +322,7 @@ Deno.test("Tests for insert()", (t) => {
         rm(container);
     });
 
-    t.step("should insert a single element at the start of a container", (t) => {
+    await t.step("should insert a single element at the start of a container", () => {
         const [container] = nu().done();
         insert(container, { into: CfDom.document!.body });
 

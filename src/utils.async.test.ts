@@ -9,8 +9,8 @@ import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("callbackify", (t) => {
-    t.step(
+Deno.test("callbackify", async (t) => {
+    await t.step(
         "should convert a Promise-returning function to a callback-style function",
         () => {
             // Setup a function that returns a promise
@@ -31,7 +31,7 @@ Deno.test("callbackify", (t) => {
         },
     );
 
-    t.step("should pass errors to the callback", () => {
+    await t.step("should pass errors to the callback", () => {
         // Setup a function that returns a rejected promise
         const msg = "Test error";
         const failingFn = () => {
@@ -49,7 +49,7 @@ Deno.test("callbackify", (t) => {
         });
     });
 
-    t.step("should pass all arguments to the original function", () => {
+    await t.step("should pass all arguments to the original function", () => {
         // Setup a function that returns each argument
         const check = (...args: any[]) => Promise.resolve(args);
 
@@ -69,7 +69,7 @@ Deno.test("callbackify", (t) => {
         );
     });
 
-    t.step("should work with zero arguments", () => {
+    await t.step("should work with zero arguments", () => {
         const noArgs = () => Promise.resolve("success");
         const cb = callbackify(noArgs);
 
@@ -80,7 +80,7 @@ Deno.test("callbackify", (t) => {
     });
 });
 
-Deno.test("poll", (t) => {
+Deno.test("poll", async (t) => {
     let clock: sinon.SinonFakeTimers;
 
     beforeEach(() => {
@@ -93,7 +93,7 @@ Deno.test("poll", (t) => {
         clock.restore();
     });
 
-    t.step("should call the function at specified intervals", () => {
+    await t.step("should call the function at specified intervals", () => {
         const callback = sinon.spy();
 
         // Start polling every 100ms
@@ -111,7 +111,7 @@ Deno.test("poll", (t) => {
         expect(callback.callCount).to.equal(3);
     });
 
-    t.step("should call the function immediately when callNow is true", () => {
+    await t.step("should call the function immediately when callNow is true", () => {
         const callback = sinon.spy();
 
         // Start polling with immediate execution
@@ -125,7 +125,7 @@ Deno.test("poll", (t) => {
         expect(callback.callCount).to.equal(2);
     });
 
-    t.step("should stop polling when the cancel function is called", () => {
+    await t.step("should stop polling when the cancel function is called", () => {
         const callback = sinon.spy();
 
         // Start polling and get cancel function
@@ -145,7 +145,7 @@ Deno.test("poll", (t) => {
         expect(callback.callCount).to.equal(2);
     });
 
-    t.step(
+    await t.step(
         "should continue polling even if the callback throws an error",
         () => {
             const errorCallback = sinon.stub();
@@ -194,7 +194,7 @@ Deno.test("poll", (t) => {
         },
     );
 
-    t.step("should clean up timeout when cancelled", () => {
+    await t.step("should clean up timeout when cancelled", () => {
         const clearTimeoutSpy = sinon.spy(globalThis, "clearTimeout");
         const callback = sinon.stub();
 

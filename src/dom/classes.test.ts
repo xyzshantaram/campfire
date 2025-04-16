@@ -7,10 +7,10 @@ import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("Classes functionality tests", (t) => {
+Deno.test("Classes functionality tests", async (t) => {
     // Basic cls method functionality tests
-    t.step("NuBuilder.cls method", (t) => {
-        t.step("should add a class with cls method", (t) => {
+    await t.step("NuBuilder.cls method", async (t) => {
+        await t.step("should add a class with cls method", () => {
             const [div] = nu("div")
                 .cls("test-class")
                 .done();
@@ -18,7 +18,7 @@ Deno.test("Classes functionality tests", (t) => {
             expect(div.classList.contains("test-class")).to.be.true;
         });
 
-        t.step("should add multiple classes with multiple cls calls", (t) => {
+        await t.step("should add multiple classes with multiple cls calls", () => {
             const [div] = nu("div")
                 .cls("first-class")
                 .cls("second-class")
@@ -30,7 +30,7 @@ Deno.test("Classes functionality tests", (t) => {
             expect(div.classList.contains("third-class")).to.be.true;
         });
 
-        t.step("should conditionally add a class with boolean value", (t) => {
+        await t.step("should conditionally add a class with boolean value", () => {
             const [div1] = nu("div")
                 .cls("enabled", true)
                 .cls("disabled", false)
@@ -48,9 +48,9 @@ Deno.test("Classes functionality tests", (t) => {
             expect(div2.classList.contains("disabled")).to.be.true;
         });
 
-        t.step(
+        await t.step(
             "should treat empty string as falsy for conditional classes",
-            (t) => {
+            () => {
                 const [div] = nu("div")
                     .cls("empty-string-class", "")
                     .done();
@@ -59,7 +59,7 @@ Deno.test("Classes functionality tests", (t) => {
             },
         );
 
-        t.step("should treat zero as falsy for conditional classes", (t) => {
+        await t.step("should treat zero as falsy for conditional classes", () => {
             const [div] = nu("div")
                 .cls("zero-class", 0)
                 .done();
@@ -67,9 +67,9 @@ Deno.test("Classes functionality tests", (t) => {
             expect(div.classList.contains("zero-class")).to.be.false;
         });
 
-        t.step(
+        await t.step(
             "should treat null and undefined as falsy for conditional classes",
-            (t) => {
+            () => {
                 const [div1] = nu("div")
                     .cls("null-class", null)
                     .done();
@@ -78,9 +78,9 @@ Deno.test("Classes functionality tests", (t) => {
             },
         );
 
-        t.step(
+        await t.step(
             "should add classes correctly when combined with class in element string",
-            (t) => {
+            () => {
                 const [div] = nu("div.initial-class")
                     .cls("added-class")
                     .done();
@@ -90,7 +90,7 @@ Deno.test("Classes functionality tests", (t) => {
             },
         );
 
-        t.step("should work with element create syntax", (t) => {
+        await t.step("should work with element create syntax", () => {
             const [button] = nu("button#my-btn.primary")
                 .cls("large")
                 .cls("rounded", true)
@@ -106,8 +106,8 @@ Deno.test("Classes functionality tests", (t) => {
     });
 
     // Classes in render function tests
-    t.step("Classes in reactive contexts", (t) => {
-        t.step("should update classes based on store changes", (t) => {
+    await t.step("Classes in reactive contexts", async (t) => {
+        await t.step("should update classes based on store changes", () => {
             const isActive = store({ value: false });
             const isDisabled = store({ value: true });
 
@@ -133,7 +133,7 @@ Deno.test("Classes functionality tests", (t) => {
             expect(button.classList.contains("disabled")).to.be.false;
         });
 
-        t.step("should handle multiple class changes in reactive contexts", (t) => {
+        await t.step("should handle multiple class changes in reactive contexts", () => {
             const state = store({ value: "default" }); // Can be 'default', 'success', 'error', 'warning'
 
             const [div] = nu("div", {
@@ -182,9 +182,9 @@ Deno.test("Classes functionality tests", (t) => {
             expect(div.classList.contains("warning")).to.be.false;
         });
 
-        t.step(
+        await t.step(
             "should maintain non-reactive classes through reactive updates",
-            (t) => {
+            () => {
                 const isActive = store({ value: false });
 
                 const [div] = nu("div.static-class", {
@@ -217,8 +217,8 @@ Deno.test("Classes functionality tests", (t) => {
     });
 
     // Integration tests for classes with other properties
-    t.step("Class integration with other properties", (t) => {
-        t.step("should combine classes with other element properties", (t) => {
+    await t.step("Class integration with other properties", async (t) => {
+        await t.step("should combine classes with other element properties", () => {
             const [button] = nu("button")
                 .content("Styled Button")
                 .cls("primary")
@@ -226,7 +226,7 @@ Deno.test("Classes functionality tests", (t) => {
                 .attr("type", "submit")
                 .style("borderRadius", "4px")
                 .style("padding", "8px 16px")
-                .on("click", () => {})
+                .on("click", () => { })
                 .done();
 
             expect(button.classList.contains("primary")).to.be.true;
@@ -236,7 +236,7 @@ Deno.test("Classes functionality tests", (t) => {
             expect(button.style.padding).to.equal("8px 16px");
         });
 
-        t.step('should work correctly with the "classes" property in nu element properties', () => {
+        await t.step('should work correctly with the "classes" property in nu element properties', () => {
             const [div] = nu("div", {
                 classes: {
                     "prop-class-1": true,
@@ -259,8 +259,8 @@ Deno.test("Classes functionality tests", (t) => {
     });
 
     // Tests for classes reconciliation in nu()
-    t.step("Classes reconciliation", (t) => {
-        t.step("should correctly reconcile classes in reactive contexts", (t) => {
+    await t.step("Classes reconciliation", async (t) => {
+        await t.step("should correctly reconcile classes in reactive contexts", () => {
             const toggleClass = store({ value: true });
 
             // Create element with initial class state
@@ -298,8 +298,8 @@ Deno.test("Classes functionality tests", (t) => {
     });
 
     // Issue with implementation
-    t.step("Implementation bug fixes", (t) => {
-        t.step("should correctly apply classes to the element DOM", (t) => {
+    await t.step("Implementation bug fixes", async (t) => {
+        await t.step("should correctly apply classes to the element DOM", () => {
             // The issue is that the code tracks the classes in the internal `props` object,
             // but doesn't actually apply them to the element's classList
 

@@ -1,10 +1,9 @@
-import { describe, it } from "jsr:@std/testing/bdd";
 import { assert } from "chai";
 import { track, tracked, untrack } from "./tracking.ts";
 import { CfDom } from "./config.ts";
 
-Deno.test("Element tracking functionality", (t) => {
-    t.step("should track and retrieve elements by ID", (t) => {
+Deno.test("Element tracking functionality", async (t) => {
+    await t.step("should track and retrieve elements by ID", () => {
         const element = CfDom.document!.createElement("div");
         track("test-element", element);
 
@@ -12,12 +11,12 @@ Deno.test("Element tracking functionality", (t) => {
         assert.strictEqual(retrievedElement, element);
     });
 
-    t.step("should return null for untracked elements", (t) => {
+    await t.step("should return null for untracked elements", () => {
         const retrievedElement = tracked("non-existent-element");
         assert.isNull(retrievedElement);
     });
 
-    t.step("should untrack elements", (t) => {
+    await t.step("should untrack elements", () => {
         const element = CfDom.document!.createElement("div");
         track("element-to-untrack", element);
 

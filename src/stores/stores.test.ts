@@ -10,15 +10,15 @@ import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("Tests for stores", (t) => {
-    t.step("Store should store and update values", (t) => {
+Deno.test("Tests for stores", async (t) => {
+    await t.step("Store should store and update values", () => {
         const s = cf.store({ value: "test" });
         expect(s.current()).to.equal("test");
         s.update("new value");
         expect(s.current()).to.equal("new value");
     });
 
-    t.step("Store should notify subscribers of changes", (t) => {
+    await t.step("Store should notify subscribers of changes", () => {
         const s = cf.store({ value: "test" });
         const mockFn = sinon.spy();
         s.on("update", mockFn);
@@ -27,7 +27,7 @@ Deno.test("Tests for stores", (t) => {
             .true;
     });
 
-    t.step("ListStore should handle array operations", (t) => {
+    await t.step("ListStore should handle array operations", () => {
         const ls = cf.store({ type: "list", value: [1, 2, 3] });
         expect(ls.current()).to.deep.equal([1, 2, 3]);
         const mockFn = sinon.spy();
@@ -37,7 +37,7 @@ Deno.test("Tests for stores", (t) => {
         expect(mockFn.calledWith({ type: "append", value: 4, idx: 3 })).to.be.true;
     });
 
-    t.step("MapStore should handle object operations", (t) => {
+    await t.step("MapStore should handle object operations", () => {
         const ms = cf.store<string | number>({
             type: "map",
             value: { name: "John" },
@@ -58,8 +58,8 @@ Deno.test("Tests for stores", (t) => {
     });
 });
 
-Deno.test("Tests for Reactivity", (t) => {
-    t.step("Element content should update when store changes", (t) => {
+Deno.test("Tests for Reactivity", async (t) => {
+    await t.step("Element content should update when store changes", () => {
         const name = cf.store({ value: "John" });
         const [div] = nu("div", {
             deps: { name },
@@ -72,7 +72,7 @@ Deno.test("Tests for Reactivity", (t) => {
         expect(div.innerHTML).to.equal("Hello, Alice!");
     });
 
-    t.step("Multiple stores should update element content independently", (t) => {
+    await t.step("Multiple stores should update element content independently", () => {
         const first = cf.store({ value: "John" });
         const last = cf.store({ value: "Doe" });
 
@@ -90,7 +90,7 @@ Deno.test("Tests for Reactivity", (t) => {
         expect(span.innerHTML).to.equal("Jane Smith");
     });
 
-    t.step("ListStore should update collection rendering", (t) => {
+    await t.step("ListStore should update collection rendering", () => {
         const itemsStore = cf.store({
             type: "list",
             value: ["Apple", "Banana", "Cherry"],
@@ -119,7 +119,7 @@ Deno.test("Tests for Reactivity", (t) => {
         );
     });
 
-    t.step("MapStore should update object rendering", (t) => {
+    await t.step("MapStore should update object rendering", () => {
         const user = cf.store({
             type: "map",
             value: {
@@ -160,7 +160,7 @@ Deno.test("Tests for Reactivity", (t) => {
         );
     });
 
-    t.step("Should handle complex nested reactivity", (t) => {
+    await t.step("Should handle complex nested reactivity", () => {
         const count = cf.store({ value: 0 });
         const message = cf.store({ value: "Click to increment" });
         const color = cf.store({ value: "blue" });
@@ -210,9 +210,9 @@ Deno.test("Tests for Reactivity", (t) => {
         );
     });
 
-    t.step(
+    await t.step(
         "Should properly clean up subscriptions when element is disposed",
-        (t) => {
+        () => {
             const countStore = cf.store({ value: 0 });
             const [div] = nu("div", {
                 render: (data) => {

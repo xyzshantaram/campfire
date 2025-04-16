@@ -3,29 +3,28 @@
  */
 
 import sinon from "sinon";
-import { describe, it } from "jsr:@std/testing/bdd";
 import { ListStore } from "./ListStore.ts";
 import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("ListStore Tests", (t) => {
-    t.step(
+Deno.test("ListStore Tests", async (t) => {
+    await t.step(
         "should initialize with empty array when no input is provided",
-        (t) => {
+        () => {
             const store = new ListStore();
             expect(store.current()).to.be.an("array").that.is.empty;
             expect(store.length).to.equal(0);
         },
     );
 
-    t.step("should initialize with provided array", (t) => {
+    await t.step("should initialize with provided array", () => {
         const store = new ListStore([1, 2, 3]);
         expect(store.current()).to.deep.equal([1, 2, 3]);
         expect(store.length).to.equal(3);
     });
 
-    t.step("should push values and emit append event", (t) => {
+    await t.step("should push values and emit append event", () => {
         const store = new ListStore<number>([1, 2]);
         const spy = sinon.spy();
         store.on("append", spy);
@@ -42,7 +41,7 @@ Deno.test("ListStore Tests", (t) => {
         });
     });
 
-    t.step("should remove values at index and emit deletion event", (t) => {
+    await t.step("should remove values at index and emit deletion event", () => {
         const store = new ListStore(["a", "b", "c"]);
         const spy = sinon.spy();
         store.on("deletion", spy);
@@ -58,7 +57,7 @@ Deno.test("ListStore Tests", (t) => {
         });
     });
 
-    t.step("should throw RangeError when removing with invalid index", (t) => {
+    await t.step("should throw RangeError when removing with invalid index", () => {
         const store = new ListStore([1, 2, 3]);
 
         expect(() => store.remove(3)).to.throw(RangeError);
@@ -67,7 +66,7 @@ Deno.test("ListStore Tests", (t) => {
         expect(store.current()).to.deep.equal([1, 2, 3]);
     });
 
-    t.step("should get value at specified index", (t) => {
+    await t.step("should get value at specified index", () => {
         const store = new ListStore(["a", "b", "c"]);
 
         expect(store.get(0)).to.equal("a");
@@ -75,14 +74,14 @@ Deno.test("ListStore Tests", (t) => {
         expect(store.get(2)).to.equal("c");
     });
 
-    t.step("should throw RangeError when getting with invalid index", (t) => {
+    await t.step("should throw RangeError when getting with invalid index", () => {
         const store = new ListStore([1, 2, 3]);
 
         expect(() => store.get(-1)).to.throw(RangeError);
         expect(() => store.get(3)).to.throw(RangeError);
     });
 
-    t.step("should set value at specified index and emit change event", (t) => {
+    await t.step("should set value at specified index and emit change event", () => {
         const store = new ListStore(["a", "b", "c"]);
         const spy = sinon.spy();
         store.on("change", spy);
@@ -98,7 +97,7 @@ Deno.test("ListStore Tests", (t) => {
         });
     });
 
-    t.step("should throw RangeError when setting with invalid index", (t) => {
+    await t.step("should throw RangeError when setting with invalid index", () => {
         const store = new ListStore([1, 2, 3]);
 
         expect(() => store.set(-1, 0)).to.throw(RangeError);
@@ -108,7 +107,7 @@ Deno.test("ListStore Tests", (t) => {
         expect(store.current()).to.deep.equal([1, 2, 3]);
     });
 
-    t.step("should clear all values and emit clear event", (t) => {
+    await t.step("should clear all values and emit clear event", () => {
         const store = new ListStore([1, 2, 3]);
         const spy = sinon.spy();
         store.on("clear", spy);
@@ -123,7 +122,7 @@ Deno.test("ListStore Tests", (t) => {
         });
     });
 
-    t.step("should access length property correctly", (t) => {
+    await t.step("should access length property correctly", () => {
         const store = new ListStore<number>();
         expect(store.length).to.equal(0);
 

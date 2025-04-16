@@ -3,14 +3,13 @@
  */
 
 import sinon from "sinon";
-import { describe, it } from "jsr:@std/testing/bdd";
 import { ListStore } from "./ListStore.ts";
 import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("Additional ListStore Tests", (t) => {
-    t.step("should silently ignore remove() with negative index", (t) => {
+Deno.test("Additional ListStore Tests", async (t) => {
+    await t.step("should silently ignore remove() with negative index", () => {
         const store = new ListStore([1, 2, 3]);
         const spy = sinon.spy();
         store.on("deletion", spy);
@@ -23,7 +22,7 @@ Deno.test("Additional ListStore Tests", (t) => {
         expect(spy.called).to.be.false;
     });
 
-    t.step("should be iterable with for-of loop", (t) => {
+    await t.step("should be iterable with for-of loop", () => {
         const store = new ListStore(["a", "b", "c"]);
         const values: string[] = [];
 
@@ -34,14 +33,14 @@ Deno.test("Additional ListStore Tests", (t) => {
         expect(values).to.deep.equal(["a", "b", "c"]);
     });
 
-    t.step("should support map() method", (t) => {
+    await t.step("should support map() method", () => {
         const store = new ListStore([1, 2, 3]);
         const doubled = store.map((x) => x * 2);
 
         expect(doubled).to.deep.equal([2, 4, 6]);
     });
 
-    t.step("should support forEach() method", (t) => {
+    await t.step("should support forEach() method", () => {
         const store = new ListStore([1, 2, 3]);
         const values: number[] = [];
 
@@ -50,7 +49,7 @@ Deno.test("Additional ListStore Tests", (t) => {
         expect(values).to.deep.equal([1, 2, 3]);
     });
 
-    t.step("should support findIndex() method", (t) => {
+    await t.step("should support findIndex() method", () => {
         const store = new ListStore([10, 20, 30]);
 
         const index = store.findIndex((value) => value > 15);

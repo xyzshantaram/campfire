@@ -3,15 +3,14 @@
  */
 
 import sinon from "sinon";
-import { describe, it } from "jsr:@std/testing/bdd";
 import { Store } from "./Store.ts";
 import type { StoreEvent } from "../types.ts";
 import { expect, setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("Additional Store Tests", (t) => {
-    t.step("should support any() to subscribe to all event types", (t) => {
+Deno.test("Additional Store Tests", async (t) => {
+    await t.step("should support any() to subscribe to all event types", () => {
         const store = new Store({ foo: "bar" });
         const spy = sinon.spy();
 
@@ -49,7 +48,7 @@ Deno.test("Additional Store Tests", (t) => {
         expect(spy.calledOnce).to.be.true;
     });
 
-    t.step("should not send events after dispose() is called", (t) => {
+    await t.step("should not send events after dispose() is called", () => {
         const store = new Store<string>("test");
         const spy = sinon.spy();
 
