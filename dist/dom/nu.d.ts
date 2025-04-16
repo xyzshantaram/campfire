@@ -36,3 +36,4 @@ export declare const extend: <T extends HTMLElement, D extends Record<string, St
  * ```
  */
 export declare const nu: <const Info extends string, Elem extends InferElementType<Info>, Deps extends Record<string, Store<any>>>(elt?: Info | Elem, args?: ElementProperties<Elem, Deps>) => NuBuilder<Elem, Deps, Info>;
+export declare const x: <Elem extends InferElementType<Info>, Deps extends Record<string, Store<any>>, Info extends string = "div">(elt: Elem, args?: ElementProperties<Elem, Deps>) => NuBuilder<Elem, Deps, Info>;

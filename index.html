@@ -287,20 +287,6 @@ const [container] = cf.nu(&quot;div&quot;)
   .children({ listItems })
   .done();
 </code></pre>
-<h5>Using an existing element with nu()</h5>
-<pre class="microlight"><code>// Get a reference to an existing element
-const existing = document.getElementById(&quot;my-element&quot;);
-
-// Add reactive behavior to it
-cf.nu(existing, {
-  deps: { message },
-  render: ({ message }, { b }) =&gt; {
-    return b
-      .content(`Current message: ${message}`)
-      .style(&quot;color&quot;, message.length &gt; 20 ? &quot;red&quot; : &quot;black&quot;);
-  },
-}).done();
-</code></pre>
 <h5>Clearing attributes and styles conditionally</h5>
 <pre class="microlight"><code>const disabled = cf.store({ value: false });
 const theme = cf.store({ value: &quot;light&quot; });
@@ -547,44 +533,34 @@ const bobGreeting = greet({ name: &quot;Bob&quot; }); // &quot;Hello, Bob!&quot;
 <details>
 <summary><code>extend()</code> - element modification</summary>
 
-<p>Modifies existing DOM elements with the same options as <code>nu()</code>.</p>
+<p>Modifies existing DOM elements with the same options as <code>nu()</code>.<br>New in v4.0.0-rc17: x(), an alias for nu() that uses the same builder API.</p>
 <h5>Basic usage</h5>
 <pre class="microlight"><code>const element = document.querySelector(&quot;#my-element&quot;);
 cf.extend(element, {
   contents: &quot;New content&quot;,
   style: { color: &quot;red&quot;, fontSize: &quot;16px&quot; },
 });
-</code></pre>
-<h5>Add event handlers</h5>
-<pre class="microlight"><code>cf.extend(element, {
-  on: {
-    click: () =&gt; console.log(&quot;Clicked!&quot;),
-    mouseover: () =&gt; element.style.opacity = &quot;0.8&quot;,
-  },
-});
+
+// or
+cf.x(element)
+  .content(&quot;New content&quot;)
+  .style({ color: &quot;red&quot;, fontSize: &quot;16px&quot; })
+  .done();
 </code></pre>
 <h5>With reactive data</h5>
-<pre class="microlight"><code>const titleStore = cf.store({ value: &quot;Initial Title&quot; });
+<pre class="microlight"><code>const title = cf.store({ value: &quot;Initial Title&quot; });
 
-cf.extend(pageHeader, {
-  contents: ({ title }) =&gt; `Page: ${title}`,
-  deps: { title: titleStore },
+cf.extend(header, {
+  render: ({ title }) =&gt; `Page: ${title}`,
+  deps: { title },
 });
-</code></pre>
-<h5>Composing elements with extend</h5>
-<pre class="microlight"><code>const childContent = cf.store({ value: &quot;Child text&quot; });
 
-cf.extend(container, {
-  contents: `&lt;h2&gt;Container&lt;/h2&gt;
-&lt;cf-slot name=&quot;childSlot&quot;&gt;&lt;/cf-slot&gt;`,
-  raw: true,
-  children: {
-    childSlot: cf.nu(&quot;span&quot;)
-      .deps({ childContent })
-      .content(({ childContent }) =&gt; childContent)
-      .ref(),
-  },
-});
+// or
+
+cf.x(header)
+  .deps({ title })
+  .render(({ title }) =&gt; `Page: ${title}`)
+  .done();
 </code></pre>
 </details>
 

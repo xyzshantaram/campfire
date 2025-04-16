@@ -150,23 +150,6 @@ const [container] = cf.nu("div")
   .done();
 ```
 
-##### Using an existing element with nu()
-
-```js
-// Get a reference to an existing element
-const existing = document.getElementById("my-element");
-
-// Add reactive behavior to it
-cf.nu(existing, {
-  deps: { message },
-  render: ({ message }, { b }) => {
-    return b
-      .content(`Current message: ${message}`)
-      .style("color", message.length > 20 ? "red" : "black");
-  },
-}).done();
-```
-
 ##### Clearing attributes and styles conditionally
 
 ```js
@@ -505,7 +488,8 @@ const bobGreeting = greet({ name: "Bob" }); // "Hello, Bob!"
 <details>
 <summary><code>extend()</code> - element modification</summary>
 
-Modifies existing DOM elements with the same options as <code>nu()</code>.
+Modifies existing DOM elements with the same options as `nu()`.\
+New in v4.0.0-rc17: x(), an alias for nu() that uses the same builder API.
 
 ##### Basic usage
 
@@ -515,46 +499,30 @@ cf.extend(element, {
   contents: "New content",
   style: { color: "red", fontSize: "16px" },
 });
-```
 
-##### Add event handlers
-
-```js
-cf.extend(element, {
-  on: {
-    click: () => console.log("Clicked!"),
-    mouseover: () => element.style.opacity = "0.8",
-  },
-});
+// or
+cf.x(element)
+  .content("New content")
+  .style({ color: "red", fontSize: "16px" })
+  .done();
 ```
 
 ##### With reactive data
 
 ```js
-const titleStore = cf.store({ value: "Initial Title" });
+const title = cf.store({ value: "Initial Title" });
 
-cf.extend(pageHeader, {
-  contents: ({ title }) => `Page: ${title}`,
-  deps: { title: titleStore },
+cf.extend(header, {
+  render: ({ title }) => `Page: ${title}`,
+  deps: { title },
 });
-```
 
-##### Composing elements with extend
+// or
 
-```js
-const childContent = cf.store({ value: "Child text" });
-
-cf.extend(container, {
-  contents: `<h2>Container</h2>
-<cf-slot name="childSlot"></cf-slot>`,
-  raw: true,
-  children: {
-    childSlot: cf.nu("span")
-      .deps({ childContent })
-      .content(({ childContent }) => childContent)
-      .ref(),
-  },
-});
+cf.x(header)
+  .deps({ title })
+  .render(({ title }) => `Page: ${title}`)
+  .done();
 ```
 
 </details>
