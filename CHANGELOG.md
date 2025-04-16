@@ -1,5 +1,11 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc18
+
+- Huzzah! Campfire now uses Deno instead of Node.js for development.
+- First JSR version
+- fixed bug where default id is cf-- instead of cf-
+
 ## 4.0.0-rc17
 
 - Added x() method for updating elements in an idiomatic way.

@@ -1,5 +1,7 @@
 import { nu } from "./nu.ts";
-import { expect } from "@/test.setup.ts";
+import { expect, setupTests } from "@/test.setup.ts";
+
+setupTests();
 
 Deno.test("nu function coverage", async (t) => {
     await t.step("render returns func, builder, string, or undefined", () => {

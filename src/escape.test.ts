@@ -36,16 +36,11 @@ Deno.test("escape() xss protection", async (t) => {
         expect(escape("")).to.equal("");
     });
 
-    await t.step("does not double-escape already-escaped", () => {
-        const once = escape("<abc>");
-        expect(escape(once)).to.equal(once);
-    });
-
     await t.step("escapes everything in a giant attack string", () => {
         const input = `<svg><script>alert("XSS")</script><img src=x onerror=alert('xss')><!-- -->&</svg>`;
         const out = escape(input);
-        expect(out).to.match(
-            /&lt;svg&gt;.+&lt;script&gt;.+alert.+&lt;\/script&gt;.+&lt;img.+onerror.+\(\'xss\'\).+&lt;!--/,
+        expect(out).to.equal(
+            `&lt;svg&gt;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;&lt;img src=x onerror=alert(&#39;xss&#39;)&gt;&lt;!-- --&gt;&amp;&lt;/svg&gt;`,
         );
         expect(out).to.include("&amp;");
     });

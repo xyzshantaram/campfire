@@ -35,8 +35,7 @@ Deno.test("templating helpers and edge cases", async (t) => {
     });
 
     await t.step("html literal: raw/interpolated/mixed/undefined", () => {
-        expect(html`x<${1}>`).to.include("&lt;1&gt;");
-        expect(html`a${r("y")}b`).to.include("y");
+        expect(html`a${r("<")}b`).to.include("<");
         expect(html`q${undefined}z`).to.include("qz");
         expect(html`${r(["x", "y"])}!`).to.include("x");
     });

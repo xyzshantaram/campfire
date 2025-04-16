@@ -1,6 +1,7 @@
 import { NuBuilder } from "@/dom/NuBuilder.ts";
 import { nu, store } from "@/campfire.ts";
 import { expect, setupTests } from "@/test.setup.ts";
+import { CfDom } from "@/dom/mod.ts";
 
 setupTests();
 
@@ -61,7 +62,7 @@ Deno.test("classes logic", async (t) => {
 
 Deno.test("NuBuilder method coverage", async (t) => {
     await t.step("covers every builder chainable method", () => {
-        const el = document.createElement("div");
+        const el = CfDom.document!.createElement("div");
         const b = nu(el);
 
         b.content("A")
