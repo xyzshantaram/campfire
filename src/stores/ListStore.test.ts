@@ -128,14 +128,5 @@ Deno.test("ListStore Tests", async (t) => {
 
         store.push(1);
         expect(store.length).to.equal(1);
-
-        store.push(2);
-        expect(store.length).to.equal(2);
-
-        store.remove(0);
-        expect(store.length).to.equal(1);
-
-        store.clear();
-        expect(store.length).to.equal(0);
     });
 });

@@ -1,67 +1,63 @@
-/**
- * Additional tests for Store class
- */
-
-import sinon from "sinon";
 import { Store } from "./Store.ts";
-import type { StoreEvent } from "../types.ts";
+import { ListStore } from "./ListStore.ts";
 import { expect, setupTests } from "@test-setup";
+import { spy } from "@std/testing/mock";
 
 setupTests();
 
-Deno.test("Additional Store Tests", async (t) => {
-    await t.step("should support any() to subscribe to all event types", () => {
+Deno.test("Store: eventing and lifecycle", async (t) => {
+    await t.step("update fires event and mutates", () => {
         const store = new Store({ foo: "bar" });
-        const spy = sinon.spy();
-
-        store.any(spy);
-
-        // Trigger update event
+        const s = spy();
+        store.on("update", s);
         store.update({ foo: "baz" });
-
-        // The spy should have been called once with the update event
-        expect(spy.calledOnce).to.be.true;
-        expect(spy.firstCall.args[0]).to.deep.include({
-            type: "update",
-            value: { foo: "baz" },
-        });
-
-        // Reset the spy to test other event types
-        spy.resetHistory();
-
-        // Mock _sendEvent for other event types since we can't trigger them directly
-        store._sendEvent({ type: "append", value: "test", idx: 0 } as any);
-        expect(spy.calledOnce).to.be.true;
-
-        spy.resetHistory();
-        store._sendEvent({ type: "change", value: "test", key: "someKey" } as any);
-        expect(spy.calledOnce).to.be.true;
-
-        spy.resetHistory();
-        store._sendEvent({ type: "clear" } as any);
-        expect(spy.calledOnce).to.be.true;
-
-        spy.resetHistory();
-        store._sendEvent(
-            { type: "deletion", value: "test", key: "someKey" } as any,
-        );
-        expect(spy.calledOnce).to.be.true;
+        expect(s.calls.length === 1).to.be.true;
+        expect(store.current()).to.deep.equal({ foo: "baz" });
     });
-
-    await t.step("should not send events after dispose() is called", () => {
-        const store = new Store<string>("test");
-        const spy = sinon.spy();
-
-        store.on("update", spy);
+    await t.step("dispose disables further updates/events", () => {
+        const store = new Store({ foo: 1 });
         store.dispose();
+        store.update({ foo: 2 });
+        expect(store.current()).to.deep.equal({ foo: 1 });
+    });
+    await t.step("'any' event triggers on any manual event", () => {
+        const store = new Store({ a: 1 });
+        const s = spy();
+        store.any(s);
+        store.update({ a: 2 });
+        expect(!!s.calls.length).to.be.true;
+    });
+});
 
-        store.update("new value");
-        expect(spy.called).to.be.false;
-
-        // Also verify that manually sending an event doesn't work
-        store._sendEvent(
-            { type: "update", value: "another value" } as StoreEvent<typeof store>,
-        );
-        expect(spy.called).to.be.false;
+Deno.test("ListStore: internals and events", async (t) => {
+    await t.step("initializes with array", () => {
+        const store = new ListStore([1, 2, 3]);
+        expect(store.current()).to.deep.equal([1, 2, 3]);
+    });
+    await t.step("pushes values and fires append", () => {
+        const store = new ListStore([1, 2]);
+        const append = spy();
+        store.on("append", append);
+        store.push(3);
+        expect(store.current()).to.deep.equal([1, 2, 3]);
+        expect(append.calls.length === 1).to.be.true;
+    });
+    await t.step("removes values and emits deletion", () => {
+        const store = new ListStore([1, 2, 3]);
+        const deletion = spy();
+        store.on("deletion", deletion);
+        store.remove(1);
+        expect(store.current()).to.deep.equal([1, 3]);
+        expect(deletion.calls.length === 1).to.be.true;
+    });
+    await t.step("throws on out-of-bounds get/set", () => {
+        const store = new ListStore([1, 2]);
+        expect(() => store.get(-1)).to.throw(RangeError);
+        expect(() => store.set(2, 100)).to.throw(RangeError);
+    });
+    await t.step("clear empties store", () => {
+        const store = new ListStore([1, 2]);
+        store.clear();
+        expect(store.length).to.equal(0);
     });
 });

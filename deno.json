@@ -1,38 +1,42 @@
 {
-  "include": [
-    "site/build.ts"
-  ],
-  "lint": {
-    "rules": {
-      "exclude": ["no-explicit-any"]
+    "include": [
+        "site/build.ts"
+    ],
+    "lint": {
+        "rules": {
+            "exclude": ["no-explicit-any"]
+        }
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "lineWidth": 120
+    },
+    "exclude": ["test/setup.ts"],
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "types": [],
+        "lib": [
+            "DOM",
+            "ES2020",
+            "deno.ns"
+        ]
+    },
+    "unstable": [
+        "sloppy-imports"
+    ],
+    "imports": {
+        "@std/testing": "jsr:@std/testing@^1.0.11",
+        "chai": "https://esm.sh/chai@^5.2.0",
+        "chai-dom": "https://esm.sh/chai-dom@^1.12.1",
+        "jsdom": "npm:jsdom@^26.1.0",
+        "sinon": "https://esm.sh/sinon@^20.0.0",
+        "@test-setup": "./src/test.setup.ts"
+    },
+    "tasks": {
+        "test": "deno test -A src/**/*.test.ts",
+        "coverage": "deno test -A --coverage && deno coverage",
+        "build-site": "deno run -A scripts/build.ts ./site/sections ./index.html",
+        "size": "deno run --allow-read scripts/size-estimate.js"
     }
-  },
-  "exclude": ["test/setup.ts"],
-  "compilerOptions": {
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "types": [],
-    "lib": [
-      "DOM",
-      "ES2020",
-      "deno.ns"
-    ]
-  },
-  "unstable": [
-    "sloppy-imports"
-  ],
-  "imports": {
-    "@std/testing": "jsr:@std/testing@^1.0.11",
-    "chai": "npm:chai@^5.2.0",
-    "chai-dom": "npm:chai-dom@^1.12.1",
-    "jsdom": "npm:jsdom@^26.1.0",
-    "sinon": "npm:sinon@^20.0.0",
-    "@test-setup": "./src/test.setup.ts"
-  },
-  "tasks": {
-    "test": "deno test -A src/**/*.test.ts",
-    "coverage": "deno test --coverage",
-    "build-site": "deno run -A scripts/build.ts ./site/sections ./index.html",
-    "size": "deno run --allow-read scripts/size-estimate.js"
-  }
 }

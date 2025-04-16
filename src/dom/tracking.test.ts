@@ -1,33 +1,18 @@
-import { assert } from "chai";
 import { track, tracked, untrack } from "./tracking.ts";
 import { CfDom } from "./config.ts";
+import { assert } from "chai";
 import { setupTests } from "@test-setup";
 
 setupTests();
 
-Deno.test("Element tracking functionality", async (t) => {
-    await t.step("should track and retrieve elements by ID", () => {
-        const element = CfDom.document!.createElement("div");
-        track("test-element", element);
-
-        const retrievedElement = tracked("test-element");
-        assert.strictEqual(retrievedElement, element);
+Deno.test("track/tracked/untrack: add, get, remove", async (t) => {
+    await t.step("track and retrieve", () => {
+        const el = CfDom.document!.createElement("div");
+        track("xyz", el);
+        assert.strictEqual(tracked("xyz"), el);
     });
-
-    await t.step("should return null for untracked elements", () => {
-        const retrievedElement = tracked("non-existent-element");
-        assert.isNull(retrievedElement);
-    });
-
-    await t.step("should untrack elements", () => {
-        const element = CfDom.document!.createElement("div");
-        track("element-to-untrack", element);
-
-        // Verify it's tracked
-        assert.strictEqual(tracked("element-to-untrack"), element);
-
-        // Untrack and verify it's no longer tracked
-        untrack("element-to-untrack");
-        assert.isNull(tracked("element-to-untrack"));
+    await t.step("untrack removes", () => {
+        untrack("xyz");
+        assert.isNull(tracked("xyz"));
     });
 });
