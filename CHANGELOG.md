@@ -1,5 +1,9 @@
 # Campfire.js Changelog
 
+## 4.0.0-rc17
+
+- Added x() method for updating elements in an idiomatic way.
+
 ## 4.0.0-rc16
 
 - Stores now use a hybrid cloning approach and freeze values. They try to clone

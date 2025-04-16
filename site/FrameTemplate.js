@@ -1,4 +1,4 @@
-import { template } from 'https://esm.sh/campfire.js@4.0.0-rc15';
+import { template } from 'https://esm.sh/campfire.js@4.0.0-rc17';
 
 export const FrameTemplate = template(`
 <html>
@@ -42,7 +42,7 @@ export const FrameTemplate = template(`
 <body>
     {{{ html }}}
     <script type='module'>
-        import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc15';
+        import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc17';
         window.onload = function() {
             {{{ javascript }}}
         }

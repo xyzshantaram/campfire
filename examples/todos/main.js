@@ -46,7 +46,7 @@ const todos = cf.nu('ul')
                 const li = cf.tracked(event.value.id);
                 li.classList.add('done');
                 const [btn] = cf.select({ s: 'button', from: li });
-                cf.nu(btn)
+                cf.x(btn)
                     .content("Delete")
                     .on('click', () => store.remove(store.findIndex(itm => itm.id === event.value.id)))
                     .done();

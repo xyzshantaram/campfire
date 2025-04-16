@@ -252,3 +252,14 @@ export const nu = <
 ): NuBuilder<Elem, Deps, Info> => {
     return new NuBuilder<Elem, Deps, Info>(elt, args);
 };
+
+export const x = <
+    Elem extends InferElementType<Info>,
+    Deps extends Record<string, Store<any>>,
+    Info extends string = 'div',
+>(
+    elt: Elem,
+    args: ElementProperties<Elem, Deps> = {},
+): NuBuilder<Elem, Deps, Info> => {
+    return nu(elt, args);
+}

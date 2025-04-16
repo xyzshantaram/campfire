@@ -1,4 +1,4 @@
-import cf from 'https://esm.sh/campfire.js@4.0.0-rc15';
+import cf from 'https://esm.sh/campfire.js@4.0.0-rc17';
 import { FrameTemplate } from "./FrameTemplate.js";
 
 const createEditorConfig = () => {
