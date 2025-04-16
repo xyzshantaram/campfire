@@ -1,83 +1,130 @@
 # campfire
 
-a cozy web framework
+A cozy web framework for modern JavaScript.
 
 <p align='center'>
     <img src='campfire.png' alt='campfire logo' width=256 height=256>
 </p>
 
-Campfire is a collection of small utilities to make developing with vanilla JS easy.
+Campfire helps you build maintainable, reactive web UI without a build step, without piles of
+dependencies, and without magic.
 
-It is kept lightweight on purpose, aiming to provide the bare minimum necessary to make development easier.
+---
 
-### Features
+## Features
 
-- **Fluent builder API**: Create and configure DOM elements with a chainable, intuitive API
-- **Reactive data stores**: Implement reactive data and elements with Campfire's store APIs
-- **Templating Helpers**: Simple utilities for HTML templating and content rendering
-- **Minimal footprint**: 5kb compressed
-- **TypeScript support**: First-class TypeScript integration with type inference
-- **Composable elements**: Preserve reactive children across re-renders
-- **DOM Helpers**: Streamlined APIs for DOM manipulation and event handling
+- **Chainable builder API** for expressive and readable DOM markup
+- **Reactive data stores** for tightly-coupled UI and state—no frameworks, no global hacks
+- **Fluent HTML templating** with autoescaping by default and simple pattern-matching
+- **TypeScript-first**: type inference for all APIs
+- **Near-zero dependencies**: ~5kb compressed, works in browsers & on the server
+- **Composable by default**: create reusable components as regular JS/TS functions
+- **Collection helpers**: ListStore and MapStore for ergonomic reactive collections
+- **Clean DOM helpers** for selection, insertion, mutation, and more
 
-### Building
+---
+
+## Install
+
+Direct ES module (browser or Deno):
+
+```js
+import { nu, Store } from "https://esm.sh/campfire.js";
+```
+
+With npm:
 
 ```sh
-$ npm run build
+pnpm i campfire.js
 ```
 
-Then you can use `dist/campfire.min.js` and `dist/campfire.d.ts`.
-
-### Usage
-
-You can use it directly in a JS file intended for the browser, either from [esm.sh](https://esm.sh/campfire.js) or
-[unpkg](https://unpkg.com/campfire.js@latest/dist/campfire.esm.min.js), or self-host it:
+Then:
 
 ```js
-import cf from "https://esm.sh/campfire.js";
+import cf from "campfire.js";
 ```
 
-or install it with npm (`npm i campfire.js`) and use it in your existing workflow.
+---
 
-All the methods and classes are also exported, so you can do named imports as usual:
+## Quick Start
+
+### Create a DOM element with the builder API
 
 ```js
-import { ListStore, nu } from "https://esm.sh/campfire.js";
+const [button] = cf.nu("button#search")
+    .content("Search")
+    .attr("type", "submit")
+    .on("click", searchHandler)
+    .done();
 ```
 
-### Quick reference
+### Reactive UI state
 
-The API reference can be found [here](https://xyzshantaram.github.io/campfire/?tab=docs).
+```js
+const count = cf.store({ value: 0 });
 
-### Contributing
+const [counter] = cf.nu("div.counter")
+    .deps({ count })
+    .render(({ count }, { b }) => b.html`Clicked ${count} times!`)
+    .done();
 
-Fork the repo and make a pull request, or open an issue on the issues page.
+count.update((n) => n + 1);
+```
 
-### Donate
+### Simple, composable components
 
-If you like using Campfire, you can donate to Campfire development using one of the means listed
+```js
+const NameBadge = () => {
+    const name = cf.store({ value: "" });
+    const elt = cf.nu("div.badge")
+        .deps({ name })
+        .render(({ name }, { b, first }) => b.content(first ? "" : `Hi, ${name}!`))
+        .done();
+    return [name, elt];
+};
+
+const [name, badge] = NameBadge();
+insert(badge, { into: document.body });
+name.update("you");
+```
+
+---
+
+## API at a Glance
+
+| Function          | Purpose                                    |
+| ----------------- | ------------------------------------------ |
+| `nu()`            | Create elements with chainable builder API |
+| `store()`         | Create reactive values, arrays, or maps    |
+| `select()`        | Select DOM elements (array or single)      |
+| `insert()`        | Insert element(s) anywhere in the DOM      |
+| `html``           | Safe HTML templating (escaped by default)  |
+| `mustache()`      | Render Mustache-style string templates     |
+| `extend()`, `x()` | Modify or enhance any DOM element          |
+| `empty()`, `rm()` | Empty or remove elements                   |
+| `seq()`, `ids()`  | Utilities for number ranges and unique IDs |
+
+For **full, annotated examples and advanced usage**, see the
+[quick reference](https://xyzshantaram.github.io/campfire/?tab=docs).
+
+---
+
+## Contributing
+
+Pull requests and issues are welcome!
+
+---
+
+## License and Acknowledgements
+
+[MIT License](LICENSE)
+
+See [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md) for full license, icon, and upstream credit
+information.
+
+---
+
+## Donate
+
+If Campfire makes your project better, you can support maintenance and new features
 [here](https://shantaram.xyz/contact/donate.html).
-
-### Acknowledgements
-
-Icon made by [Those Icons](https://www.flaticon.com/authors/those-icons) from [Flaticon](https://www.flaticon.com/)
-
-The [unescape](https://github.com/lodash/lodash/blob/master/unescape.js) function and
-[unit tests for it](https://github.com/lodash/lodash/blob/master/test/unescape.js) and
-[escape](https://github.com/lodash/lodash/blob/master/test/escape.test.js) are derived from lodash under the terms of
-the MIT License. Code in lodash is a copyright of JS Foundation and other contributors <https://js.foundation/>. Lodash
-itself is based on Underscore.js, copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-<http://underscorejs.org/>
-
-Docs for Campfire are built with [TypeDoc](https://typedoc.org).
-
-The Campfire website uses the [toml](https://www.npmjs.com/package/toml) and [Marked.js](https://marked.js.org/)
-libraries under the MIT License to display its content.
-
-Syntax highlighting on the Campfire website is achieved with [`macrolight`](https://github.com/xyzshantaram/macrolight).
-`macrolight` is a fork of [`microlight`](https://asvd.github.io/microlight) by [asvd](https://github.com/asvd) and is
-used under the [MIT License](https://github.com/asvd/microlight/blob/master/LICENSE).
-
-The Campfire playground uses the [Ace editor](https://github.com/ajaxorg/ace/) as an embedded editor. The Ace editor is
-a copyright of Ajax.org B.V. and is used under the
-[3-clause BSD license](https://github.com/ajaxorg/ace/blob/master/LICENSE).
