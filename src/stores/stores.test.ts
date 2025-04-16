@@ -1,6 +1,5 @@
 import cf, { nu } from "../campfire.ts";
 import { expect, setupTests } from "@test-setup";
-import { spy } from "@std/testing/mock";
 
 setupTests();
 
