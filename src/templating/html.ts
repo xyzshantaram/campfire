@@ -39,7 +39,7 @@ export const r = (val: any, options?: RawHtmlOptions): RawHtml => {
  */
 export const html = (
     strings: TemplateStringsArray,
-    ...values: (string | boolean | number | RawHtml)[]
+    ...values: (string | boolean | number | RawHtml | undefined)[]
 ) => {
     const built = [];
     for (let i = 0; i < strings.length; i++) {

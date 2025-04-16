@@ -1,6 +1,6 @@
 import { extend, insert, nu, rm } from "../campfire.ts";
 import { CfDom } from "./config.ts";
-import { expect, setupTests } from "@test-setup";
+import { expect, setupTests } from "@/test.setup.ts";
 
 setupTests();
 

@@ -31,7 +31,7 @@
         "chai-dom": "https://esm.sh/chai-dom@1.12.1",
         "jsdom": "npm:jsdom@26.1.0",
         "sinon": "https://esm.sh/sinon@20.0.0",
-        "@test-setup": "./src/test.setup.ts"
+        "@/": "./src/"
     },
     "tasks": {
         "test": "deno test -A src/**/*.test.ts",

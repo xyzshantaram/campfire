@@ -1,5 +1,5 @@
 import { MapStore } from "./MapStore.ts";
-import { expect, setupTests } from "@test-setup";
+import { expect, setupTests } from "@/test.setup.ts";
 import { spy } from "@std/testing/mock";
 
 setupTests();

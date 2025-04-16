@@ -1,7 +1,7 @@
 import { track, tracked, untrack } from "./tracking.ts";
 import { CfDom } from "./config.ts";
 import { assert } from "chai";
-import { setupTests } from "@test-setup";
+import { setupTests } from "@/test.setup.ts";
 
 setupTests();
 

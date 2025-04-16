@@ -1,5 +1,5 @@
 import cf, { nu } from "../campfire.ts";
-import { expect, setupTests } from "@test-setup";
+import { expect, setupTests } from "@/test.setup.ts";
 
 setupTests();
 

@@ -1,5 +1,5 @@
 import { callbackify, escape, poll, seq, unescape } from "./utils.ts";
-import { expect, setupTests } from "@test-setup";
+import { expect, setupTests } from "@/test.setup.ts";
 import { spy } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
 

@@ -1,5 +1,6 @@
-import { nu, store } from "../campfire.ts";
-import { expect, setupTests } from "@test-setup";
+import { NuBuilder } from "@/dom/NuBuilder.ts";
+import { nu, store } from "@/campfire.ts";
+import { expect, setupTests } from "@/test.setup.ts";
 
 setupTests();
 
@@ -55,5 +56,44 @@ Deno.test("classes logic", async (t) => {
         expect(b.classList.contains("on")).to.be.false;
         s.update(true);
         expect(b.classList.contains("on")).to.be.true;
+    });
+});
+
+Deno.test("NuBuilder method coverage", async (t) => {
+    await t.step("covers every builder chainable method", () => {
+        const el = document.createElement("div");
+        const b = nu(el);
+
+        b.content("A")
+            .attr("data-x", "v")
+            .attrs({ "data-y": "z" })
+            .style("color", "red")
+            .styles({ background: "white" })
+            .raw(true)
+            .misc("tabIndex", 3)
+            .misc({ title: "T" })
+            .on("click", () => {})
+            .cls("foo", true)
+            .track("test-id")
+            .gimme(".foo", "#id")
+            .deps({})
+            .html("<span>B</span>");
+
+        expect(b).to.be.instanceOf(NuBuilder);
+        expect(b.ref()).to.equal(el);
+    });
+
+    await t.step("throws for # in classes", () => {
+        expect(() => nu("div.class#name")).to.throw();
+    });
+
+    await t.step("defaults tag to div & parses selectors", () => {
+        const b = nu();
+        expect(b.ref().tagName).to.equal("DIV");
+        const tagParse = nu("span#u.x.y").ref();
+        expect(tagParse.tagName).to.equal("SPAN");
+        expect(tagParse.id).to.equal("u");
+        expect(tagParse.classList.contains("x")).to.be.true;
+        expect(tagParse.classList.contains("y")).to.be.true;
     });
 });

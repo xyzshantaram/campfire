@@ -1,6 +1,6 @@
 import { Store } from "./Store.ts";
 import { ListStore } from "./ListStore.ts";
-import { expect, setupTests } from "@test-setup";
+import { expect, setupTests } from "@/test.setup.ts";
 import { spy } from "@std/testing/mock";
 
 setupTests();
@@ -59,5 +59,22 @@ Deno.test("ListStore: internals and events", async (t) => {
         const store = new ListStore([1, 2]);
         store.clear();
         expect(store.length).to.equal(0);
+    });
+});
+
+Deno.test("Store missing/edge paths", async (t) => {
+    await t.step("unsubscribes via unsubscribe", () => {
+        const s = new Store(1);
+        const sub = s.on("update", () => {});
+        s.unsubscribe("update", sub);
+        expect(typeof sub).to.equal("number"); // unsub runs
+    });
+
+    await t.step("update with updater fn and with value", () => {
+        const st = new Store<number>(1);
+        st.update((x) => x + 1);
+        expect(st.current()).to.equal(2);
+        st.update(5);
+        expect(st.current()).to.equal(5);
     });
 });

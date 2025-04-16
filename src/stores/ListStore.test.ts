@@ -4,7 +4,7 @@
 
 import { spy } from "@std/testing/mock";
 import { ListStore } from "./ListStore.ts";
-import { expect, setupTests } from "@test-setup";
+import { expect, setupTests } from "@/test.setup.ts";
 
 setupTests();
 
