@@ -5,6 +5,7 @@
             "title": "What do you get when you multiply six by nine?",
             "path": "answer"
         },
-        { "title": "To-do list", "path": "todos" }
+        { "title": "To-do list", "path": "todos" },
+        { "title": "Router", "path": "router" }
     ]
 }
