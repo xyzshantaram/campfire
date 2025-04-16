@@ -35,8 +35,8 @@
     },
     "tasks": {
         "test": "deno test -A src/**/*.test.ts",
-        "coverage:detailed": "deno test -A --coverage && deno coverage --detailed",
-        "coverage": "deno test -A --coverage && deno coverage",
+        "coverage:detailed": "deno test -A --coverage && deno coverage --detailed && rm -rf coverage/",
+        "coverage": "deno test -A --coverage && deno coverage --exclude=\"dom/config.ts\" && rm -rf coverage/",
         "build-site": "deno run -A scripts/build.ts ./site/sections ./index.html",
         "size": "deno run --allow-read scripts/size-estimate.js"
     }

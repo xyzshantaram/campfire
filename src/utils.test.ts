@@ -1,4 +1,4 @@
-import { callbackify, escape, poll, seq, unescape } from "./utils.ts";
+import { callbackify, deepishClone, escape, poll, seq, unescape } from "@/utils.ts";
 import { expect, setupTests } from "@/test.setup.ts";
 import { spy } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
@@ -69,5 +69,25 @@ Deno.test("poll", async (t) => {
         const cancel = poll(cb2, 50, true);
         expect(cb2.calls.length).to.equal(1);
         cancel();
+    });
+});
+
+Deno.test("deepishClone edge cases", async (t) => {
+    await t.step("falls back for Map/Set/Date/RegExp and returns the reference", () => {
+        const m = new Map();
+        expect(deepishClone(m)).to.equal(m);
+        const s = new Set();
+        expect(deepishClone(s)).to.equal(s);
+        const d = new Date();
+        expect(deepishClone(d)).to.equal(d);
+        const r = /x/;
+        expect(deepishClone(r)).to.equal(r);
+    });
+    await t.step("cycles fallback to original", () => {
+        const obj: any = {};
+        obj.me = obj;
+        const clone = deepishClone(obj);
+        expect(clone).not.to.equal(obj);
+        expect(clone.me).to.equal(clone);
     });
 });
