@@ -6,10 +6,10 @@ import { select } from "./mod.ts";
 import { NuBuilder } from "./NuBuilder.ts";
 import { CfDom } from "./config.ts";
 import type { StoreEventFromObject } from "../types.ts";
-import * as tracking from './tracking.ts';
+import * as tracking from "./tracking.ts";
 
 const unwrap = <D extends Record<string, Store<any>>>(
-    deps: D
+    deps: D,
 ): UnwrapStore<D> => {
     const result: any = {};
     for (const key in deps) {
@@ -18,7 +18,10 @@ const unwrap = <D extends Record<string, Store<any>>>(
     return result;
 };
 
-const isValidRenderFn = <T extends HTMLElement, D extends Record<string, Store<any>>>(
+const isValidRenderFn = <
+    T extends HTMLElement,
+    D extends Record<string, Store<any>>,
+>(
     fn: ElementProperties<T, D>["render"],
 ): fn is RenderFunction<T, any> => {
     if (!fn) return false;
@@ -26,32 +29,34 @@ const isValidRenderFn = <T extends HTMLElement, D extends Record<string, Store<a
     return true;
 };
 
-const reconcileClasses = (elt: HTMLElement, changed: Record<string, boolean>) => {
+const reconcileClasses = (
+    elt: HTMLElement,
+    changed: Record<string, boolean>,
+) => {
     return Object.keys(changed).forEach(
-        key => changed[key] ? elt.classList.add(key) : elt.classList.remove(key)
+        (key) => changed[key] ? elt.classList.add(key) : elt.classList.remove(key),
     );
-}
+};
 
 /**
  * Reconciles the properties from a NuBuilder to an existing element.
  * This applies the builder's properties to the element without replacing it.
- * 
+ *
  * @param elt The target element to update
  * @param builder The NuBuilder whose properties will be applied
  */
 const reconcile = <
     T extends HTMLElement,
-    D extends Record<string, Store<any>>
+    D extends Record<string, Store<any>>,
 >(elt: T, builder: RenderBuilder<T, D>) => {
     const { style = {}, attrs = {}, misc = {}, classes = {} } = builder.props;
     reconcileClasses(elt, classes);
     Object.assign(elt.style, style);
     if (attrs) {
         Object.entries(attrs || {}).forEach(([key, value]) => {
-            if (typeof value === 'string' && value.length === 0) {
+            if (typeof value === "string" && value.length === 0) {
                 elt.removeAttribute(key);
-            }
-            else if (elt.getAttribute(key) !== String(value)) {
+            } else if (elt.getAttribute(key) !== String(value)) {
                 elt.setAttribute(key, String(value));
             }
         });
@@ -61,73 +66,73 @@ const reconcile = <
 };
 
 const extractReactiveChildren = (elt: HTMLElement) =>
-    select({ s: '[data-cf-slot]', all: true, from: elt })
-        .map(elt => [elt.getAttribute('data-cf-slot'), elt] as [string, HTMLElement])
+    select({ s: "[data-cf-slot]", all: true, from: elt })
+        .map((elt) => [elt.getAttribute("data-cf-slot"), elt] as [string, HTMLElement])
         .reduce((prev, [slot, elt]) => {
             prev[slot] ??= [];
             prev[slot].push(elt);
             return prev;
-        }, {} as Record<string, HTMLElement[]>)
+        }, {} as Record<string, HTMLElement[]>);
 
 const setupDeps = <
-    T extends HTMLElement, D extends Record<string, Store<any>>
+    T extends HTMLElement,
+    D extends Record<string, Store<any>>,
 >({ elt, render, deps }: {
-    elt: T,
-    render: RenderFunction<T, D>,
-    deps: D
+    elt: T;
+    render: RenderFunction<T, D>;
+    deps: D;
 }) => {
-    Object.entries(deps).forEach(([name, dep]) => dep.any((evt) => {
-        const builder = new NuBuilder<T, D, string>(elt);
-        const res = render(unwrap(deps), {
-            elt,
-            event: { ...(evt as StoreEventFromObject<D>), triggeredBy: name },
-            b: builder as NuBuilder<T, any, string>,
-            first: false
-        });
+    Object.entries(deps).forEach(([name, dep]) =>
+        dep.any((evt) => {
+            const builder = new NuBuilder<T, D, string>(elt);
+            const res = render(unwrap(deps), {
+                elt,
+                event: { ...(evt as StoreEventFromObject<D>), triggeredBy: name },
+                b: builder as NuBuilder<T, any, string>,
+                first: false,
+            });
 
-        const children = extractReactiveChildren(elt);
-        if (typeof res === 'string') {
-            elt.innerHTML = res;
-        }
-        else if (res instanceof NuBuilder) {
-            const c = res.props.contents || '';
-            elt.innerHTML = res.props.raw ? c : escape(c);
-            reconcile(elt, res);
-        }
-        else return;
+            const children = extractReactiveChildren(elt);
+            if (typeof res === "string") {
+                elt.innerHTML = res;
+            } else if (res instanceof NuBuilder) {
+                const c = res.props.contents || "";
+                elt.innerHTML = res.props.raw ? c : escape(c);
+                reconcile(elt, res);
+            } else return;
 
-        for (const key in children) {
-            const [slot] = select({ s: `cf-slot[name='${key}']`, from: elt });
-            if (!slot) continue;
-            const list = children[key] || [];
-            const fragment = CfDom.createDocumentFragment();
-            list.forEach(elt => fragment.appendChild(elt))
-            slot.replaceWith(fragment);
-        }
-    })
+            for (const key in children) {
+                const [slot] = select({ s: `cf-slot[name='${key}']`, from: elt });
+                if (!slot) continue;
+                const list = children[key] || [];
+                const fragment = CfDom.createDocumentFragment();
+                list.forEach((elt) => fragment.appendChild(elt));
+                slot.replaceWith(fragment);
+            }
+        })
     );
-}
+};
 
 const setupReactiveChildren = <T extends HTMLElement>(
     elt: T,
-    children: Record<string, CfHTMLElementInterface | CfHTMLElementInterface[]>
+    children: Record<string, CfHTMLElementInterface | CfHTMLElementInterface[]>,
 ) => {
-    elt.querySelectorAll('cf-slot[name]').forEach(itm => {
-        const name = itm.getAttribute('name');
+    elt.querySelectorAll("cf-slot[name]").forEach((itm) => {
+        const name = itm.getAttribute("name");
         if (!name) return;
         if (Object.hasOwn(children, name)) {
             const val = children[name];
-            const replacement: Node = Array.isArray(val) ?
-                CfDom.createDocumentFragment() : val;
-            if (Array.isArray(val)) val.forEach(item => {
-                replacement.appendChild(item);
-                item.setAttribute('data-cf-slot', name);
-            });
-            else val.setAttribute('data-cf-slot', name);
+            const replacement: Node = Array.isArray(val) ? CfDom.createDocumentFragment() : val;
+            if (Array.isArray(val)) {
+                val.forEach((item) => {
+                    replacement.appendChild(item);
+                    item.setAttribute("data-cf-slot", name);
+                });
+            } else val.setAttribute("data-cf-slot", name);
             itm.replaceWith(replacement);
         }
     });
-}
+};
 
 /**
  * Takes an existing element and modifies its properties.
@@ -155,7 +160,7 @@ export const extend = <
         gimme = [],
         deps = ({} as D),
         children = {},
-        track
+        track,
     } = args;
     let raw = !!r;
 
@@ -169,18 +174,19 @@ export const extend = <
         const result = render(unwrap(deps), {
             elt,
             b: new NuBuilder<T, D, string>(elt),
-            first: true
+            first: true,
         });
 
-        if (typeof result === "undefined") elt.setAttribute("data-cf-fg-updates", "true");
-        else {
+        if (typeof result === "undefined") {
+            elt.setAttribute("data-cf-fg-updates", "true");
+        } else {
             elt.removeAttribute("data-cf-fg-updates");
-            if (typeof result === 'string') {
+            if (typeof result === "string") {
                 setHtml(result);
             }
             if (result instanceof NuBuilder) {
                 raw = !!result.props.raw;
-                setHtml(result.props.contents || '');
+                setHtml(result.props.contents || "");
                 reconcile(elt, result);
             }
         }
@@ -200,8 +206,9 @@ export const extend = <
         const current = elt.getAttribute(attr);
         const str = String(value);
         if (current === str) return;
-        if (typeof value === 'string' && value.length === 0) elt.removeAttribute(attr);
-        else elt.setAttribute(attr, String(value));
+        if (typeof value === "string" && value.length === 0) {
+            elt.removeAttribute(attr);
+        } else elt.setAttribute(attr, String(value));
     });
 
     const extras: HTMLElement[] = [];
@@ -247,7 +254,7 @@ export const nu = <
     Elem extends InferElementType<Info>,
     Deps extends Record<string, Store<any>>,
 >(
-    elt = 'div' as Info | Elem,
+    elt = "div" as Info | Elem,
     args: ElementProperties<Elem, Deps> = {},
 ): NuBuilder<Elem, Deps, Info> => {
     return new NuBuilder<Elem, Deps, Info>(elt, args);
@@ -256,10 +263,10 @@ export const nu = <
 export const x = <
     Elem extends InferElementType<Info>,
     Deps extends Record<string, Store<any>>,
-    Info extends string = 'div',
+    Info extends string = "div",
 >(
     elt: Elem,
     args: ElementProperties<Elem, Deps> = {},
 ): NuBuilder<Elem, Deps, Info> => {
     return nu(elt, args);
-}
+};

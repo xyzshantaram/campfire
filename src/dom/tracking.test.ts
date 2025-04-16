@@ -1,31 +1,31 @@
-import { describe, it } from "mocha";
+import { describe, it } from "jsr:@std/testing/bdd";
 import { assert } from "chai";
-import { track, untrack, tracked } from "./tracking.ts";
+import { track, tracked, untrack } from "./tracking.ts";
 import { CfDom } from "./config.ts";
 
-describe("Element tracking functionality", () => {
-  it("should track and retrieve elements by ID", () => {
-    const element = CfDom.document!.createElement("div");
-    track("test-element", element);
-    
-    const retrievedElement = tracked("test-element");
-    assert.strictEqual(retrievedElement, element);
-  });
+Deno.test("Element tracking functionality", (t) => {
+    t.step("should track and retrieve elements by ID", (t) => {
+        const element = CfDom.document!.createElement("div");
+        track("test-element", element);
 
-  it("should return null for untracked elements", () => {
-    const retrievedElement = tracked("non-existent-element");
-    assert.isNull(retrievedElement);
-  });
+        const retrievedElement = tracked("test-element");
+        assert.strictEqual(retrievedElement, element);
+    });
 
-  it("should untrack elements", () => {
-    const element = CfDom.document!.createElement("div");
-    track("element-to-untrack", element);
-    
-    // Verify it's tracked
-    assert.strictEqual(tracked("element-to-untrack"), element);
-    
-    // Untrack and verify it's no longer tracked
-    untrack("element-to-untrack");
-    assert.isNull(tracked("element-to-untrack"));
-  });
+    t.step("should return null for untracked elements", (t) => {
+        const retrievedElement = tracked("non-existent-element");
+        assert.isNull(retrievedElement);
+    });
+
+    t.step("should untrack elements", (t) => {
+        const element = CfDom.document!.createElement("div");
+        track("element-to-untrack", element);
+
+        // Verify it's tracked
+        assert.strictEqual(tracked("element-to-untrack"), element);
+
+        // Untrack and verify it's no longer tracked
+        untrack("element-to-untrack");
+        assert.isNull(tracked("element-to-untrack"));
+    });
 });

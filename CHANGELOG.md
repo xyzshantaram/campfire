@@ -6,42 +6,33 @@
 
 ## 4.0.0-rc16
 
-- Stores now use a hybrid cloning approach and freeze values. They try to clone
-  primitives and simple objects/arrays but fall back to copying references
-  otherwise.
+- Stores now use a hybrid cloning approach and freeze values. They try to clone primitives and simple objects/arrays but
+  fall back to copying references otherwise.
 
 ## 4.0.0-rc15
 
 - Add `ids()` generator function
-- Allow passing an array with multiple sibling reactive children to .children()
-  and have them all be stably mounted to the parent in the slot.
-- add .track() system to NuBuilder - can now call .track(id) on an element being
-  built and get it back later with cf.tracked(id).
-- Store::update() now optionally accepts a function to transform a store's
-  existing value.
+- Allow passing an array with multiple sibling reactive children to .children() and have them all be stably mounted to
+  the parent in the slot.
+- add .track() system to NuBuilder - can now call .track(id) on an element being built and get it back later with
+  cf.tracked(id).
+- Store::update() now optionally accepts a function to transform a store's existing value.
 - Store::value is now protected - use .current() to get the value.
-- Render functions now receive a boolean `first` argument in the `opts`
-  parameter, so they can conditionally change their output depending on if the
-  component is mounting or just re-rendering
+- Render functions now receive a boolean `first` argument in the `opts` parameter, so they can conditionally change
+  their output depending on if the component is mounting or just re-rendering
 
 ## 4.0.0-rc14
 
-- Added new `render()` method to NuBuilder for more flexible reactive content
-  generation:
+- Added new `render()` method to NuBuilder for more flexible reactive content generation:
   - Render functions can return either strings or builder instances
-  - Automatic reconciliation of styles, attributes, and properties during
-    re-renders
-  - Improved property clearing with empty string values for styles and
-    attributes
-- Can now use `nu(existingElement, props)` to add reactive behavior to existing
-  elements
-- Added NuBuilder::html overload for it to be used as a string templating
-  function
+  - Automatic reconciliation of styles, attributes, and properties during re-renders
+  - Improved property clearing with empty string values for styles and attributes
+- Can now use `nu(existingElement, props)` to add reactive behavior to existing elements
+- Added NuBuilder::html overload for it to be used as a string templating function
 - remove enumerate() - TIL Array::entries() exists
 - Enhanced mustache templating system with:
   - Support for triple braces `{{{ var }}}` for unescaped HTML content
-  - section functionality (`{{#section}}content{{/section}}`) for conditional
-    rendering
+  - section functionality (`{{#section}}content{{/section}}`) for conditional rendering
   - inverted sections (`{{^section}}content when false{{/section}}`)
   - array iteration with automatic context switching
   - support for nested sections
@@ -58,46 +49,40 @@
 
 ## 4.0.0-rc11
 
-- Added CfDom, a DOM shim so campfire can be used in server environments etc.
-  Also makes testing easier.
+- Added CfDom, a DOM shim so campfire can be used in server environments etc. Also makes testing easier.
 
 ## 4.0.0-rc10
 
-- 'change' events are now fired only for MapStore and ListStore - this is so
-  whole-value replacements are possible for these types. Store&lt;T&gt; now
-  therefore fires a 'update' event when .update() is called.
+- 'change' events are now fired only for MapStore and ListStore - this is so whole-value replacements are possible for
+  these types. Store&lt;T&gt; now therefore fires a 'update' event when .update() is called.
 - Store .on() and related functionality is now strongly typed.
 
 ## 4.0.0-rc9
 
-- select now optionally accepts a `single: true` arg to only return a single
-  element
+- select now optionally accepts a `single: true` arg to only return a single element
 - Added NuBuilder::ref() to return the element directly
 
 ## 4.0.0-rc8
 
-- Both insert() and children() now accept either a single HTMLElement or
-  HTMLElement[], providing greater flexibility when working with DOM elements.
-- Fixed insert() validation to properly handle { into: element, at: 'start' }
-  case.
+- Both insert() and children() now accept either a single HTMLElement or HTMLElement[], providing greater flexibility
+  when working with DOM elements.
+- Fixed insert() validation to properly handle { into: element, at: 'start' } case.
 
 ## 4.0.0-rc7
 
-- Make .children() accept HTMLElement[] instead of HTMLElement so you can
-  directly pass the output of nu() into .children().
+- Make .children() accept HTMLElement[] instead of HTMLElement so you can directly pass the output of nu() into
+  .children().
 
 ## 4.0.0-rc6
 
-- Added `.html()` method to NuBuilder to make building elements slightly more
-  ergonomic
+- Added `.html()` method to NuBuilder to make building elements slightly more ergonomic
 - Made `.gimme()` be a variadic function
-- Added functionality to preserve reactive children to extend() / NuBuilder.
-  This should greatly improve composability of elements.
+- Added functionality to preserve reactive children to extend() / NuBuilder. This should greatly improve composability
+  of elements.
 
 ## 4.0.0-rc5
 
-`cf.insert()` now accepts `HTMLElement[]` instead of a single element, to make
-it easier to use with `cf.nu`.
+`cf.insert()` now accepts `HTMLElement[]` instead of a single element, to make it easier to use with `cf.nu`.
 
 ## 4.0.0-rc4
 
@@ -109,8 +94,7 @@ it easier to use with `cf.nu`.
 
 ## 4.0.0-rc2 (Release Candidate 2)
 
-This release includes substantial architectural improvements, better TypeScript
-integration, and modern tooling updates.
+This release includes substantial architectural improvements, better TypeScript integration, and modern tooling updates.
 
 ### Breaking Changes
 
@@ -127,11 +111,9 @@ integration, and modern tooling updates.
     - `utils.ts`: Common utility functions
 
 - **API Changes**:
-  - Removed shortened aliases (`c`, `s`, `a`, etc.) from `ElementProperties`
-    interface
+  - Removed shortened aliases (`c`, `s`, `a`, etc.) from `ElementProperties` interface
   - Removed `selectAll` function from exports
-  - Changed `nu()` to return a builder object that must be finalized with
-    `.done()`
+  - Changed `nu()` to return a builder object that must be finalized with `.done()`
   - Changed `select()` API:
     - Now always accepts an options object: `{ selector, from?, all? }`
     - Always returns an Array, even when selecting a single element
@@ -158,16 +140,16 @@ integration, and modern tooling updates.
     ```javascript
     // Old API
     const [button] = nu("button#submit", {
-      contents: "Click me",
-      attrs: { type: "submit" },
+        contents: "Click me",
+        attrs: { type: "submit" },
     });
 
     // New Fluent API
     const [button] = nu("button#submit")
-      .content("Click me")
-      .attr("type", "submit")
-      .on("click", handleClick)
-      .done();
+        .content("Click me")
+        .attr("type", "submit")
+        .on("click", handleClick)
+        .done();
     ```
 
 - **Improved Type Safety**:
@@ -181,8 +163,8 @@ integration, and modern tooling updates.
     const nameStore = cf.store({ value: "John" });
 
     const [div] = nu("div", {
-      contents: (data) => `Hello, ${data.name}!`,
-      deps: { name: nameStore },
+        contents: (data) => `Hello, ${data.name}!`,
+        deps: { name: nameStore },
     }).done();
 
     // Updates automatically when store changes
@@ -233,15 +215,15 @@ integration, and modern tooling updates.
    ```javascript
    // Old
    const [element] = nu("div", {
-     contents: "Hello",
-     attrs: { id: "greeting" },
+       contents: "Hello",
+       attrs: { id: "greeting" },
    });
 
    // New
    const [element] = nu("div")
-     .content("Hello")
-     .attr("id", "greeting")
-     .done();
+       .content("Hello")
+       .attr("id", "greeting")
+       .done();
    ```
 
 3. **Update Stores**:

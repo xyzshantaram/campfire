@@ -1,7 +1,7 @@
-import type { EventSubscriber, EventType, StoreEvent, AnySubscriber } from "../types.ts";
-import { ids, deepishClone } from "../utils.ts";
+import type { AnySubscriber, EventSubscriber, EventType, StoreEvent } from "../types.ts";
+import { deepishClone, ids } from "../utils.ts";
 
-const storeId = ids('cf-store');
+const storeId = ids("cf-store");
 
 /**
  * A simple reactive store.
@@ -15,22 +15,22 @@ export class Store<T> {
      */
     id = storeId();
 
-    /**  
-     * The value of the store. 
+    /**
+     * The value of the store.
      * @private As of 4.0.0-rc15, direct access is protected. Use current() instead.
      */
     protected value: T;
-    /** 
-     * The subscribers currently registered to the store. 
+    /**
+     * The subscribers currently registered to the store.
      * @internal
-    */
+     */
     _subscribers: {
-        [K in EventType]?: Record<number, EventSubscriber<K, Store<T>>>
+        [K in EventType]?: Record<number, EventSubscriber<K, Store<T>>>;
     } = {};
-    /** 
-     * The subscribers currently registered to the store. 
+    /**
+     * The subscribers currently registered to the store.
      * @internal
-    */
+     */
     _subscriberCounts: Record<string, number> = {};
     /**
      * A value describing whether or not the store has been disposed of.
@@ -67,20 +67,24 @@ export class Store<T> {
      * counter.on("update", (event) => {
      *   console.log(`Counter updated to: ${event.value}`);
      * });
-     * 
+     *
      * // Subscribe and trigger immediately with current value
      * counter.on("update", (event) => {
      *   console.log(`Current value: ${event.value}`);
      * }, true);
      * ```
      */
-    on<K extends EventType>(type: K, fn: EventSubscriber<K, Store<T>>, callNow?: true): number {
+    on<K extends EventType>(
+        type: K,
+        fn: EventSubscriber<K, Store<T>>,
+        callNow?: true,
+    ): number {
         this._subscriberCounts[type] ??= 0;
         this._subscribers[type] ??= {};
         const id = this._subscriberCounts[type]++;
         this._subscribers[type][id] = fn;
         // @ts-ignore this is not a problem
-        if (type === 'update' && callNow) fn({ type: 'update', value: this.value });
+        if (type === "update" && callNow) fn({ type: "update", value: this.value });
         return this._subscriberCounts[type]++;
     }
 
@@ -88,16 +92,16 @@ export class Store<T> {
      * Subscribes the provided function to all store events.
      * This is a convenience method that registers the function for 'change',
      * 'append', 'clear', and 'deletion' events.
-     * 
+     *
      * @param fn A callback function that will be called for all store events
      * @returns void
      */
     any(fn: AnySubscriber<Store<T>>) {
-        this.on('append', fn);
-        this.on('change', fn);
-        this.on('clear', fn);
-        this.on('deletion', fn);
-        this.on('update', fn);
+        this.on("append", fn);
+        this.on("change", fn);
+        this.on("clear", fn);
+        this.on("deletion", fn);
+        this.on("update", fn);
     }
 
     /**
@@ -115,15 +119,15 @@ export class Store<T> {
      * @internal
      */
     static isUpdater<T>(val: unknown): val is (arg: T) => T {
-        return typeof val === 'function';
+        return typeof val === "function";
     }
 
     /**
      * Updates the store's value and notifies all subscribers.
-     * 
+     *
      * As of 4.0.0-rc15, this method can also accept a transform function that
      * receives the current value and returns a new value.
-     * 
+     *
      * @param value The new value to set for the store, or a transform function
      * that takes the current value and returns a new value.
      * @returns The updated value, or null if the store has been disposed.
@@ -132,10 +136,10 @@ export class Store<T> {
      * ```ts
      * // Direct update
      * counter.update(5);
-     * 
+     *
      * // Update using a transform function
      * counter.update(current => current + 1);
-     * 
+     *
      * // Complex transform
      * userStore.update(user => ({
      *   ...user,
@@ -151,22 +155,24 @@ export class Store<T> {
         let updated: T;
         if (Store.isUpdater<T>(value)) {
             updated = value(this.value);
-        }
-        else {
+        } else {
             updated = value;
         }
         this.value = updated;
-        this._sendEvent({ type: 'update', value: Object.freeze(updated) });
+        this._sendEvent({ type: "update", value: Object.freeze(updated) });
         return updated;
     }
 
     /**
      * Sends an event to all subscribers if the store has not been disposed of.
      * @internal
-    */
+     */
     _sendEvent(event: StoreEvent<Store<T>>) {
         if (this._dead) return;
-        const subs = this._subscribers[event.type] as Record<number, EventSubscriber<typeof event.type, Store<T>>>;
+        const subs = this._subscribers[event.type] as Record<
+            number,
+            EventSubscriber<typeof event.type, Store<T>>
+        >;
         if (!subs) return;
 
         for (const idx in subs) {
@@ -185,10 +191,10 @@ export class Store<T> {
 
     /**
      * Get a deep clone of the current store value.
-     * 
+     *
      * Added in 4.0.0-rc15 as the recommended way to access store values
      * since the value property is now protected.
-     * 
+     *
      * @returns A deep clone of the store's current value
      * @example
      * ```ts

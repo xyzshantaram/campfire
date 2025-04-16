@@ -2,129 +2,133 @@
  * Tests for additional utility functions in utils.ts
  */
 
-import * as chai from 'chai';
-import sinon from 'sinon';
-import { describe, it, beforeEach, afterEach } from 'mocha';
-import { callbackify, poll, seq, escape, unescape } from './utils.ts';
+import sinon from "sinon";
+import { afterEach, beforeEach } from "jsr:@std/testing/bdd";
+import { callbackify, escape, poll, seq, unescape } from "./utils.ts";
+import { expect, setupTests } from "@test-setup";
 
-const expect = chai.expect;
+setupTests();
 
-describe('tests for escape() and unescape()', () => {
-    let escaped = '&amp;&lt;&gt;&quot;&#39;/';
-    let unescaped = '&<>"\'/';
+Deno.test("tests for escape() and unescape()", (t) => {
+    let escaped = "&amp;&lt;&gt;&quot;&#39;/";
+    let unescaped = "&<>\"'/";
 
     escaped += escaped;
     unescaped += unescaped;
 
-    it('should escape values', () => {
+    t.step("should escape values", () => {
         expect(escape(unescaped)).to.equal(escaped);
     });
 
-    it('should handle strings with nothing to escape', () => {
-        expect(escape('abc')).to.equal('abc');
+    t.step("should handle strings with nothing to escape", () => {
+        expect(escape("abc")).to.equal("abc");
     });
 
-    it('should escape the same characters unescaped by `unescape`', () => {
+    t.step("should escape the same characters unescaped by `unescape`", () => {
         expect(escape(unescape(escaped))).to.equal(escaped);
     });
 
-    it('should unescape entities in order', () => {
+    t.step("should unescape entities in order", () => {
         expect(unescape("&amp;lt;")).to.equal("&lt;");
     });
 
-    it('should unescape the proper entities', () => {
+    t.step("should unescape the proper entities", () => {
         expect(unescape(escaped)).to.equal(unescaped);
     });
 
-    it('should handle strings with nothing to unescape', () => {
-        expect(unescape('abc')).to.equal('abc');
+    t.step("should handle strings with nothing to unescape", () => {
+        expect(unescape("abc")).to.equal("abc");
     });
 
-    it('should unescape the same characters escaped by `escape`', () => {
+    t.step("should unescape the same characters escaped by `escape`", () => {
         expect(unescape(escape(unescaped))).to.equal(unescaped);
     });
 
-    it('should handle leading zeros in html entities', () => {
-        expect(unescape('&#39;')).to.equal("'");
-        expect(unescape('&#039;')).to.equal("'");
-        expect(unescape('&#000039;')).to.equal("'");
+    t.step("should handle leading zeros in html entities", () => {
+        expect(unescape("&#39;")).to.equal("'");
+        expect(unescape("&#039;")).to.equal("'");
+        expect(unescape("&#000039;")).to.equal("'");
     });
 });
 
-describe('tests for seq', () => {
-    it('should use args[0] as stop if only one param provided', () => {
+Deno.test("tests for seq", (t) => {
+    t.step("should use args[0] as stop if only one param provided", () => {
         expect(seq(3)).to.deep.equal([0, 1, 2]);
     });
 
-    it('should work for ranges', () => {
+    t.step("should work for ranges", () => {
         expect(seq(1, 4)).to.deep.equal([1, 2, 3]);
     });
 
-    it('should return empty list if start is negative', () => {
+    t.step("should return empty list if start is negative", () => {
         expect(seq(-1)).to.deep.equal([]);
     });
 
-    it('should work for negative ranges', () => {
+    t.step("should work for negative ranges", () => {
         expect(seq(-4, -1)).to.deep.equal([-4, -3, -2]);
     });
 
-    it('should work for ranges with a step', () => {
+    t.step("should work for ranges with a step", () => {
         expect(seq(0, 7, 2)).to.deep.equal([0, 2, 4, 6]);
     });
 
-    it('should work for negative ranges with a step', () => {
+    t.step("should work for negative ranges with a step", () => {
         expect(seq(-8, -4, 2)).to.deep.equal([-8, -6]);
     });
 });
 
-describe('callbackify', () => {
-    it('should convert a Promise-returning function to a callback-style function', (done) => {
-        const promiseFn = (value: number) => Promise.resolve(value * 2);
-        const callbackFn = callbackify(promiseFn);
+Deno.test("callbackify", (t) => {
+    t.step(
+        "should convert a Promise-returning function to a callback-style function",
+        () => {
+            const promiseFn = (value: number) => Promise.resolve(value * 2);
+            const callbackFn = callbackify(promiseFn);
 
-        callbackFn((err: Error | null, result: number | null) => {
-            expect(err).to.be.null;
-            expect(result).to.equal(6);
-            done();
-        }, 3);
-    });
+            callbackFn((err: Error | null, result: number | null) => {
+                expect(err).to.be.null;
+                expect(result).to.equal(6);
+            }, 3);
+        },
+    );
 
-    it('should pass errors to the callback', (done) => {
-        const error = new Error('Test error');
+    t.step("should pass errors to the callback", () => {
+        const error = new Error("Test error");
         const promiseFn = () => Promise.reject(error);
         const callbackFn = callbackify(promiseFn);
 
         callbackFn((err: Error | null, result: null) => {
             expect(err).to.equal(error);
             expect(result).to.be.null;
-            done();
         });
     });
 
-    it('should pass all arguments to the original function', (done) => {
+    t.step("should pass all arguments to the original function", () => {
         const promiseFn = (a: number, b: number, c: number) => Promise.resolve(a + b + c);
         const callbackFn = callbackify(promiseFn);
 
-        callbackFn((err: Error | null, result: number | null) => {
-            expect(err).to.be.null;
-            expect(result).to.equal(6);
-            done();
-        }, 1, 2, 3);
+        callbackFn(
+            (err: Error | null, result: number | null) => {
+                expect(err).to.be.null;
+                expect(result).to.equal(6);
+            },
+            1,
+            2,
+            3,
+        );
     });
 
-    it('should work with zero arguments', (done) => {
-        const promiseFn = () => Promise.resolve('test result');
+    t.step("should work with zero arguments", () => {
+        const promiseFn = () => Promise.resolve("test result");
         const callbackFn = callbackify(promiseFn);
 
         callbackFn((err: Error | null, result: string | null) => {
             expect(err).to.be.null;
-            expect(result).to.equal('test result');
-            done();
+            expect(result).to.equal("test result");
         });
     });
 });
 
-describe('poll', () => {
+Deno.test("poll", (t) => {
     let clock: sinon.SinonFakeTimers;
 
     beforeEach(() => {
@@ -135,7 +139,7 @@ describe('poll', () => {
         clock.restore();
     });
 
-    it('should call the function at specified intervals', () => {
+    t.step("should call the function at specified intervals", () => {
         const fn = sinon.spy();
         poll(fn, 100, false);
 
@@ -151,7 +155,7 @@ describe('poll', () => {
         expect(fn.callCount).to.equal(4);
     });
 
-    it('should call the function immediately when callNow is true', () => {
+    t.step("should call the function immediately when callNow is true", () => {
         const fn = sinon.spy();
         poll(fn, 100, true);
 
@@ -161,7 +165,7 @@ describe('poll', () => {
         expect(fn.callCount).to.equal(2);
     });
 
-    it('should stop polling when the cancel function is called', () => {
+    t.step("should stop polling when the cancel function is called", () => {
         const fn = sinon.spy();
         const cancel = poll(fn, 100);
 
@@ -174,7 +178,7 @@ describe('poll', () => {
         expect(fn.callCount).to.equal(1); // Should still be 1 as we cancelled
     });
 
-    it('should poll repeatedly', () => {
+    t.step("should poll repeatedly", () => {
         const fn = sinon.spy();
         const cancel = poll(fn, 100);
 
@@ -194,7 +198,7 @@ describe('poll', () => {
     });
 
     // Error handling test
-    it('should handle errors within the callback', () => {
+    t.step("should handle errors within the callback", () => {
         const errorSpy = sinon.spy();
         const fn = sinon.stub();
         fn.onFirstCall().callsFake(() => {
@@ -206,7 +210,7 @@ describe('poll', () => {
         expect(errorSpy.calledOnce).to.be.true;
     });
 
-    it('should clean up timeout when cancelled', () => {
+    t.step("should clean up timeout when cancelled", () => {
         const fn = sinon.spy();
         const cancel = poll(fn, 100);
 

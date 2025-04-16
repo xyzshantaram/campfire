@@ -1,8 +1,8 @@
-import { escape } from '../utils.ts';
+import { escape } from "../utils.ts";
 
 export interface RawHtml {
-    raw: true,
-    contents: string
+    raw: true;
+    contents: string;
 }
 
 /**
@@ -20,11 +20,9 @@ export interface RawHtmlOptions {
 export const r = (val: any, options?: RawHtmlOptions): RawHtml => {
     return {
         raw: true,
-        contents: Array.isArray(val) ?
-            val.join(options?.joiner ?? ' ') :
-            val.toString()
-    }
-}
+        contents: Array.isArray(val) ? val.join(options?.joiner ?? " ") : val.toString(),
+    };
+};
 
 /**
  * Creates an HTML string with automatic escaping of interpolated values.
@@ -39,17 +37,19 @@ export const r = (val: any, options?: RawHtmlOptions): RawHtml => {
  * const safeHtml = html`<div>${r("<b>Bold</b>")}</div>`; // Using r() to prevent escaping
  * ```
  */
-export const html = (strings: TemplateStringsArray, ...values: (string | boolean | number | RawHtml)[]) => {
+export const html = (
+    strings: TemplateStringsArray,
+    ...values: (string | boolean | number | RawHtml)[]
+) => {
     const built = [];
     for (let i = 0; i < strings.length; i++) {
-        built.push(strings[i] || '');
+        built.push(strings[i] || "");
         const val = values[i];
-        if (typeof val !== 'undefined' && typeof val !== 'object') {
-            built.push(escape((val ?? '').toString()));
-        }
-        else {
-            built.push(val?.contents || '');
+        if (typeof val !== "undefined" && typeof val !== "object") {
+            built.push(escape((val ?? "").toString()));
+        } else {
+            built.push(val?.contents || "");
         }
     }
-    return built.join('');
-}
+    return built.join("");
+};

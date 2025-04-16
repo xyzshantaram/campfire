@@ -1,15 +1,15 @@
-import { insert, empty, rm, select, onload } from "./dom/mod.ts"
-import { extend, nu } from "./dom/nu.ts"
-import { NuBuilder } from "./dom/NuBuilder.ts"
-import { ListStore, MapStore, Store, store } from "./stores/mod.ts"
-import { html, r } from "./templating/html.ts"
-import { mustache, template } from "./templating/mustache.ts"
-import { seq, escape, unescape, callbackify, poll, ids } from './utils.ts'
+import { empty, insert, onload, rm, select } from "./dom/mod.ts";
+import { extend, nu } from "./dom/nu.ts";
+import { NuBuilder } from "./dom/NuBuilder.ts";
+import { ListStore, MapStore, Store, store } from "./stores/mod.ts";
+import { html, r } from "./templating/html.ts";
+import { mustache, template } from "./templating/mustache.ts";
+import { callbackify, escape, ids, poll, seq, unescape } from "./utils.ts";
 import { CfDom } from "./dom/mod.ts";
 
 import type { SelectParams } from "./dom/mod.ts";
 import type { RawHtmlOptions } from "./templating/html.ts";
-import type { ElementPosition, ElementProperties, AnySubscriber, EventSubscriber, Template } from "./types.ts"
+import type { AnySubscriber, ElementPosition, ElementProperties, EventSubscriber, Template } from "./types.ts";
 import type { Callback, Callbackified } from "./utils.ts";
 import { track, tracked, untrack } from "./dom/tracking.ts";
 
@@ -38,46 +38,46 @@ export default {
     ids,
     track,
     tracked,
-    untrack
-}
+    untrack,
+};
 
 export {
+    callbackify,
+    CfDom,
+    empty,
+    escape,
+    extend,
+    html,
+    ids,
+    insert,
     ListStore,
     MapStore,
-    Store,
-    store,
-    nu,
     mustache,
-    template,
-    escape,
-    unescape,
-    extend,
-    insert,
-    empty,
+    nu,
+    onload,
+    poll,
+    r,
     rm,
     select,
-    onload,
-    html,
-    r,
     seq,
-    CfDom,
-    callbackify,
-    poll,
-    ids,
+    Store,
+    store,
+    template,
     track,
     tracked,
-    untrack
-}
+    unescape,
+    untrack,
+};
 
 export type {
+    AnySubscriber,
+    Callback,
+    Callbackified,
     ElementPosition,
     ElementProperties,
-    AnySubscriber,
     EventSubscriber,
-    Template,
     NuBuilder,
-    SelectParams,
     RawHtmlOptions,
-    Callback,
-    Callbackified
-}
+    SelectParams,
+    Template,
+};

@@ -1,4 +1,4 @@
-import { template } from 'https://esm.sh/campfire.js@4.0.0-rc17';
+import { template } from "https://esm.sh/campfire.js@4.0.0-rc17";
 
 export const FrameTemplate = template(`
 <html>

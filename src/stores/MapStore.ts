@@ -2,13 +2,12 @@ import { Store } from "./Store.ts";
 
 /**
  * A reactive map store.
- * Implements set(key, value), remove(key), clear(), transform(key, fn), has(key), entries(), 
+ * Implements set(key, value), remove(key), clear(), transform(key, fn), has(key), entries(),
  * and get(key).
  * set() sends a "change" event, remove() sends a "deletion" event, clear() sends a "clear" event,
  * and transform() sends a "change" event.
  */
 export class MapStore<T> extends Store<Record<string, T>> {
-
     /**
      * Constructor for MapStore.
      * Initializes the store with the provided initial key-value pairs.
@@ -34,7 +33,7 @@ export class MapStore<T> extends Store<Record<string, T>> {
      */
     set(key: string, value: T) {
         this.value[key] = Object.freeze(value);
-        this._sendEvent({ key, value, type: 'change' });
+        this._sendEvent({ key, value, type: "change" });
     }
 
     /**
@@ -46,9 +45,9 @@ export class MapStore<T> extends Store<Record<string, T>> {
      */
     remove(key: string) {
         const value = this.value[key];
-        if (value === null || typeof value === 'undefined') return;
+        if (value === null || typeof value === "undefined") return;
         delete this.value[key];
-        this._sendEvent({ key, value: value, type: 'deletion' });
+        this._sendEvent({ key, value: value, type: "deletion" });
     }
 
     /**
@@ -57,7 +56,7 @@ export class MapStore<T> extends Store<Record<string, T>> {
      */
     clear() {
         this.value = {};
-        this._sendEvent({ type: 'clear' });
+        this._sendEvent({ type: "clear" });
     }
 
     /**

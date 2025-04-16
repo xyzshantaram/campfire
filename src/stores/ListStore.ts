@@ -1,8 +1,8 @@
 import { Store } from "./Store.ts";
 
 /**
-    * A reactive list store.
-*/
+ * A reactive list store.
+ */
 export class ListStore<T> extends Store<T[]> {
     constructor(ls?: T[]) {
         super(ls || []);
@@ -32,7 +32,7 @@ export class ListStore<T> extends Store<T[]> {
         this._sendEvent({
             type: "append",
             value: Object.freeze(val),
-            idx: this.value.length - 1
+            idx: this.value.length - 1,
         });
         return this.value.length;
     }
@@ -49,9 +49,9 @@ export class ListStore<T> extends Store<T[]> {
         if (idx < 0) return; // fail quietly incase findIndex() was passed
         if (idx >= this.value.length) throw new RangeError("Invalid index.");
         this._sendEvent({
-            type: 'deletion',
+            type: "deletion",
             idx,
-            value: this.value.splice(idx, 1)[0]
+            value: this.value.splice(idx, 1)[0],
         });
     }
 
@@ -62,7 +62,9 @@ export class ListStore<T> extends Store<T[]> {
      * @throws {RangeError} If the index is out of bounds.
      */
     get(idx: number) {
-        if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
+        if (idx < 0 || idx >= this.value.length) {
+            throw new RangeError("Invalid index.");
+        }
         return Object.freeze(this.value[idx]);
     }
 
@@ -76,11 +78,15 @@ export class ListStore<T> extends Store<T[]> {
      *   - `idx`: The index of the modified element
      */
     set(idx: number, value: T) {
-        if (idx < 0 || idx >= this.value.length) throw new RangeError("Invalid index.");
+        if (idx < 0 || idx >= this.value.length) {
+            throw new RangeError("Invalid index.");
+        }
         this.value[idx] = value;
         // Send a copy in the event
         this._sendEvent({
-            type: "change", value: Object.freeze(value), idx
+            type: "change",
+            value: Object.freeze(value),
+            idx,
         });
     }
 
@@ -88,16 +94,17 @@ export class ListStore<T> extends Store<T[]> {
         return this.value[Symbol.iterator]();
     }
 
-    map: (...args: Parameters<T[]['map']>) => ReturnType<T[]['map']> = (...args) => {
+    map: (...args: Parameters<T[]["map"]>) => ReturnType<T[]["map"]> = (...args) => {
         return this.value.map(...args);
     };
 
-    forEach: (...args: Parameters<T[]['forEach']>) => ReturnType<T[]['forEach']> = (...args) => {
+    forEach: (...args: Parameters<T[]["forEach"]>) => ReturnType<T[]["forEach"]> = (...args) => {
         return this.value.forEach(...args);
     };
 
-
-    findIndex: (...args: Parameters<T[]['findIndex']>) => ReturnType<T[]['findIndex']> = (...args) => {
+    findIndex: (
+        ...args: Parameters<T[]["findIndex"]>
+    ) => ReturnType<T[]["findIndex"]> = (...args) => {
         return this.value.findIndex(...args);
     };
 

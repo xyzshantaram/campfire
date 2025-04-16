@@ -7,29 +7,23 @@ export interface UpdateEvent<ST> {
     value: ST extends Store<infer T> ? T : never;
 }
 
-export type AppendEvent<ST> =
-    ST extends Store<infer T> ?
-    (T extends Array<infer L> ? { type: "append"; value: L; idx: number }
+export type AppendEvent<ST> = ST extends Store<infer T>
+    ? (T extends Array<infer L> ? { type: "append"; value: L; idx: number }
         : { type: "append"; value: T })
     : never;
 
-export type ChangeEvent<ST> =
-    ST extends Store<infer T> ? (
-        T extends Record<string, infer M> ?
-        { type: "change"; value: M; key: string }
-        : (
-            T extends Array<infer L> ?
-            { type: "change"; value: L; idx: number }
-            : { type: "change"; value: T }
-        )
-    ) : never;
+export type ChangeEvent<ST> = ST extends Store<infer T> ? (
+        T extends Record<string, infer M> ? { type: "change"; value: M; key: string }
+            : (
+                T extends Array<infer L> ? { type: "change"; value: L; idx: number }
+                    : { type: "change"; value: T }
+            )
+    )
+    : never;
 
-export type DeletionEvent<ST> =
-    ST extends Store<infer T>
-    ? T extends Record<string, infer M>
-    ? { type: "deletion"; value: M; key: string }
-    : T extends Array<infer L>
-    ? { type: "deletion"; value: L; idx: number }
+export type DeletionEvent<ST> = ST extends Store<infer T>
+    ? T extends Record<string, infer M> ? { type: "deletion"; value: M; key: string }
+    : T extends Array<infer L> ? { type: "deletion"; value: L; idx: number }
     : { type: "deletion"; value: T }
     : never;
 
@@ -54,7 +48,9 @@ export type SubscriberTypeMap<ST> = {
 export type AnySubscriber<ST> = (event: StoreEvent<ST>) => void;
 
 /** A signature for a subscriber of a specific event. */
-export type EventSubscriber<K extends EventType, ST> = (event: SubscriberTypeMap<ST>[K]) => void;
+export type EventSubscriber<K extends EventType, ST> = (
+    event: SubscriberTypeMap<ST>[K],
+) => void;
 
 /** The function signature for a function returned by `template()`. */
 export type Template = (e: Record<string, any>) => string;
@@ -67,28 +63,34 @@ export type StoreEventFromObject<D> = {
     [K in keyof D]: D[K] extends Store<any> ? StoreEvent<D[K]> : never;
 }[keyof D];
 
-type NuBuilderInstance<Elem extends HTMLElement, Deps extends Record<string, Store<any>>> =
-    NuBuilder<Elem, Deps, string>;
+type NuBuilderInstance<
+    Elem extends HTMLElement,
+    Deps extends Record<string, Store<any>>,
+> = NuBuilder<Elem, Deps, string>;
 
-export type RenderBuilder<Elem extends HTMLElement, Deps> =
-    Omit<NuBuilderInstance<Elem, Deps extends Record<string, Store<any>> ? Deps : never>,
-        "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render">;
+export type RenderBuilder<Elem extends HTMLElement, Deps> = Omit<
+    NuBuilderInstance<
+        Elem,
+        Deps extends Record<string, Store<any>> ? Deps : never
+    >,
+    "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render"
+>;
 
 /**
  * Function signature for rendering reactive content.
- * 
+ *
  * @template Elem The type of HTML element being rendered
  * @template Deps The type of the dependencies object
- * 
+ *
  * @param props The unwrapped values from the store dependencies
  * @param opts Additional options and utilities for rendering:
  *   - event: The event that triggered this render (if applicable)
  *   - b: A builder instance for fluent element modification
  *   - elt: Reference to the element being rendered
  *   - first: Boolean flag indicating whether this is the first render (true) or a re-render (false)
- * 
+ *
  * @returns A string, builder instance, or void
- * 
+ *
  * @example
  * ```js
  * // Using the first parameter to conditionally render initial state
@@ -100,24 +102,30 @@ export type RenderBuilder<Elem extends HTMLElement, Deps> =
  *       b.attr("data-initialized", "true");
  *       b.style("transition", "all 0.3s ease");
  *     }
- *     
+ *
  *     return b.content(`Count is: ${count}`);
  *   })
  *   .done();
  * ```
  */
-export type RenderFunction<Elem extends HTMLElement, Deps extends Record<string, Store<any>>> = (
+export type RenderFunction<
+    Elem extends HTMLElement,
+    Deps extends Record<string, Store<any>>,
+> = (
     props: UnwrapStore<Deps>,
     opts: {
-        event?: StoreEventFromObject<Deps> & { triggeredBy: string },
-        b: RenderBuilder<Elem, Deps>,
-        elt: Elem,
-        first: boolean
-    }
+        event?: StoreEventFromObject<Deps> & { triggeredBy: string };
+        b: RenderBuilder<Elem, Deps>;
+        elt: Elem;
+        first: boolean;
+    },
 ) => string | RenderBuilder<Elem, Deps> | void;
 
 export type StringStyleProps = keyof {
-    [K in keyof CSSStyleDeclaration as CSSStyleDeclaration[K] extends string ? K : never]: true
+    [
+        K in keyof CSSStyleDeclaration as CSSStyleDeclaration[K] extends string ? K
+            : never
+    ]: true;
 };
 
 export type DOMEventHandlers = {
@@ -127,7 +135,10 @@ export type DOMEventHandlers = {
 /**
  * Properties for the HTML element to be created.
  */
-export interface ElementProperties<T extends HTMLElement, D extends Record<string, Store<any>>> {
+export interface ElementProperties<
+    T extends HTMLElement,
+    D extends Record<string, Store<any>>,
+> {
     /**
      * String that will be set as the inner HTML of the created element. By default,
      * this is escaped using cf.escape() - however, if you supply `raw: true` in
@@ -136,14 +147,14 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
 
     contents?: string;
 
-    /** 
+    /**
      * Rendering function to use to update the element on redraws.
      * As of 4.0.0-rc15, render functions receive a 'first' parameter in the opts
      * object that indicates if this is the first render (true) or a re-render (false).
      */
     render?: RenderFunction<T, D>;
 
-    /** 
+    /**
      * Classes for the newly created element. Will be combined with whatever is
      * passed into nu().
      */
@@ -160,13 +171,13 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
      */
     misc?: Record<string, unknown>;
 
-    /** 
-     * Contains styles that will be applied to the new element. Property names 
+    /**
+     * Contains styles that will be applied to the new element. Property names
      * must be the same as those in `CSSStyleDeclaration`.
      */
     style?: Partial<Record<StringStyleProps, string | number>>;
 
-    /** 
+    /**
      * An object containing event handlers that will be applied using addEventListener.
      * For example: `{'click': (e) => console.log(e)}`
      */
@@ -175,29 +186,29 @@ export interface ElementProperties<T extends HTMLElement, D extends Record<strin
     /** Attributes that will be set on the element using `Element.setAttribute`. */
     attrs?: Record<string, string | number | boolean>;
 
-    /** 
-     * A list of elements to query from the element. Will be returned as 
-     * subsequent members of the returned Array after the element itself. 
+    /**
+     * A list of elements to query from the element. Will be returned as
+     * subsequent members of the returned Array after the element itself.
      * Returns null when a selector isn't found to preserve order of returned
      * elements.
      */
     gimme?: string[];
 
-    /** 
-     * A Record<string, Store> of the element's dependencies. The element's 
+    /**
+     * A Record<string, Store> of the element's dependencies. The element's
      * render function will be called every time any of the deps change.
      */
     deps?: D;
 
     /**
-     * Children of the element to mount. They will be mounted into `cf-slot`s 
-     * corresponding to the Record's keys and preserved between re-renders of 
-     * the parent. 
-     * 
+     * Children of the element to mount. They will be mounted into `cf-slot`s
+     * corresponding to the Record's keys and preserved between re-renders of
+     * the parent.
+     *
      * As of 4.0.0-rc15, you can provide an array of elements for a slot, and they
      * will all be mounted to that slot in order.
-     * 
-     * Exercise caution when passing nu().done() directly - all children 
+     *
+     * Exercise caution when passing nu().done() directly - all children
      * returned will be mounted to the element.
      */
     children?: Record<string, CfHTMLElementInterface | CfHTMLElementInterface[]>;
@@ -230,15 +241,15 @@ type TagName = keyof HTMLElementTagNameMap;
 
 export type EltInfoToTag<T extends string> =
     // Case 4: Tag#id.class
-    T extends `${infer Tag extends TagName}#${string}.${string}` ? Tag :
-    // Case 2: Tag#id
-    T extends `${infer Tag extends TagName}#${string}` ? Tag :
-    // Case 3: Tag.class
-    T extends `${infer Tag extends TagName}.${string}` ? Tag :
-    // Case 1: Tag only
-    T extends `${infer Tag extends TagName}` ? Tag :
-    'div';
+    T extends `${infer Tag extends TagName}#${string}.${string}` ? Tag
+        // Case 2: Tag#id
+        : T extends `${infer Tag extends TagName}#${string}` ? Tag
+        // Case 3: Tag.class
+        : T extends `${infer Tag extends TagName}.${string}` ? Tag
+        // Case 1: Tag only
+        : T extends `${infer Tag extends TagName}` ? Tag
+        : "div";
 
-
-export type InferElementType<T extends string> =
-    T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[EltInfoToTag<T>] : HTMLElement;
+export type InferElementType<T extends string> = T extends keyof HTMLElementTagNameMap
+    ? HTMLElementTagNameMap[EltInfoToTag<T>]
+    : HTMLElement;

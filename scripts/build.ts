@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
-import { template, escape } from '../src/campfire.ts';
+import { escape, template } from "../src/campfire.ts";
 import { parseArgs } from "jsr:@std/cli@1.0.15";
 import { walk } from "jsr:@std/fs@1.0.15";
 import { resolve } from "jsr:@std/path@1.0.8";
-import { marked } from 'https://esm.sh/marked@15.0.7';
+import { marked } from "https://esm.sh/marked@15.0.7";
 
 const tpl = template(`<!DOCTYPE html>
 <html lang="en">
@@ -56,14 +56,18 @@ const tpl = template(`<!DOCTYPE html>
 </html>`);
 
 const PageRenderer = {
-    code: (code: Record<string, any>, _info: Record<string, any>, escaped: boolean) => {
-        const contents = code.text.replace(/\n$/, '') + '\n';
+    code: (
+        code: Record<string, any>,
+        _info: Record<string, any>,
+        escaped: boolean,
+    ) => {
+        const contents = code.text.replace(/\n$/, "") + "\n";
 
-        return '<pre class="microlight"><code>'
-            + (escaped ? contents : escape(contents))
-            + '</code></pre>\n';
-    }
-}
+        return '<pre class="microlight"><code>' +
+            (escaped ? contents : escape(contents)) +
+            "</code></pre>\n";
+    },
+};
 
 try {
     const [sectionArg, dest] = parseArgs(Deno.args)._;
@@ -86,31 +90,27 @@ try {
 
     for await (const section of walk(sectionPath)) {
         if (!section.isFile) continue;
-        if (!section.path.endsWith('.md')) continue;
-        const filename = section.path.split('/').at(-1)?.replace('.md', '');
+        if (!section.path.endsWith(".md")) continue;
+        const filename = section.path.split("/").at(-1)?.replace(".md", "");
         if (!filename) throw new Error(`Invalid filename for ${section.path}`);
         const contents = await Deno.readTextFile(section.path);
         built.push([filename, marked.parse(contents)]);
     }
 
-    const result = built.map(([name, contents]) =>
-        `<div class="cf-site-div" data-heading="${name}">${contents}</div>`
-    ).join('\n');
+    const result = built.map(([name, contents]) => `<div class="cf-site-div" data-heading="${name}">${contents}</div>`)
+        .join("\n");
 
     await Deno.writeTextFile(dest.toString(), tpl({ built: result }));
-}
-catch (e) {
+} catch (e) {
     if (e instanceof Deno.errors.NotFound) {
         console.log(e.message);
         const matches = e.message.match(/stat ('.+').+stat/);
         if (matches) {
             console.error(`FATAL: Path ${matches[1]} was not found.`);
+        } else {
+            console.error("FATAL: A required file was not found.");
         }
-        else {
-            console.error('FATAL: A required file was not found.');
-        }
-    }
-    else {
+    } else {
         console.error(`ERROR: ${e}`);
     }
 
