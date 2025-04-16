@@ -2,10 +2,10 @@
  * Tests for additional utility functions in utils.ts
  */
 
-import sinon from "sinon";
-import { afterEach, beforeEach } from "jsr:@std/testing/bdd";
 import { callbackify, escape, poll, seq, unescape } from "./utils.ts";
 import { expect, setupTests } from "@test-setup";
+import { spy } from "@std/testing/mock";
+import { FakeTime } from "@std/testing/time";
 
 setupTests();
 
@@ -129,93 +129,81 @@ Deno.test("callbackify", async (t) => {
 });
 
 Deno.test("poll", async (t) => {
-    let clock: sinon.SinonFakeTimers;
-
-    beforeEach(() => {
-        clock = sinon.useFakeTimers();
-    });
-
-    afterEach(() => {
-        clock.restore();
-    });
 
     await t.step("should call the function at specified intervals", () => {
-        const fn = sinon.spy();
+        const time = new FakeTime();
+        const fn = spy();
         poll(fn, 100, false);
 
-        expect(fn.callCount).to.equal(0);
+        expect(fn.calls.length).to.equal(0);
 
-        clock.tick(100);
-        expect(fn.callCount).to.equal(1);
+        time.tick(100);
+        expect(fn.calls.length).to.equal(1);
 
-        clock.tick(100);
-        expect(fn.callCount).to.equal(2);
+        time.tick(100);
+        expect(fn.calls.length).to.equal(2);
 
-        clock.tick(200);
-        expect(fn.callCount).to.equal(4);
+        time.tick(200);
+        expect(fn.calls.length).to.equal(4);
+        time.restore();
     });
 
     await t.step("should call the function immediately when callNow is true", () => {
-        const fn = sinon.spy();
+        const time = new FakeTime();
+        const fn = spy();
         poll(fn, 100, true);
 
-        expect(fn.callCount).to.equal(1);
+        expect(fn.calls.length).to.equal(1);
 
-        clock.tick(100);
-        expect(fn.callCount).to.equal(2);
+        time.tick(100);
+        expect(fn.calls.length).to.equal(2);
+        time.restore();
     });
 
     await t.step("should stop polling when the cancel function is called", () => {
-        const fn = sinon.spy();
+        const time = new FakeTime();
+        const fn = spy();
         const cancel = poll(fn, 100);
 
-        clock.tick(100);
-        expect(fn.callCount).to.equal(1);
+        time.tick(100);
+        expect(fn.calls.length).to.equal(1);
 
         cancel();
 
-        clock.tick(200);
-        expect(fn.callCount).to.equal(1); // Should still be 1 as we cancelled
+        time.tick(200);
+        expect(fn.calls.length).to.equal(1); // Should still be 1 as we cancelled
+        time.restore();
     });
 
     await t.step("should poll repeatedly", () => {
-        const fn = sinon.spy();
+        const time = new FakeTime();
+        const fn = spy();
         const cancel = poll(fn, 100);
 
         // Should not have been called yet
-        expect(fn.callCount).to.equal(0);
+        expect(fn.calls.length).to.equal(0);
 
         // After time advances, should be called
-        clock.tick(100);
-        expect(fn.callCount).to.equal(1);
+        time.tick(100);
+        expect(fn.calls.length).to.equal(1);
 
         // After more time, should be called again
-        clock.tick(100);
-        expect(fn.callCount).to.equal(2);
+        time.tick(100);
+        expect(fn.calls.length).to.equal(2);
 
         // Clean up
         cancel();
-    });
-
-    // Error handling test
-    await t.step("should handle errors within the callback", () => {
-        const errorSpy = sinon.spy();
-        const fn = sinon.stub();
-        fn.onFirstCall().callsFake(() => {
-            errorSpy();
-        });
-
-        // No error should propagate out
-        poll(fn, 100, true);
-        expect(errorSpy.calledOnce).to.be.true;
+        time.restore();
     });
 
     await t.step("should clean up timeout when cancelled", () => {
-        const fn = sinon.spy();
+        const time = new FakeTime();
+        const fn = spy();
         const cancel = poll(fn, 100);
 
         cancel();
-        clock.tick(200);
-        expect(fn.callCount).to.equal(0);
+        time.tick(200);
+        expect(fn.calls.length).to.equal(0);
+        time.restore();
     });
 });

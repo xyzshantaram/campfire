@@ -1,8 +1,8 @@
 /**
  * Tests specifically for the -style render function in NuBuilder
  */
-import sinon from "sinon";
 import { nu, store } from "../campfire.ts";
+import { spy } from "@std/testing/mock";
 import { expect, setupTests } from "@test-setup";
 
 setupTests();
@@ -289,7 +289,7 @@ Deno.test("Builder-style render function tests", async (t) => {
     // Event handler behavior
     await t.step("Event handlers", async (t) => {
         await t.step("should not duplicate event handlers during re-renders", () => {
-            const clickHandler = sinon.spy();
+            const clickHandler = spy();
             const count = store({ value: 0 });
 
             // Create button with click handler outside the render function
@@ -301,7 +301,7 @@ Deno.test("Builder-style render function tests", async (t) => {
 
             // First click
             button.click();
-            expect(clickHandler.callCount).to.equal(1);
+            expect(clickHandler.calls.length).to.equal(1);
 
             // Update several times to trigger re-renders
             for (let i = 1; i <= 5; i++) {
@@ -310,7 +310,7 @@ Deno.test("Builder-style render function tests", async (t) => {
 
             // Click again - should only be called once more
             button.click();
-            expect(clickHandler.callCount).to.equal(2);
+            expect(clickHandler.calls.length).to.equal(2);
         });
     });
 

@@ -2,7 +2,7 @@
  * Tests for Store functionality in Campfire.js
  */
 
-import sinon from "sinon";
+import { spy } from "@std/testing/mock";
 import cf, { nu } from "../campfire.ts";
 
 // Setup chai
@@ -20,21 +20,20 @@ Deno.test("Tests for stores", async (t) => {
 
     await t.step("Store should notify subscribers of changes", () => {
         const s = cf.store({ value: "test" });
-        const mockFn = sinon.spy();
+        const mockFn = spy();
         s.on("update", mockFn);
         s.update("new value");
-        expect(mockFn.calledWith({ type: "update", value: "new value" })).to.be
-            .true;
+        expect(mockFn.calls[0].args).to.deep.include({ type: "update", value: "new value" });
     });
 
     await t.step("ListStore should handle array operations", () => {
         const ls = cf.store({ type: "list", value: [1, 2, 3] });
         expect(ls.current()).to.deep.equal([1, 2, 3]);
-        const mockFn = sinon.spy();
+        const mockFn = spy();
         ls.on("append", mockFn);
         ls.push(4);
         expect(ls.current()).to.deep.equal([1, 2, 3, 4]);
-        expect(mockFn.calledWith({ type: "append", value: 4, idx: 3 })).to.be.true;
+        expect(mockFn.calls[0].args).to.deep.include({ type: "append", value: 4, idx: 3 });
     });
 
     await t.step("MapStore should handle object operations", () => {
@@ -44,17 +43,17 @@ Deno.test("Tests for stores", async (t) => {
         });
         expect(ms.get("name")).to.deep.equal("John");
 
-        const mockFn = sinon.spy();
+        const mockFn = spy();
         ms.on("change", mockFn);
 
         ms.set("age", 30);
         expect(ms.get("age")).to.deep.equal(30);
 
-        expect(mockFn.calledWith({
+        expect(mockFn.calls[0].args).to.deep.include({
             type: "change",
             value: 30,
             key: "age",
-        })).to.be.true;
+        });
     });
 });
 

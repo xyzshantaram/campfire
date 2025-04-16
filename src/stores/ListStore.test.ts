@@ -2,7 +2,7 @@
  * Comprehensive tests for ListStore
  */
 
-import sinon from "sinon";
+import { spy } from "@std/testing/mock";
 import { ListStore } from "./ListStore.ts";
 import { expect, setupTests } from "@test-setup";
 
@@ -26,15 +26,15 @@ Deno.test("ListStore Tests", async (t) => {
 
     await t.step("should push values and emit append event", () => {
         const store = new ListStore<number>([1, 2]);
-        const spy = sinon.spy();
-        store.on("append", spy);
+        const s = spy();
+        store.on("append", s);
 
         const length = store.push(3);
 
         expect(length).to.equal(3);
         expect(store.current()).to.deep.equal([1, 2, 3]);
-        expect(spy.calledOnce).to.be.true;
-        expect(spy.firstCall.args[0]).to.deep.include({
+        expect(s.calls.length === 1).to.be.true;
+        expect(s.calls[0].args[0]).to.deep.include({
             type: "append",
             value: 3,
             idx: 2,
@@ -43,14 +43,14 @@ Deno.test("ListStore Tests", async (t) => {
 
     await t.step("should remove values at index and emit deletion event", () => {
         const store = new ListStore(["a", "b", "c"]);
-        const spy = sinon.spy();
-        store.on("deletion", spy);
+        const s = spy();
+        store.on("deletion", s);
 
         store.remove(1);
 
         expect(store.current()).to.deep.equal(["a", "c"]);
-        expect(spy.calledOnce).to.be.true;
-        expect(spy.firstCall.args[0]).to.deep.include({
+        expect(s.calls.length === 1).to.be.true;
+        expect(s.calls[0].args[0]).to.deep.include({
             type: "deletion",
             idx: 1,
             value: "b",
@@ -83,14 +83,14 @@ Deno.test("ListStore Tests", async (t) => {
 
     await t.step("should set value at specified index and emit change event", () => {
         const store = new ListStore(["a", "b", "c"]);
-        const spy = sinon.spy();
-        store.on("change", spy);
+        const s = spy();
+        store.on("change", s);
 
         store.set(1, "X");
 
         expect(store.current()).to.deep.equal(["a", "X", "c"]);
-        expect(spy.calledOnce).to.be.true;
-        expect(spy.firstCall.args[0]).to.deep.include({
+        expect(s.calls.length === 1).to.be.true;
+        expect(s.calls[0].args[0]).to.deep.include({
             type: "change",
             value: "X",
             idx: 1,
@@ -109,15 +109,15 @@ Deno.test("ListStore Tests", async (t) => {
 
     await t.step("should clear all values and emit clear event", () => {
         const store = new ListStore([1, 2, 3]);
-        const spy = sinon.spy();
-        store.on("clear", spy);
+        const s = spy();
+        store.on("clear", s);
 
         store.clear();
 
         expect(store.current()).to.be.an("array").that.is.empty;
         expect(store.length).to.equal(0);
-        expect(spy.calledOnce).to.be.true;
-        expect(spy.firstCall.args[0]).to.deep.include({
+        expect(s.calls.length === 1).to.be.true;
+        expect(s.calls[0].args[0]).to.deep.include({
             type: "clear",
         });
     });

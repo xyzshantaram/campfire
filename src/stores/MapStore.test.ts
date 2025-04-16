@@ -2,7 +2,7 @@
  * Comprehensive tests for MapStore
  */
 
-import sinon from "sinon";
+import { spy } from "@std/testing/mock";
 import { MapStore } from "./MapStore.ts";
 import { expect, setupTests } from "@test-setup";
 
@@ -23,14 +23,14 @@ Deno.test("MapStore Tests", async (t) => {
 
     await t.step("should set values and emit change event", () => {
         const store = new MapStore<string | number>();
-        const spy = sinon.spy();
-        store.on("change", spy);
+        const s = spy();
+        store.on("change", s);
 
         store.set("name", "John");
 
         expect(store.get("name")).to.equal("John");
-        expect(spy.calledOnce).to.be.true;
-        expect(spy.firstCall.args[0]).to.deep.include({
+        expect(s.calls.length === 1).to.be.true;
+        expect(s.calls[0].args[0]).to.deep.include({
             type: "change",
             key: "name",
             value: "John",
@@ -39,15 +39,15 @@ Deno.test("MapStore Tests", async (t) => {
 
     await t.step("should remove values and emit deletion event", () => {
         const store = new MapStore({ name: "John", age: 30 });
-        const spy = sinon.spy();
-        store.on("deletion", spy);
+        const s = spy();
+        store.on("deletion", s);
 
         store.remove("name");
 
         expect(store.has("name")).to.be.false;
         expect(store.size).to.equal(1);
-        expect(spy.calledOnce).to.be.true;
-        expect(spy.firstCall.args[0]).to.deep.include({
+        expect(s.calls.length === 1).to.be.true;
+        expect(s.calls[0].args[0]).to.deep.include({
             type: "deletion",
             key: "name",
             value: "John",
@@ -56,38 +56,38 @@ Deno.test("MapStore Tests", async (t) => {
 
     await t.step("should do nothing when removing non-existent key", () => {
         const store = new MapStore({ name: "John" });
-        const spy = sinon.spy();
-        store.on("deletion", spy);
+        const s = spy();
+        store.on("deletion", s);
 
         store.remove("nonexistent");
 
-        expect(spy.called).to.be.false;
+        expect(s.calls.length === 0).to.be.true;
         expect(store.size).to.equal(1);
     });
 
     await t.step("should clear all values and emit clear event", () => {
         const store = new MapStore({ name: "John", age: 30 });
-        const spy = sinon.spy();
-        store.on("clear", spy);
+        const s = spy();
+        store.on("clear", s);
 
         store.clear();
 
         expect(store.size).to.equal(0);
-        expect(spy.calledOnce).to.be.true;
-        expect(spy.firstCall.args[0]).to.deep.include({
+        expect(s.calls.length === 1).to.be.true;
+        expect(s.calls[0].args[0]).to.deep.include({
             type: "clear",
         });
     });
 
     await t.step("should transform values and emit change event", () => {
         const store = new MapStore({ count: 5 });
-        const spy = sinon.spy();
-        store.on("change", spy);
+        const s = spy();
+        store.on("change", s);
 
         store.transform("count", (val) => val + 1);
 
         expect(store.get("count")).to.equal(6);
-        expect(spy.calledTwice).to.be.true; // Once from set() and once from transform()
+        expect(s.calls.length === 2).to.be.true; // Once from set() and once from transform()
     });
 
     await t.step("should throw error when transforming non-existent key", () => {

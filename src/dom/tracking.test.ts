@@ -1,6 +1,9 @@
 import { assert } from "chai";
 import { track, tracked, untrack } from "./tracking.ts";
 import { CfDom } from "./config.ts";
+import { setupTests } from "@test-setup";
+
+setupTests();
 
 Deno.test("Element tracking functionality", async (t) => {
     await t.step("should track and retrieve elements by ID", () => {

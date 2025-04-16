@@ -2,7 +2,7 @@
  * Tests for DOM manipulation utilities in Campfire.js
  */
 
-import sinon from "sinon";
+import { spy } from "@std/testing/mock";
 import { extend, insert, nu, rm, seq, store } from "../campfire.ts";
 import { CfDom } from "./config.ts";
 import { tracked } from "./tracking.ts";
@@ -129,20 +129,23 @@ Deno.test("Tests for NuBuilder", async (t) => {
     });
 
     await t.step("should support multiple event listeners", () => {
-        const clickHandler = sinon.spy();
-        const mouseoverHandler = sinon.spy();
+        const clickHandler = spy();
+        const submitHandler = spy();
 
-        const [btn] = nu("button")
+        const [form] = nu("form")
             .content("Interactive")
+            .attr('type', 'submit')
             .on("click", clickHandler)
-            .on("mouseover", mouseoverHandler)
+            .on("submit", submitHandler)
             .done();
 
-        btn.click();
-        btn.dispatchEvent(new MouseEvent("mouseover"));
+        document.body.appendChild(form);
 
-        expect(clickHandler.calledOnce).to.be.true;
-        expect(mouseoverHandler.calledOnce).to.be.true;
+        form.click();
+        form.submit();
+
+        expect(clickHandler.calls.length === 1).to.be.true;
+        expect(submitHandler.calls.length === 1).to.be.true;
     });
 
     await t.step("should support querying multiple elements with gimme", () => {
