@@ -38,6 +38,19 @@ const reconcileClasses = (
     );
 };
 
+const reconcileAttrs = (
+    elt: HTMLElement,
+    attrs: Record<string, string | number | boolean>,
+) => {
+    Object.entries(attrs).forEach(([name, value]) => {
+        const current = elt.getAttribute(name);
+        if (["boolean", "string"].includes(typeof value) && !value) return elt.removeAttribute(name);
+        const str = String(value);
+        if (current === str) return;
+        elt.setAttribute(name, String(value));
+    });
+};
+
 /**
  * Reconciles the properties from a NuBuilder to an existing element.
  * This applies the builder's properties to the element without replacing it.
@@ -52,15 +65,7 @@ const reconcile = <
     const { style = {}, attrs = {}, misc = {}, classes = {} } = builder.props;
     reconcileClasses(elt, classes);
     Object.assign(elt.style, style);
-    if (attrs) {
-        Object.entries(attrs || {}).forEach(([key, value]) => {
-            if (typeof value === "string" && value.length === 0) {
-                elt.removeAttribute(key);
-            } else if (elt.getAttribute(key) !== String(value)) {
-                elt.setAttribute(key, String(value));
-            }
-        });
-    }
+    if (attrs) reconcileAttrs(elt, attrs);
     if (misc) Object.assign(elt, misc);
     return elt;
 };
@@ -202,14 +207,7 @@ export const extend = <
     Object.entries(on)
         .forEach(([evt, listener]) => CfDom.addElEventListener(elt, evt, listener as (evt: Event) => void));
 
-    Object.entries(attrs).forEach(([attr, value]) => {
-        const current = elt.getAttribute(attr);
-        const str = String(value);
-        if (current === str) return;
-        if (typeof value === "string" && value.length === 0) {
-            elt.removeAttribute(attr);
-        } else elt.setAttribute(attr, String(value));
-    });
+    reconcileAttrs(elt, attrs);
 
     const extras: HTMLElement[] = [];
     for (const selector of gimme) {

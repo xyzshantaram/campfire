@@ -66,7 +66,8 @@ Deno.test("poll", async (t) => {
 
     await t.step("calls immediately when callNow is true", () => {
         const cb2 = spy();
-        poll(cb2, 50, true);
+        const cancel = poll(cb2, 50, true);
         expect(cb2.calls.length).to.equal(1);
+        cancel();
     });
 });

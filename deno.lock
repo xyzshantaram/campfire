@@ -15,7 +15,7 @@
     "jsr:@std/testing@*": "1.0.11",
     "jsr:@std/testing@^1.0.11": "1.0.11",
     "npm:@types/node@*": "22.12.0",
-    "npm:jsdom@^26.1.0": "26.1.0"
+    "npm:jsdom@26.1.0": "26.1.0"
   },
   "jsr": {
     "@std/assert@1.0.12": {
@@ -470,7 +470,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/testing@^1.0.11",
-      "npm:jsdom@^26.1.0"
+      "npm:jsdom@26.1.0"
     ]
   }
 }

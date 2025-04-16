@@ -168,7 +168,7 @@ export class NuBuilder<
      */
     attr(name: string, value: string | boolean | number) {
         this.props.attrs ||= {};
-        this.props.attrs[name] = value.toString();
+        this.props.attrs[name] = value;
         return this;
     }
 
