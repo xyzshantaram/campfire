@@ -1,3 +1,5 @@
+/** @import cf from '@/campfire.ts'; */
+
 /**
  * Minimal idiomatic Campfire router.
  *

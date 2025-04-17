@@ -1,3 +1,5 @@
+/** @import cf from '@/campfire.ts'; */
+
 const store = cf.store({ type: "list", value: [] });
 const storeId = cf.ids("todo");
 

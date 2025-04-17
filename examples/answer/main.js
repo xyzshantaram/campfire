@@ -1,3 +1,4 @@
+/** @import cf from '@/campfire.ts'; */
 const value = cf.store({ value: 0 }); // initial value
 
 const [result] = cf.nu() // defaults to div
