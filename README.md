@@ -105,7 +105,7 @@ name.update("you");
 | `seq()`, `ids()`  | Utilities for number ranges and unique IDs |
 
 For **full, annotated examples and advanced usage**, see the
-[quick reference](https://xyzshantaram.github.io/campfire/?tab=docs).
+[docs](https://xyzshantaram.github.io/campfire/?tab=docs).
 
 ---
 

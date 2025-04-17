@@ -1,14 +1,27 @@
 import cf from "https://esm.sh/campfire.js@4.0.0-rc17";
 import { FrameTemplate } from "./FrameTemplate.js";
 
-const createEditorConfig = () => {
+const EDITABLE = ['html', 'css', 'javascript'];
+const VISIBLE = [...EDITABLE, "output"];
+const aceConfig = {
+    wrap: true,
+    fontSize: "1rem",
+    theme: "ace/theme/tomorrow_night_blue"
+}
+
+const createEditorConfig = (overlay) => {
     return Object.fromEntries(
-        ["html", "css", "javascript", "output"]
-            .map((itm) => [itm, {
-                elt: cf.select({ s: ".cf-editor-" + itm, single: true }),
-                mode: itm === "output" ? null : "ace/mode/" + itm,
-                editor: null,
-            }]),
+        [...EDITABLE, "output", "loading"].map((itm) => {
+            let elt = itm === 'loading' ? overlay : null;
+            let mode = null;
+
+            if (VISIBLE.includes(itm)) {
+                mode = "ace/mode/" + itm;
+                elt = cf.select({ s: ".cf-editor-" + itm, single: true });
+            }
+
+            return [itm, { elt, mode, editor: null }];
+        }),
     );
 };
 
@@ -18,32 +31,27 @@ const EditorButton = (key, currentEditor) =>
         .content(key)
         .attr("data-editor-view", key)
         .on("click", () => currentEditor.update(key))
+        .track(`editor-btn-${key}`)
         .ref();
 
-const edit = (config) =>
-    ace.edit(config.elt, {
-        wrap: true,
-        fontSize: "1rem",
-        mode: config.mode,
-        theme: "ace/theme/tomorrow_night_blue",
-    });
+const setupEditor = ({ elt, mode }) => ace.edit(elt, { ...aceConfig, mode });
 
-const EditorSwitcher = (configs, currentEditor) => {
-    const switcher = cf.nu("div.switcher").ref();
+const EditorSwitcher = (configs, state) => {
+    const slots = VISIBLE
+        .map(item => cf.html`<cf-slot name=${item}></cf-slot>`)
+        .join('');
 
-    for (const key in configs) {
-        if (key === "output") continue;
-        if (!configs[key].elt) continue;
+    const buttons = {
+        ...Object.fromEntries(EDITABLE.map(key => {
+            configs[key].editor = setupEditor(configs[key]);
+            return [key, EditorButton(key, state)];
+        })),
+        output: EditorButton('output', state)
+    };
 
-        const button = EditorButton(key, currentEditor);
-        cf.insert(button, { into: switcher });
-
-        configs[key].editor = edit(configs[key]);
-    }
-
-    cf.insert(EditorButton("output", currentEditor), { into: switcher });
-    return switcher;
-};
+    const switcher = cf.nu('div.switcher').html(slots).children(buttons).ref();
+    return [switcher, buttons];
+}
 
 const OutputFrame = (contents) =>
     cf.nu("iframe.cf-editor-output-iframe")
@@ -52,29 +60,46 @@ const OutputFrame = (contents) =>
         .misc("sandbox", "allow-modals allow-scripts")
         .ref();
 
-const DemoListItem = (example, setActiveDemo, cache) => {
+const DemoListItem = ({ example, setDemo, cache, current }) => {
     const file = (name) => `examples/${example.path}/${name}`;
+
+    const getFiles = async () => Object.fromEntries(await Promise.all(
+        ["index.html", "style.css", "main.js"].map(async (name) => {
+            const res = await fetch(file(name));
+            const text = res.ok ? await res.text() : "";
+            return [name.split(".").at(-1), text];
+        }),
+    ));
 
     return cf.nu("li")
         .on("click", async () => {
             let files = cache.get(example.path);
-            if (files) return setActiveDemo(files);
-
-            files = Object.fromEntries(
-                await Promise.all(
-                    ["index.html", "style.css", "main.js"].map(async (name) => {
-                        const res = await fetch(file(name));
-                        const text = res.ok ? await res.text() : "";
-                        return [name.split(".").at(-1), text];
-                    }),
-                ),
-            );
+            if (files) return setDemo(files);
+            current.update('loading');
+            files = await getFiles();
             cache.set(example.path, files);
-            setActiveDemo(files);
+            setDemo(files);
         })
         .html`<a href='javascript:void(0)'>${example.title}</a>`
         .ref();
 };
+
+const Overlay = () => cf.nu("div.cf-editor-loading-overlay")
+    .styles({
+        display: "none",
+        zIndex: "1000",
+        inset: "0",
+        background: "inherit",
+        fontFamily: "inherit",
+        color: "#fff",
+        fontSize: "2rem",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        pointerEvents: "all"
+    })
+    .content("Loading…")
+    .ref();
 
 export const editorReady = () => {
     const [examples] = cf.select({
@@ -82,9 +107,12 @@ export const editorReady = () => {
     });
     if (!examples) return;
 
-    const configs = createEditorConfig();
+    const overlay = Overlay();
+    const configs = createEditorConfig(overlay);
     const wrapper = cf.select({ s: ".editor-wrapper", single: true });
-    const currentEditor = cf.store({ value: "html" });
+    wrapper.style.position = "relative";
+    cf.insert(overlay, { into: wrapper, at: 'start' });
+    const current = cf.store({ value: "html" });
     const cache = new Map();
 
     const getContent = () =>
@@ -102,34 +130,30 @@ export const editorReady = () => {
         "css": "/* This demo has no CSS. */",
     };
 
-    const renderDemo = (obj) => {
-        ["html", "javascript", "css"].forEach((itm) => {
+    const setDemo = (obj) => {
+        VISIBLE.forEach((itm) => {
             const key = itm === "javascript" ? "js" : itm;
-            configs[itm].editor.setValue(obj[key] || defaults[key]);
+            configs[itm].editor?.setValue(obj[key] || defaults[key]);
         });
 
-        currentEditor.update("output");
+        current.update("output");
     };
 
-    cf.insert(EditorSwitcher(configs, currentEditor), { into: wrapper });
+    const [switcher, buttons] = EditorSwitcher(configs, current);
+    cf.insert(switcher, { into: wrapper });
 
     // Set up event handlers
-    currentEditor.on("update", (event) => {
+    current.on("update", (event) => {
         const val = event.value;
 
-        // Update visibility
-        cf.select({ s: ".editor-wrapper > :not(.switcher)", all: true })
-            .forEach((elem) => elem.style.display = "none");
-        configs[val].elt.style.display = "block";
+        Object.entries(configs).forEach(([key, config]) =>
+            config.elt.style.display = key === val ? 'block' : 'none');
+
         configs[val].editor?.resize();
-
-        // Update active button
-        cf.select({ s: `.switcher>button.active`, single: true })
-            ?.classList.remove("active");
-        cf.select({ s: `button[data-editor-view="${val}"]`, single: true })
-            ?.classList.add("active");
-
+        if (val === 'loading') return;
         if (val === "output") generateOutput();
+        Object.values(buttons).forEach(button => button.classList.remove('active'));
+        cf.tracked(`editor-btn-${val}`).classList.add('active');
     }, true);
 
     const [list] = cf.select({ s: "#playground-demo-list" });
@@ -142,7 +166,7 @@ export const editorReady = () => {
             .attr(
                 "href",
                 "data:text/html;charset=utf-8," +
-                    encodeURIComponent(FrameTemplate(getContent())),
+                encodeURIComponent(FrameTemplate(getContent())),
             )
             .ref();
         link.click();
@@ -159,8 +183,9 @@ export const editorReady = () => {
     fetch("examples/dir.json")
         .then((res) => res.json())
         .then((parsed) =>
-            parsed.examples.forEach((itm) => {
-                cf.insert(DemoListItem(itm, renderDemo, cache), { into: list });
+            parsed.examples.forEach((example) => {
+                cf.insert(DemoListItem({ example, setDemo, cache, current }),
+                    { into: list });
             })
         );
 };
