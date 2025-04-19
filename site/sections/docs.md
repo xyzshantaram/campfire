@@ -1,7 +1,7 @@
 ### using campfire 4.0.0
 
-View the [full API reference](/site/docs/modules/campfire.html) for detailed descriptions of the methods and classes
-provided by Campfire.
+View the [full API reference](/site/docs/modules/campfire.html) for detailed descriptions of the
+methods and classes provided by Campfire.
 
 #### quick reference
 
@@ -12,7 +12,9 @@ Campfire provides the following methods and classes:
 
 Create DOM elements with a readable, chainable builder pattern.
 
-```js
+```ts
+import cf from "@campfire/core";
+
 const [greeting] = cf.nu("h1")
     .content("Hello, world!")
     .attr("id", "greeting")
@@ -32,7 +34,9 @@ const [info] = cf.nu("div.info")
 
 Store state in a reactive scalar, array, or map.
 
-```js
+```ts
+import cf from "@campfire/core";
+
 const counter = cf.store({ value: 0 });
 counter.update((n) => n + 1);
 counter.on("update", (e) => console.log(e.value));
@@ -51,7 +55,9 @@ users.set("alex", false);
 
 Select DOM elements with a unified API.
 
-```js
+```ts
+import cf from "@campfire/core";
+
 const [header] = cf.select({ s: "header" });
 const buttons = cf.select({ s: "button", all: true });
 ```
@@ -63,8 +69,20 @@ const buttons = cf.select({ s: "button", all: true });
 
 Insert elements anywhere in the DOM.
 
-```js
+```ts
+import cf from "@campfire/core";
+
+const [greeting] = cf.nu("h1")
+    .content("Hello, world!")
+    .done();
+
+const info = cf.nu("p")
+    .content("This element was generated using Campfire v4")
+    .done();
+
+// insert a single HTMLElement...
 cf.insert(greeting, { into: document.body });
+// or insert the result of nu() directly
 cf.insert(info, { after: greeting });
 ```
 
@@ -75,8 +93,11 @@ cf.insert(info, { after: greeting });
 
 Escape content for the DOM and compose structured HTML.
 
-```js
-const text = cf.html`A message for <b>${user}</b>`;
+```ts
+import cf from "@campfire/core";
+
+const user = "<script>alert('xss')</script>";
+const text = cf.html`A message for <b>${user}</b>`; // user is escaped safely
 ```
 
 </details>
@@ -84,7 +105,9 @@ const text = cf.html`A message for <b>${user}</b>`;
 <details>
 <summary><code>mustache()</code> & <code>template()</code> - string templates</summary>
 
-```js
+```ts
+import cf from "@campfire/core";
+
 // Basic interpolation (auto-escaped)
 cf.mustache("Hello, {{name}}!", { name: "<b>Alex</b>" }); // "Hello, &lt;b&gt;Alex&lt;/b&gt;!"
 
@@ -110,7 +133,11 @@ hello({ who: "<x>" }); // "Hello, &lt;x&gt;!"
 
 Modify or enhance any DOM element with props, reactivity, and more. Use the builder for clarity.
 
-```js
+```ts
+import cf from "@campfire/core";
+
+const header = document.createElement("header");
+
 cf.x(header)
     .content("Page Header")
     .style("fontWeight", "bold")
@@ -124,8 +151,11 @@ cf.x(header)
 
 Clear an element or remove it from the DOM.
 
-```js
-cf.empty(container);
+```ts
+import cf from "@campfire/core";
+
+const header = cf.nu("header").content("foo").ref();
+cf.empty(header);
 cf.rm(header);
 ```
 
@@ -134,7 +164,9 @@ cf.rm(header);
 <details>
 <summary><code>seq()</code> & <code>ids()</code> - ranges and unique ids</summary>
 
-```js
+```ts
+import cf from "@campfire/core";
+
 cf.seq(3).forEach((i) => {
     const id = cf.ids("item")();
     cf.nu("div.item").attr("id", id).content(`Item #${i + 1}`).done();
