@@ -20,7 +20,7 @@ export { CfDom };
  * @throws an Error when there are no valid keys ('into', 'after', or 'before') present in `where`.
  * @returns the element that was inserted, so you can do `const a = insert(nu(), _)`.
  */
-export const insert = (els: Element | Element[], where: ElementPosition) => {
+export const insert = (els: Element | Element[], where: ElementPosition): typeof els => {
     // Check we have at least one valid key
     if (!("into" in where) && !("after" in where) && !("before" in where)) {
         throw new Error(
@@ -71,7 +71,8 @@ export const insert = (els: Element | Element[], where: ElementPosition) => {
  * @param cb The callback to run.
  * @returns void
  */
-export const onload = (cb: (ev: Event) => void) => globalThis.addEventListener("DOMContentLoaded", cb);
+export const onload = (cb: (ev: Event) => void): void =>
+    globalThis.addEventListener("DOMContentLoaded", cb);
 
 export type SelectParams = {
     /** The selector to query for. */
@@ -110,12 +111,12 @@ export function select(
  * @param elt The element to remove.
  * @returns void
  */
-export const rm = (elt: Element) => elt.remove();
+export const rm = (elt: Element): void => elt.remove();
 
 /**
  * Empties a DOM element of its content.
  * @param elt The element to empty.
  */
-export const empty = (elt: Element) => {
+export const empty = (elt: Element): void => {
     elt.innerHTML = "";
 };

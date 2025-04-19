@@ -99,7 +99,7 @@ export class MapStore<T> extends Store<Record<string, T>> {
      * @param key The key to look up.
      * @returns The value associated with the key, or undefined if the key does not exist.
      */
-    get(key: string) {
+    get(key: string): T | undefined {
         return this.value[key];
     }
 
@@ -107,11 +107,11 @@ export class MapStore<T> extends Store<Record<string, T>> {
         return Object.hasOwn(this.value, key);
     }
 
-    entries() {
+    entries(): [string, T][] {
         return Object.entries(this.value);
     }
 
-    get size() {
+    get size(): number {
         return Object.keys(this.value).length;
     }
 }

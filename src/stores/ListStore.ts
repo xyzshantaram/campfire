@@ -48,7 +48,7 @@ export class ListStore<T> extends Store<T[]> {
      *   - `value`: The appended item
      *   - `idx`: The index where the item was inserted (length - 1)
      */
-    push(val: T) {
+    push(val: T): number {
         this.value.push(val);
         // Send a copy in the event
         this._sendEvent({
@@ -83,7 +83,7 @@ export class ListStore<T> extends Store<T[]> {
      * @returns The element at the specified index.
      * @throws {RangeError} If the index is out of bounds.
      */
-    get(idx: number) {
+    get(idx: number): T {
         if (idx < 0 || idx >= this.value.length) {
             throw new RangeError("Invalid index.");
         }
@@ -112,7 +112,7 @@ export class ListStore<T> extends Store<T[]> {
         });
     }
 
-    [Symbol.iterator]() {
+    [Symbol.iterator](): Iterator<T> {
         return this.value[Symbol.iterator]();
     }
 
@@ -133,7 +133,7 @@ export class ListStore<T> extends Store<T[]> {
     /**
      * Utility accessor to find the length of the store.
      */
-    get length() {
+    get length(): number {
         return this.value.length;
     }
 }

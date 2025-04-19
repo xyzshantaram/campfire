@@ -40,7 +40,7 @@ export const r = (val: any, options?: RawHtmlOptions): RawHtml => {
 export const html = (
     strings: TemplateStringsArray,
     ...values: (string | boolean | number | RawHtml | undefined)[]
-) => {
+): string => {
     const built = [];
     for (let i = 0; i < strings.length; i++) {
         built.push(strings[i] || "");

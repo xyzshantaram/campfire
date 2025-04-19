@@ -1,4 +1,4 @@
-import { Store } from "../stores/mod.ts";
+import type { Store } from "../stores/mod.ts";
 import type {
     DOMEventHandlers,
     ElementProperties,
@@ -50,7 +50,9 @@ const createElemFromInfo = (info: string) => {
  * @internal
  */
 const parseEltString = (str: string | undefined): TagStringParseResult => {
-    const matches = str ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/) : undefined;
+    const matches = str
+        ? str.match(/([0-9a-zA-Z\-]*)?(#[0-9a-zA-Z\-]*)?((.[0-9a-zA-Z\-]+)*)/)
+        : undefined;
     const results = matches
         ? matches.slice(1, 4)?.map((elem) => elem ? elem.trim() : undefined)
         : Array(3).fill(undefined);
@@ -61,7 +63,9 @@ const parseEltString = (str: string | undefined): TagStringParseResult => {
         ? {
             tag: results[0] || undefined,
             id: results[1] || undefined,
-            classes: results[2] ? results[2].split(".").filter((elem: string) => elem.trim()) : undefined,
+            classes: results[2]
+                ? results[2].split(".").filter((elem: string) => elem.trim())
+                : undefined,
         }
         : {};
 };
@@ -115,7 +119,7 @@ export class NuBuilder<
      * @param on - Whether the class should be applied (true) or removed (false/falsy)
      * @returns The builder instance for chaining
      */
-    cls(name: string, on: "" | boolean | 0 | null = true) {
+    cls(name: string, on: "" | boolean | 0 | null = true): typeof this {
         this.props.classes ??= {};
         this.props.classes[name] = !!on;
         return this;
@@ -131,7 +135,7 @@ export class NuBuilder<
         return extend(this.elem as any as Elem, this.props);
     }
 
-    ref() {
+    ref(): Elem {
         return this.done()[0];
     }
 
@@ -142,7 +146,7 @@ export class NuBuilder<
      * @param value - String content to set
      * @returns The builder instance for chaining
      */
-    content(value: string) {
+    content(value: string): typeof this {
         this.props.contents = value;
         return this;
     }
@@ -154,7 +158,7 @@ export class NuBuilder<
      * @param fn - The render function that returns content
      * @returns The builder instance for chaining
      */
-    render(fn: RenderFunction<Elem, Deps>) {
+    render(fn: RenderFunction<Elem, Deps>): typeof this {
         this.props.render = fn;
         return this;
     }
@@ -166,7 +170,7 @@ export class NuBuilder<
      * @param value - The attribute value. Set to empty string ('') to clear/reset an attribute.
      * @returns The builder instance for chaining
      */
-    attr(name: string, value: string | boolean | number) {
+    attr(name: string, value: string | boolean | number): typeof this {
         this.props.attrs ||= {};
         this.props.attrs[name] = value;
         return this;
@@ -178,7 +182,7 @@ export class NuBuilder<
      * @param value - An object containing attribute name-value pairs
      * @returns The builder instance for chaining
      */
-    attrs(value: ElementProperties<Elem, Deps>["attrs"]) {
+    attrs(value: ElementProperties<Elem, Deps>["attrs"]): typeof this {
         this.props.attrs = value;
         return this;
     }
@@ -189,7 +193,7 @@ export class NuBuilder<
      * @param value - If true, content will not be escaped before setting innerHTML
      * @returns The builder instance for chaining
      */
-    raw(value: boolean) {
+    raw(value: boolean): typeof this {
         this.props.raw = value;
         return this;
     }
@@ -201,12 +205,12 @@ export class NuBuilder<
      * @param value - The value for the property if obj is a property name
      * @returns The builder instance for chaining
      */
-    misc(obj: string, value: unknown): NuBuilder<Elem, Deps, Info>;
-    misc(obj: Record<string, unknown>): NuBuilder<Elem, Deps, Info>;
+    misc(obj: string, value: unknown): typeof this;
+    misc(obj: Record<string, unknown>): typeof this;
     misc(
         obj: string | Record<string, unknown>,
         value?: unknown,
-    ): NuBuilder<Elem, Deps, Info> {
+    ): typeof this {
         this.props.misc ||= {};
         if (typeof obj === "object") this.props.misc = obj;
         else this.props.misc[obj] = value;
@@ -220,7 +224,7 @@ export class NuBuilder<
      * @param value - The CSS property value. Set to empty string ('') to clear a style.
      * @returns The builder instance for chaining
      */
-    style(prop: StringStyleProps, value: string) {
+    style(prop: StringStyleProps, value: string): typeof this {
         this.props.style ||= {};
         this.props.style[prop] = value;
         return this;
@@ -232,7 +236,7 @@ export class NuBuilder<
      * @param value - An object containing style name-value pairs
      * @returns The builder instance for chaining
      */
-    styles(value: ElementProperties<Elem, Deps>["style"]) {
+    styles(value: ElementProperties<Elem, Deps>["style"]): typeof this {
         this.props.style = value ?? {};
         return this;
     }
@@ -247,7 +251,7 @@ export class NuBuilder<
     on<K extends keyof HTMLElementEventMap>(
         type: K,
         handler: (event: HTMLElementEventMap[K]) => void,
-    ) {
+    ): typeof this {
         this.props.on ||= {};
         this.props.on[type] = handler as DOMEventHandlers[K];
         return this;
@@ -259,7 +263,7 @@ export class NuBuilder<
      * @param selectors - A single selector string or an array of selector strings
      * @returns The builder instance for chaining
      */
-    gimme(...selectors: string[]) {
+    gimme(...selectors: string[]): typeof this {
         this.props.gimme ||= [];
         this.props.gimme = selectors;
         return this;
@@ -282,15 +286,15 @@ export class NuBuilder<
      * @param value The string to set.
      * @returns The builder for chaining.
      */
-    html(value: string): NuBuilder<Elem, Deps, Info>;
+    html(value: string): typeof this;
     html(
         arr: TemplateStringsArray,
         ...values: (string | number | boolean | RawHtml)[]
-    ): NuBuilder<Elem, Deps, Info>;
+    ): typeof this;
     html(
         value: string | TemplateStringsArray,
         ...args: (string | boolean | number | RawHtml)[]
-    ): NuBuilder<Elem, Deps, Info> {
+    ): typeof this {
         this.props.raw = true;
         if (typeof value === "string") {
             this.props.contents = value;
@@ -307,7 +311,7 @@ export class NuBuilder<
      * of cf-slot elements in the parent's innerHTML.
      * @returns The builder object for chaining.
      */
-    children(children: Record<string, HTMLElement | HTMLElement[]>) {
+    children(children: Record<string, HTMLElement | HTMLElement[]>): typeof this {
         this.props.children = children;
         return this;
     }
@@ -317,7 +321,7 @@ export class NuBuilder<
      * `cf.tracked(id)`.
      * @param id The id to track the element by.
      */
-    track(id: string) {
+    track(id: string): typeof this {
         this.props.track = id;
         return this;
     }

@@ -1,7 +1,7 @@
 import type { AnySubscriber, EventSubscriber, EventType, StoreEvent } from "../types.ts";
 import { deepishClone, ids } from "../utils.ts";
 
-const storeId = ids("cf-store");
+const storeId: ReturnType<typeof ids<"cf-store">> = ids("cf-store");
 
 /**
  * The primitive observable container. Store is the base class for all reactive state in Campfire.
@@ -31,7 +31,7 @@ export class Store<T> {
      * A unique ID for the store, to track nested reactive elements to warn the user.
      * @internal
      */
-    id = storeId();
+    id: ReturnType<typeof storeId> = storeId();
 
     /**
      * The value of the store.
@@ -220,14 +220,14 @@ export class Store<T> {
      * const userData = user.current();  // { name: "John", age: 30 }
      * ```
      */
-    current() {
+    current(): T {
         return deepishClone(this.value);
     }
 
     /**
      * @deprecated Use current() instead
      */
-    valueOf() {
+    valueOf(): T {
         return deepishClone(this.value);
     }
 }

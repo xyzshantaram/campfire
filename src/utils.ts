@@ -10,7 +10,7 @@
  * [he](https://github.com/mathiasbynens/he) or
  * [sanitize-html](https://github.com/apostrophecms/sanitize-html)).
  */
-export const escape = (str: string) => {
+export const escape = (str: string): string => {
     if (!str) return "";
 
     return str.replace(/&/g, "&amp;")
@@ -27,7 +27,7 @@ export const escape = (str: string) => {
  * @returns The string, with its character references replaced by the characters it references.
  * No characters other than the ones mentioned above are unescaped.
  */
-export const unescape = (str: string) => {
+export const unescape = (str: string): string => {
     if (!str) return "";
     const expr = /&(?:amp|lt|gt|quot|#(0+)?39);/g;
 
@@ -58,7 +58,7 @@ export const unescape = (str: string) => {
  * @param step Optional step to increment by, default is 1
  * @returns Array of numbers forming the range
  */
-export const seq = (...args: number[]) => {
+export const seq = (...args: number[]): Array<number> => {
     let start = 0, stop = args[0], step = 1;
     if (typeof args[1] !== "undefined") {
         start = args[0];
@@ -160,7 +160,7 @@ export const callbackify = <T extends any[], U = unknown, E = any>(
  * stopPolling();
  * ```
  */
-export const poll = (fn: () => void, interval: number, callNow = false) => {
+export const poll = (fn: () => void, interval: number, callNow = false): () => void => {
     let timeout: ReturnType<typeof setTimeout> | null = null;
     const handler = () => {
         try {
@@ -190,6 +190,7 @@ const generateId = (prefix: string) => `${prefix}-${Math.random().toString(36).s
  *
  * @example
  * ```ts
+ * import { ids } from "@campfire/core";
  * const genId = ids();
  * console.log(genId()) // cf-k9yh28
  * const todoId = ids('todo');
@@ -198,14 +199,14 @@ const generateId = (prefix: string) => `${prefix}-${Math.random().toString(36).s
  * @param prefix The prefix to use. Defaults to 'cf-'.
  * @returns A function that generates a unique ID.
  */
-export const ids = (prefix = "cf") => {
+export const ids = <T extends string>(prefix: T = "cf" as T): () => `${T}-${string}` => {
     const existing = new Set<string>();
-    return () => {
+    return (() => {
         let id = generateId(prefix);
         while (existing.has(id)) id = generateId(prefix);
         existing.add(id);
         return id;
-    };
+    }) as () => `${T}-${string}`;
 };
 
 /**

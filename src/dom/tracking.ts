@@ -28,7 +28,7 @@ const elements = new Map<string, HTMLElement>();
  * entire application.
  * @param elt The element to track.
  */
-export const track = (id: string, elt: HTMLElement) => {
+export const track = (id: string, elt: HTMLElement): void => {
     elements.set(id, elt);
 };
 
@@ -51,7 +51,7 @@ export const track = (id: string, elt: HTMLElement) => {
  *
  * @param id Id of the element to untrack, as passed to `track()`.
  */
-export const untrack = (id: string) => {
+export const untrack = (id: string): void => {
     elements.delete(id);
 };
 
@@ -73,6 +73,6 @@ export const untrack = (id: string) => {
  * @param id The id of the tracked element to retrieve
  * @returns The tracked element, or null if not found
  */
-export const tracked = (id: string) => {
+export const tracked = (id: string): HTMLElement | null => {
     return elements.get(id) || null;
 };
