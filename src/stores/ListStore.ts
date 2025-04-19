@@ -6,15 +6,17 @@ import { Store } from "./Store.ts";
  * Offers push/remove/set/clear and iterable helpers, producing granular change events.
  * Compatible with Campfire’s store API, and usable in both imperative and reactive contexts.
  *
- * Example:
+ * @example
  * ```ts
- * import { store } from "campfire";
+ * import { store } from "@campfire/core";
  * const todos = store({ type: "list", value: ["one"] });
  * todos.push("two");               // Appends new item
- * todos.set(0, "ONE");            // Update item in-place with eventing
+ * todos.set(0, "ONE");             // Update item in-place with eventing
  * todos.remove(1);                 // Remove by index
  * todos.clear();                   // Remove all
- * for (const item of todos) {...}  // Iterable like a JS array
+ * for (const item of todos) { // Iterable like a JS array
+ *  console.log(item);
+ * }
  * ```
  *
  * Events:

@@ -77,7 +77,8 @@ const parseEltString = (str: string | undefined): TagStringParseResult => {
  * before creating the actual DOM element with the `done()` method.
  *
  * @example
- * ```typescript
+ * ```ts
+ * import { nu } from "@campfire/core";
  * // Create a button with multiple options
  * const [button] = nu('button#submit.primary')
  *   .content('Submit')

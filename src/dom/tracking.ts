@@ -15,11 +15,9 @@ const elements = new Map<string, HTMLElement>();
  *
  * @example
  * ```ts
- * // Create and track elements
- * const header = document.createElement('header');
- * track('main-header', header);
+ * import { nu, track } from '@campfire/core';
  *
- * // Track dynamically created elements
+ * // Create and track elements
  * const [sidebar] = nu('aside.sidebar').done();
  * track('app-sidebar', sidebar);
  * ```

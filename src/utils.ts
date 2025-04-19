@@ -216,15 +216,6 @@ export const ids = <T extends string>(prefix: T = "cf" as T): () => `${T}-${stri
  * - Cyclic references are preserved via a WeakMap (safe for objects/arrays).
  * - This is **not** a full/robust deep clone (for edge cases, use a specialized library).
  *
- * @example
- * ```ts
- * import { deepishClone } from "@/campfire.ts";
- * const original = { a: [1, { b: 2 }] };
- * const copy = deepishClone(original);
- * copy.a[1].b = 33;
- * console.log(original.a[1].b); // 2
- * ```
- *
  * @param value The value to deep-clone (array or plain object recommended)
  * @returns A recursively cloned copy, or original for non-objects/functions.
  */

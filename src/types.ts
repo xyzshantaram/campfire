@@ -1,6 +1,6 @@
-import { NuBuilder } from "./dom/NuBuilder.ts";
+import type { NuBuilder } from "./dom/NuBuilder.ts";
 import type { CfHTMLElementInterface } from "./dom/config.ts";
-import { Store } from "./stores/mod.ts";
+import type { Store } from "./stores/mod.ts";
 
 export interface UpdateEvent<ST> {
     type: "update";
@@ -248,7 +248,7 @@ export type EltInfoToTag<T extends string> =
         : T extends `${infer Tag extends TagName}.${string}` ? Tag
         // Case 1: Tag only
         : T extends `${infer Tag extends TagName}` ? Tag
-        : "div";
+        : "";
 
 export type InferElementType<T extends string> = T extends keyof HTMLElementTagNameMap
     ? HTMLElementTagNameMap[EltInfoToTag<T>]

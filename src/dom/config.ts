@@ -49,7 +49,7 @@ export type CfHTMLElementInterface =
     & Node;
 
 /**
- * DOMShim provides a configurable interface for core DOM operations.
+ * CfDom provides a configurable interface for core DOM operations.
  *
  * This allows Campfire to work in both browser environments
  * (using native DOM) and server environments (using a DOM implementation
@@ -59,7 +59,7 @@ export type CfHTMLElementInterface =
  *
  * 1. Browser environment (automatic initialization):
  *    ```ts
- *    import { CfDom } from './dom/config';
+ *    import { CfDom } from '@campfire/core';
  *
  *    // Methods are already initialized with browser DOM
  *    const element = CfDom.createElement('div');
@@ -68,7 +68,7 @@ export type CfHTMLElementInterface =
  *
  * 2. Server-side rendering with custom DOM implementation:
  *    ```ts
- *    import { CfDom } from './dom/config';
+ *    import { CfDom } from '@campfire/core';
  *    import { JSDOM } from 'jsdom';
  *
  *    // Setup a custom DOM environment

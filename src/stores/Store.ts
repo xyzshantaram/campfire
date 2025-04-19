@@ -9,9 +9,9 @@ const storeId: ReturnType<typeof ids<"cf-store">> = ids("cf-store");
  * Stores emit events when changed and support granular subscriptions. There are helpers for updating,
  * transforming, cloning, and explicit disposal. See also: ListStore, MapStore for array/object variants.
  *
- * Example:
+ * @example
  * ```ts
- * import { store } from "campfire";
+ * import { store } from "@campfire/core";
  * const state = store({ value: { open: false } });
  * state.on("update", e => console.log(e.value.open)); // Subscribe
  * state.update(x => ({ ...x, open: true }));
@@ -80,6 +80,7 @@ export class Store<T> {
      * @returns A unique subscriber ID that can be used to unsubscribe the listener.
      * @example
      * ```ts
+     * import { store } from "@campfire/core";
      * // Subscribe to updates
      * const counter = store({ value: 0 });
      * counter.on("update", (event) => {
@@ -152,18 +153,12 @@ export class Store<T> {
      * @emits 'update' event with the new value when successfully updated.
      * @example
      * ```ts
-     * // Direct update
+     * import { store } from "@campfire/core";
+     * const counter = store({ value: 4 });
      * counter.update(5);
      *
      * // Update using a transform function
      * counter.update(current => current + 1);
-     *
-     * // Complex transform
-     * userStore.update(user => ({
-     *   ...user,
-     *   visits: user.visits + 1,
-     *   lastVisit: new Date()
-     * }));
      * ```
      */
     update(value: (arg: T) => T): T | null;
@@ -208,7 +203,9 @@ export class Store<T> {
     }
 
     /**
-     * Get a deep clone of the current store value.
+     * Get a deep(-ish) clone of the current store value. The store tries
+     * to clone simple objects but falls back to copying refs for complex
+     * ones.
      *
      * Added in 4.0.0-rc15 as the recommended way to access store values
      * since the value property is now protected.
@@ -216,8 +213,9 @@ export class Store<T> {
      * @returns A deep clone of the store's current value
      * @example
      * ```ts
+     * import { store } from "@campfire/core";
      * const user = store({ value: { name: "John", age: 30 } });
-     * const userData = user.current();  // { name: "John", age: 30 }
+     * const userData = user.current(); // { name: "John", age: 30 }
      * ```
      */
     current(): T {

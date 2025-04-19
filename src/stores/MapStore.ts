@@ -6,18 +6,18 @@ import { Store } from "./Store.ts";
  *
  * You can treat `MapStore` almost like an object/Map but with integrated reactivity:
  *
- * Example:
+ * @example
  * ```ts
- * import { store } from "campfire";
+ * import { store } from "@campfire/core";
  * const users = store({ type: "map", value: { foo: { id: 1 } } });
- * users.set("bar", { id: 2 });          // Add/replace by key
- * users.transform("foo", u => ({...u, id: 99 }));
- * users.entries().forEach(([k, v]) => ...); // JS-style Map iteration
- * users.remove("bar");                  // Remove entry & event
+ * users.set("bar", { id: 2 });           // Add/replace by key
+ * users.remove("bar");                   // Remove entry & event
  * users.clear();                         // Remove all
- * users.has("foo");                     // Check presence
- * users.get("foo").id;                  // Get value
+ * users.has("foo");                      // Check presence
+ * users.get("foo")?.id;                   // Get value
  * users.size;                            // Number of keys, always up to date
+ * users.transform("foo", u => ({...u, id: 99 }));        // transform key inplace
+ * users.entries().forEach(entry => console.log(entry));  // use common map methods
  * ```
  *
  * Events:

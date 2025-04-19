@@ -18,8 +18,8 @@ export type StoreInitializer<T> =
  * // Scalar store
  * import { store } from "@/campfire.ts";
  * const n = store({ value: 42 });
- * n.set(12);
- * console.log(n.current()); // 12
+ * n.update(69);
+ * console.log(n.current()); // 69
  * ```
  *
  * @example

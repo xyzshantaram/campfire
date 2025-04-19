@@ -1,5 +1,11 @@
 import type { Store } from "../stores/mod.ts";
-import type { ElementProperties, InferElementType, RenderBuilder, RenderFunction, UnwrapStore } from "../types.ts";
+import type {
+    ElementProperties,
+    InferElementType,
+    RenderBuilder,
+    RenderFunction,
+    UnwrapStore,
+} from "../types.ts";
 import type { CfHTMLElementInterface } from "./config.ts";
 import { escape } from "../utils.ts";
 import { select } from "./mod.ts";
@@ -44,7 +50,9 @@ const reconcileAttrs = (
 ) => {
     Object.entries(attrs).forEach(([name, value]) => {
         const current = elt.getAttribute(name);
-        if (["boolean", "string"].includes(typeof value) && !value) return elt.removeAttribute(name);
+        if (["boolean", "string"].includes(typeof value) && !value) {
+            return elt.removeAttribute(name);
+        }
         const str = String(value);
         if (current === str) return;
         elt.setAttribute(name, String(value));
@@ -205,7 +213,9 @@ export const extend = <
     if (style) Object.assign(elt.style, style);
 
     Object.entries(on)
-        .forEach(([evt, listener]) => CfDom.addElEventListener(elt, evt, listener as (evt: Event) => void));
+        .forEach(([evt, listener]) =>
+            CfDom.addElEventListener(elt, evt, listener as (evt: Event) => void)
+        );
 
     reconcileAttrs(elt, attrs);
 
@@ -229,7 +239,7 @@ export const extend = <
  *
  * @example
  * ```ts
- * import { nu, html } from "@/campfire.ts";
+ * import { nu, html } from "@campfire/core";
  * // Using builder API for a div with classes and content
  * const [first] = nu("div.my-class").content("Hello!").done();
  * // Using builder API to create a div with raw HTML content
@@ -248,11 +258,12 @@ export const extend = <
  * ```
  * @example
  * ```ts
+ * import { nu } from "@campfire/core";
  * // Creating multiple sub-elements with gimme:
- * const [container, child] = nu("div", {
- *   contents: html`<span class='foo'>hi!</span>`,
- *   gimme: [".foo"]
- * }).done();
+ * const [container, child] = nu("div")
+ *  .gimme('.foo')
+ *  .html`<span class='foo'>hi!</span>`
+ *  .done();
  * // Now 'child' is the inner .foo element.
  * ```
  *
@@ -283,11 +294,12 @@ export const nu = <
  * @example
  * ```ts
  * // Enhance a DOM-created element with Campfire's reactive/class/attr API:
- * import * as cf from "@/campfire.ts";
+ * import * as cf from "@campfire/core";
  * const btn = document.createElement('button');
  * const count = cf.store({ value: 0 });
- * cf.x(btn)
+ * cf.x<HTMLButtonElement>(btn)
  *  .cls('text-lg')
+ *  .deps({ count })
  *  .on('click', () => count.update(n => n + 1))
  *  .misc('type', 'button') // set btn.type = 'button'. Different from attr()
  *  .render(({ count }, { b }) => b.content(`Clicked ${count} times`))
@@ -303,8 +315,8 @@ export const nu = <
 
 export const x = <
     Elem extends InferElementType<Info>,
-    Deps extends Record<string, Store<any>>,
-    Info extends string = "div",
+    Deps extends Record<string, Store<any>> = Record<string, Store<any>>,
+    Info extends string = "",
 >(
     elt: Elem,
     args: ElementProperties<Elem, Deps> = {},

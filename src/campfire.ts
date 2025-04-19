@@ -1,17 +1,23 @@
 import { empty, insert, onload, rm, select } from "./dom/mod.ts";
-import { extend, nu } from "./dom/nu.ts";
-import { NuBuilder } from "./dom/NuBuilder.ts";
+import { extend, nu, x } from "./dom/nu.ts";
 import { ListStore, MapStore, Store, store } from "./stores/mod.ts";
 import { html, r } from "./templating/html.ts";
 import { mustache, template } from "./templating/mustache.ts";
 import { callbackify, escape, ids, poll, seq, unescape } from "./utils.ts";
 import { CfDom } from "./dom/mod.ts";
+import { track, tracked, untrack } from "./dom/tracking.ts";
 
+import type { NuBuilder } from "./dom/NuBuilder.ts";
 import type { SelectParams } from "./dom/mod.ts";
 import type { RawHtmlOptions } from "./templating/html.ts";
-import type { AnySubscriber, ElementPosition, ElementProperties, EventSubscriber, Template } from "./types.ts";
+import type {
+    AnySubscriber,
+    ElementPosition,
+    ElementProperties,
+    EventSubscriber,
+    Template,
+} from "./types.ts";
 import type { Callback, Callbackified } from "./utils.ts";
-import { track, tracked, untrack } from "./dom/tracking.ts";
 
 export default {
     ListStore,
@@ -39,6 +45,7 @@ export default {
     track,
     tracked,
     untrack,
+    x,
 };
 
 export {
@@ -67,6 +74,7 @@ export {
     tracked,
     unescape,
     untrack,
+    x,
 };
 
 export type {
