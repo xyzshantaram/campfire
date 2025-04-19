@@ -1,4 +1,7 @@
 {
+    "name": "@campfire/core",
+    "version": "4.0.0-rc17",
+    "license": "MIT",
     "include": [
         "site/build.ts"
     ],
@@ -39,5 +42,6 @@
         "coverage": "deno test -A --coverage && deno coverage --exclude=\"dom/config.ts\" && rm -rf coverage/",
         "build-site": "deno run -A scripts/build.ts ./site/sections ./index.html",
         "size": "deno run --allow-read scripts/size-estimate.js"
-    }
+    },
+    "exports": "./src/campfire.ts"
 }
