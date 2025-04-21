@@ -1,13 +1,44 @@
 import cf from "https://esm.sh/campfire.js@4.0.0-rc17";
 import { FrameTemplate } from "./FrameTemplate.js";
+import * as CodeCake from "https://unpkg.com/codecake@0.5.0/codecake.js";
+import { highlight } from "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0";
+import js from "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0/langs/javascript";
+import css from "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0/langs/sass";
+import html from "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0/langs/xhtml";
 
-const EDITABLE = ['html', 'css', 'javascript'];
-const VISIBLE = [...EDITABLE, "output"];
-const aceConfig = {
-    wrap: true,
-    fontSize: "1rem",
-    theme: "ace/theme/tomorrow_night_blue"
+export const highlightStyles = {
+    unformatted: "color: white;",
+    keyword: "color: #ff9a00; font-weight: bold;",
+    punctuation: "color: #7f7f7f;",
+    string: "color: #3cb371;",
+    comment: "color: #7f7f7f; font-style: italic;",
 }
+
+const keywords = {
+    js, css, html
+}
+
+const highlighter = (text, lang) => {
+    return highlight(text, {
+        keywords: keywords[lang],
+        styles: highlightStyles
+    })
+}
+
+const ccConfig = (language) => ({
+    language,
+    className: "codecake-dark",
+    highlight: highlighter
+})
+
+const setupEditor = ({ elt, mode }) => {
+    console.log(elt, mode)
+    const editor = CodeCake.create(elt, ccConfig(mode));
+    return editor;
+};
+
+const EDITABLE = ['html', 'css', 'js'];
+const VISIBLE = [...EDITABLE, "output"];
 
 const createEditorConfig = (overlay) => {
     return Object.fromEntries(
@@ -16,7 +47,7 @@ const createEditorConfig = (overlay) => {
             let mode = null;
 
             if (VISIBLE.includes(itm)) {
-                mode = "ace/mode/" + itm;
+                mode = itm;
                 elt = cf.select({ s: ".cf-editor-" + itm, single: true });
             }
 
@@ -33,8 +64,6 @@ const EditorButton = (key, currentEditor) =>
         .on("click", () => currentEditor.update(key))
         .track(`editor-btn-${key}`)
         .ref();
-
-const setupEditor = ({ elt, mode }) => ace.edit(elt, { ...aceConfig, mode });
 
 const EditorSwitcher = (configs, state) => {
     const slots = VISIBLE
@@ -116,8 +145,8 @@ export const editorReady = () => {
     const cache = new Map();
 
     const getContent = () =>
-        Object.fromEntries(["html", "css", "javascript"]
-            .map((itm) => [itm, configs[itm].editor.getValue()]));
+        Object.fromEntries(EDITABLE
+            .map((itm) => [itm, configs[itm].editor.getCode()]));
 
     const generateOutput = () => {
         cf.empty(configs.output.elt);
@@ -133,7 +162,7 @@ export const editorReady = () => {
     const setDemo = (obj) => {
         VISIBLE.forEach((itm) => {
             const key = itm === "javascript" ? "js" : itm;
-            configs[itm].editor?.setValue(obj[key] || defaults[key]);
+            configs[itm].editor?.setCode(obj[key] || defaults[key]);
         });
 
         current.update("output");
@@ -149,7 +178,6 @@ export const editorReady = () => {
         Object.entries(configs).forEach(([key, config]) =>
             config.elt.style.display = key === val ? 'block' : 'none');
 
-        configs[val].editor?.resize();
         if (val === 'loading') return;
         if (val === "output") generateOutput();
         Object.values(buttons).forEach(button => button.classList.remove('active'));

@@ -14,6 +14,7 @@
     "jsr:@std/path@^1.0.8": "1.0.8",
     "jsr:@std/testing@*": "1.0.11",
     "jsr:@std/testing@^1.0.11": "1.0.11",
+    "jsr:@xyzshantaram/macrolight@*": "1.7.0",
     "npm:@types/node@*": "22.12.0",
     "npm:jsdom@26.1.0": "26.1.0"
   },
@@ -61,6 +62,9 @@
         "jsr:@std/internal",
         "jsr:@std/path@^1.0.8"
       ]
+    },
+    "@xyzshantaram/macrolight@1.7.0": {
+      "integrity": "a3a29494ab33d90f2ae1c3645d441a8ce0d224abe7bdf902433484b6b9e478a6"
     }
   },
   "npm": {
@@ -320,6 +324,8 @@
     "https://esm.sh/https-proxy-agent@^7.0.6?target=denonext": "https://esm.sh/https-proxy-agent@7.0.6?target=denonext",
     "https://esm.sh/is-potential-custom-element-name@^1.0.1?target=denonext": "https://esm.sh/is-potential-custom-element-name@1.0.1?target=denonext",
     "https://esm.sh/jsdom@^26.1.0": "https://esm.sh/jsdom@26.1.0",
+    "https://esm.sh/jsr/@xyzshantaram/macrolight": "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0",
+    "https://esm.sh/jsr/@xyzshantaram/macrolight/langs/javascript": "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0/langs/javascript",
     "https://esm.sh/lru-cache@^10.4.3?target=denonext": "https://esm.sh/lru-cache@10.4.3?target=denonext",
     "https://esm.sh/ms@^2.1.3?target=denonext": "https://esm.sh/ms@2.1.3?target=denonext",
     "https://esm.sh/node-gyp-build@^4.3.0?target=denonext": "https://esm.sh/node-gyp-build@4.8.4?target=denonext",
@@ -347,7 +353,8 @@
     "https://esm.sh/xml-name-validator@^5.0.0?target=denonext": "https://esm.sh/xml-name-validator@5.0.0?target=denonext",
     "https://esm.sh/xmlchars@^2.2.0/xml/1.0/ed5?target=denonext": "https://esm.sh/xmlchars@2.2.0/xml/1.0/ed5?target=denonext",
     "https://esm.sh/xmlchars@^2.2.0/xml/1.1/ed2?target=denonext": "https://esm.sh/xmlchars@2.2.0/xml/1.1/ed2?target=denonext",
-    "https://esm.sh/xmlchars@^2.2.0/xmlns/1.0/ed3?target=denonext": "https://esm.sh/xmlchars@2.2.0/xmlns/1.0/ed3?target=denonext"
+    "https://esm.sh/xmlchars@^2.2.0/xmlns/1.0/ed3?target=denonext": "https://esm.sh/xmlchars@2.2.0/xmlns/1.0/ed3?target=denonext",
+    "https://unpkg.com/codecake/codecake.js": "https://unpkg.com/codecake@0.5.0/codecake.js"
   },
   "remote": {
     "http://localhost:5500/dist/campfire.js": "0b74ff270754361d344c75affda9b1fcbb3ab1ed002168ffeccaacff915a4242",
@@ -363,6 +370,10 @@
     "https://esm.sh/@csstools/css-parser-algorithms@3.0.4?target=denonext": "f223bfed16b536c65b396c303c7f28f6ab8833f3f3efc938fac94db0721438c8",
     "https://esm.sh/@csstools/css-tokenizer@3.0.3/denonext/css-tokenizer.mjs": "bd6d4f01c1f809fb060bf2d3f871e8362cfa237efc624bb979e9e732cac8490a",
     "https://esm.sh/@csstools/css-tokenizer@3.0.3?target=denonext": "ed04501a1c3ee9e49da8dedf494690890405d6aaed849bef0e537f15026c86b6",
+    "https://esm.sh/@jsr/xyzshantaram__macrolight@1.7.0/denonext/langs/javascript.mjs": "eade75c04f3c257d37118db33b3c3a50aa3e4ea4d48d74e53e6b6ed2aa3b4c0a",
+    "https://esm.sh/@jsr/xyzshantaram__macrolight@1.7.0/denonext/langs/sass.mjs": "18b24876c03e98c41eddca7d19fce2975b51796b200769c18b2868cb596e36f3",
+    "https://esm.sh/@jsr/xyzshantaram__macrolight@1.7.0/denonext/langs/xhtml.mjs": "6a5fe5ebdbc4ca93d2135ed189192a161dc0c57900bd97e31766c15588562a9e",
+    "https://esm.sh/@jsr/xyzshantaram__macrolight@1.7.0/denonext/xyzshantaram__macrolight.mjs": "e260bd42d6f2abc48903a0498038868022c7cbdc7d0c64e42c1db956458f62ed",
     "https://esm.sh/agent-base@7.1.3/denonext/agent-base.mjs": "65d873bec0946614e2e33c0c3c1c958ee346695facfdeb51e2dda348e700bd57",
     "https://esm.sh/agent-base@7.1.3?target=denonext": "c76a77281d852899060a3ecf8bed33525c5f252f53dfac18e2f0ae5957b22910",
     "https://esm.sh/bufferutil@4.0.9/denonext/bufferutil.mjs": "13dca4d5bb2c68cbe119f880fa3bd785b9a81a8e02e0834dae604b4b85295cd8",
@@ -406,6 +417,10 @@
     "https://esm.sh/is-potential-custom-element-name@1.0.1?target=denonext": "78374c1d74ce1440683f94d22341ba09b796b2a86ece0ab387708b66fbd007ce",
     "https://esm.sh/jsdom@26.1.0": "dd282a18357f62da567dc19269dfd764e87c7c7679f6b2260ad3aa6c0a098ce2",
     "https://esm.sh/jsdom@26.1.0/denonext/jsdom.mjs": "c6386e1690878cf4ae0ce39345604b6a685c63bbfaabc676c43bfece5daef8e8",
+    "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0": "bde915f5f891160320b536233d740df095a79dbd89e373d71f132e105bf5b529",
+    "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0/langs/javascript": "36d405dc7c87203b95bba878c2fee69c0611fed691efcf4e5e4b60c6c5414138",
+    "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0/langs/sass": "3125432106b1b0b3c4986ec7a8200db112ce75b48db920ed30da9e9b26fc4568",
+    "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0/langs/xhtml": "0c3d961a51d35f22629712620f867f4b83358efac3de20c0d3a0450ca152bf9a",
     "https://esm.sh/lru-cache@10.4.3/denonext/lru-cache.mjs": "ba5ee5ff9067a3a33de530b47c0ce7e81cdff92937e5519258ed422b7e23fbdb",
     "https://esm.sh/lru-cache@10.4.3?target=denonext": "e0a3f66d0dbb61c67fbec24fb29ba1b18e21dab43178cfba399481560e076382",
     "https://esm.sh/macrolight@1.5.0": "503cef0295f695b468d29903042860d606fb178d6afc59aefb604c8fde340a28",
@@ -465,7 +480,8 @@
     "https://esm.sh/xmlchars@2.2.0/denonext/xmlns/1.0/ed3.mjs": "ab12a41555aa2468e6f8f42649ae209163e9ab835ca05817cb4f95bac8699ce9",
     "https://esm.sh/xmlchars@2.2.0/xml/1.0/ed5?target=denonext": "b1ca831e2cf0954307ebded209a1657cb27223f2a1fd0b347ffcb4e566e997ad",
     "https://esm.sh/xmlchars@2.2.0/xml/1.1/ed2?target=denonext": "005781985db506e433617587305e4176c3f3333ac4bb8b0db2a953f0e14bf71c",
-    "https://esm.sh/xmlchars@2.2.0/xmlns/1.0/ed3?target=denonext": "be6502edd92b286ab2a25e3f5db439700ff79daa964aa3d6e4a0c109af35dd36"
+    "https://esm.sh/xmlchars@2.2.0/xmlns/1.0/ed3?target=denonext": "be6502edd92b286ab2a25e3f5db439700ff79daa964aa3d6e4a0c109af35dd36",
+    "https://unpkg.com/codecake@0.5.0/codecake.js": "e6aa9aeacc02036dbba2fad381ec7d3bf158a232de640c70618976cf1f896f14"
   },
   "workspace": {
     "dependencies": [

@@ -44,7 +44,7 @@ export const FrameTemplate = template(`
     <script type='module'>
         import * as cf from 'https://esm.sh/campfire.js@4.0.0-rc17';
         window.onload = function() {
-            {{{ javascript }}}
+            {{{ js }}}
         }
     </script>
 </body>

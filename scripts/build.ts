@@ -1,9 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
-import { escape, template } from "../src/campfire.ts";
+import { escape, template } from "@/campfire.ts";
 import { parseArgs } from "jsr:@std/cli@1.0.15";
 import { walk } from "jsr:@std/fs@1.0.15";
 import { resolve } from "jsr:@std/path@1.0.8";
-import { marked } from "https://esm.sh/marked@15.0.7";
+import { marked, type Renderer } from "https://esm.sh/marked@15.0.7";
+import { highlight } from "jsr:@xyzshantaram/macrolight";
+import keywords from "jsr:@xyzshantaram/macrolight/langs/javascript";
+import { highlightStyles } from "../site/editor.js";
 
 const tpl = template(`<!DOCTYPE html>
 <html lang="en">
@@ -17,13 +20,8 @@ const tpl = template(`<!DOCTYPE html>
     <link rel="shortcut icon" type="image/jpg" href="campfire.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://unpkg.com/codecake/codecake.css">
     <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.min.js"></script>
-    <script src="https://ace.c9.io/build/src/theme-tomorrow_night_blue.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-html.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/mode-javascript.min.js"></script>
 </head>
 
 <body>
@@ -55,17 +53,20 @@ const tpl = template(`<!DOCTYPE html>
 
 </html>`);
 
-const PageRenderer = {
-    code: (
-        code: Record<string, any>,
-        _info: Record<string, any>,
-        escaped: boolean,
-    ) => {
-        const contents = code.text.replace(/\n$/, "") + "\n";
-
-        return '<pre class="microlight"><code>' +
-            (escaped ? contents : escape(contents)) +
-            "</code></pre>\n";
+const PageRenderer: Partial<Renderer> = {
+    code: ({ text, lang, escaped }) => {
+        const langMatches = (lang || "").match(/\S*/);
+        if (langMatches) {
+            lang = langMatches[0];
+        }
+        if (lang) {
+            text = highlight(text, {
+                keywords,
+                styles: highlightStyles,
+            });
+            escaped = true;
+        }
+        return `\n<pre><code>${(escaped ? text : escape(text))}</code></pre>\n`;
     },
 };
 
@@ -94,10 +95,12 @@ try {
         const filename = section.path.split("/").at(-1)?.replace(".md", "");
         if (!filename) throw new Error(`Invalid filename for ${section.path}`);
         const contents = await Deno.readTextFile(section.path);
-        built.push([filename, marked.parse(contents)]);
+        built.push([filename, await marked.parse(contents)]);
     }
 
-    const result = built.map(([name, contents]) => `<div class="cf-site-div" data-heading="${name}">${contents}</div>`)
+    const result = built.map(([name, contents]) =>
+        `<div class="cf-site-div" data-heading="${name}">${contents}</div>`
+    )
         .join("\n");
 
     await Deno.writeTextFile(dest.toString(), tpl({ built: result }));

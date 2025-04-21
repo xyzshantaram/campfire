@@ -1,6 +1,5 @@
 // deno-lint-ignore-file no-window no-window-prefix
 import cf from "https://esm.sh/campfire.js@4.0.0-rc14";
-import { highlightAll, HL_KEYWORDS } from "https://esm.sh/macrolight@1.5.0";
 import { editorReady } from "./editor.js";
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -56,18 +55,6 @@ window.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
     focusTab(tab || "home");
-
-    // Highlight all code blocks
-    highlightAll({
-        keywords: HL_KEYWORDS.javascript,
-        styles: {
-            unformatted: "color: white;",
-            keyword: "color: #ff9a00; font-weight: bold;",
-            punctuation: "color: #7f7f7f;",
-            string: "color: #3cb371;",
-            comment: "color: #7f7f7f; font-style: italic;",
-        },
-    }, ".microlight");
 
     editorReady();
     mask.style.display = "none";
