@@ -42,7 +42,7 @@ export const FrameTemplate = template(`
 <body>
     {{{ html }}}
     <script type='module'>
-        import * as cf from 'https://esm.sh/jsr/campfire.js@4';
+        import * as cf from 'https://esm.sh/jsr/@campfire/core@4';
         window.onload = function() {
             {{{ js }}}
         }

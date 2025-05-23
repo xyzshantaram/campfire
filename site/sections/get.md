@@ -19,13 +19,13 @@ you full TypeScript support as well as TSDoc comments.
 To install:
 
 ```sh
-npm install --save-dev campfire.js
+pnpm i jsr:@campfire/core
 ```
 
 Then in your code:
 
 ```ts
-import cf from "campfire.js";
+import cf from "@campfire/core";
 ```
 
 Good luck, and thank you for choosing Campfire!

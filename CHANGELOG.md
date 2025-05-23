@@ -1,5 +1,29 @@
 # Campfire.js Changelog
 
+## 4.0.0-4.0.2
+
+- Public 4.0 release!
+
+### Migration
+
+1. **Update Imports**:
+   ```javascript
+   // Old
+   import { html, nu } from "campfire.js";
+
+   // New
+   import { html, nu } from "@campfire/core";
+   ```
+
+2. _(If using esm.sh)_
+   ```javascript
+   // Old
+   import { html, nu } from "https://esm.sh/campfire.js";
+
+   // New
+   import { html, nu } from "https://esm.sh/jsr/@campfire/core";
+   ```
+
 ## 4.0.0-rc18
 
 - Huzzah! Campfire now uses Deno instead of Node.js for development.
@@ -12,20 +36,20 @@
 
 ## 4.0.0-rc16
 
-- Stores now use a hybrid cloning approach and freeze values. They try to clone primitives and simple objects/arrays but
-  fall back to copying references otherwise.
+- Stores now use a hybrid cloning approach and freeze values. They try to clone primitives and
+  simple objects/arrays but fall back to copying references otherwise.
 
 ## 4.0.0-rc15
 
 - Add `ids()` generator function
-- Allow passing an array with multiple sibling reactive children to .children() and have them all be stably mounted to
-  the parent in the slot.
-- add .track() system to NuBuilder - can now call .track(id) on an element being built and get it back later with
-  cf.tracked(id).
+- Allow passing an array with multiple sibling reactive children to .children() and have them all be
+  stably mounted to the parent in the slot.
+- add .track() system to NuBuilder - can now call .track(id) on an element being built and get it
+  back later with cf.tracked(id).
 - Store::update() now optionally accepts a function to transform a store's existing value.
 - Store::value is now protected - use .current() to get the value.
-- Render functions now receive a boolean `first` argument in the `opts` parameter, so they can conditionally change
-  their output depending on if the component is mounting or just re-rendering
+- Render functions now receive a boolean `first` argument in the `opts` parameter, so they can
+  conditionally change their output depending on if the component is mounting or just re-rendering
 
 ## 4.0.0-rc14
 
@@ -55,12 +79,14 @@
 
 ## 4.0.0-rc11
 
-- Added CfDom, a DOM shim so campfire can be used in server environments etc. Also makes testing easier.
+- Added CfDom, a DOM shim so campfire can be used in server environments etc. Also makes testing
+  easier.
 
 ## 4.0.0-rc10
 
-- 'change' events are now fired only for MapStore and ListStore - this is so whole-value replacements are possible for
-  these types. Store&lt;T&gt; now therefore fires a 'update' event when .update() is called.
+- 'change' events are now fired only for MapStore and ListStore - this is so whole-value
+  replacements are possible for these types. Store&lt;T&gt; now therefore fires a 'update' event
+  when .update() is called.
 - Store .on() and related functionality is now strongly typed.
 
 ## 4.0.0-rc9
@@ -70,25 +96,26 @@
 
 ## 4.0.0-rc8
 
-- Both insert() and children() now accept either a single HTMLElement or HTMLElement[], providing greater flexibility
-  when working with DOM elements.
+- Both insert() and children() now accept either a single HTMLElement or HTMLElement[], providing
+  greater flexibility when working with DOM elements.
 - Fixed insert() validation to properly handle { into: element, at: 'start' } case.
 
 ## 4.0.0-rc7
 
-- Make .children() accept HTMLElement[] instead of HTMLElement so you can directly pass the output of nu() into
-  .children().
+- Make .children() accept HTMLElement[] instead of HTMLElement so you can directly pass the output
+  of nu() into .children().
 
 ## 4.0.0-rc6
 
 - Added `.html()` method to NuBuilder to make building elements slightly more ergonomic
 - Made `.gimme()` be a variadic function
-- Added functionality to preserve reactive children to extend() / NuBuilder. This should greatly improve composability
-  of elements.
+- Added functionality to preserve reactive children to extend() / NuBuilder. This should greatly
+  improve composability of elements.
 
 ## 4.0.0-rc5
 
-`cf.insert()` now accepts `HTMLElement[]` instead of a single element, to make it easier to use with `cf.nu`.
+`cf.insert()` now accepts `HTMLElement[]` instead of a single element, to make it easier to use with
+`cf.nu`.
 
 ## 4.0.0-rc4
 
@@ -100,7 +127,8 @@
 
 ## 4.0.0-rc2 (Release Candidate 2)
 
-This release includes substantial architectural improvements, better TypeScript integration, and modern tooling updates.
+This release includes substantial architectural improvements, better TypeScript integration, and
+modern tooling updates.
 
 ### Breaking Changes
 
@@ -204,18 +232,6 @@ This release includes substantial architectural improvements, better TypeScript 
 - Improved build process
 - Added TypeScript 5.7 support
 - Added better documentation
-
-### Migration Guide
-
-1. **Update Imports**:
-   ```javascript
-   // Old
-   import { html, nu } from "campfire.js";
-
-   // New
-   import { html, nu } from "campfire.js";
-   // No change to external imports, but internal structure is different
-   ```
 
 2. **Update Element Creation**:
    ```javascript

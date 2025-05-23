@@ -29,19 +29,19 @@ dependencies, and without magic.
 Direct ES module (browser or Deno):
 
 ```js
-import { nu, Store } from "https://esm.sh/campfire.js";
+import { nu, Store } from "https://esm.sh/jsr/@campfire/core";
 ```
 
 With npm:
 
 ```sh
-pnpm i campfire.js
+pnpm i jsr:@campfire/core
 ```
 
 Then:
 
 ```js
-import cf from "campfire.js";
+import cf from "@campfire/core";
 ```
 
 ---
