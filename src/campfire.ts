@@ -19,6 +19,10 @@ import type {
 } from "./types.ts";
 import type { Callback, Callbackified } from "./utils.ts";
 
+/**
+ * Default export for campfire. Same as doing a synthetic import with
+ * `import * as cf from "@campfire/core";`
+ */
 export default {
     ListStore,
     MapStore,

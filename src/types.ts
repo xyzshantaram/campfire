@@ -232,6 +232,9 @@ export interface TagStringParseResult {
     classes?: string[] | undefined;
 }
 
+/**
+ * Arg for `insert()`.
+ */
 export type ElementPosition =
     | { before: CfHTMLElementInterface }
     | { after: CfHTMLElementInterface }
