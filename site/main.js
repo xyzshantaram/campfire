@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-window no-window-prefix
-import cf from "https://esm.sh/campfire.js@4.0.0-rc14";
+import cf from "https://esm.sh/jsr/@campfire/core@4";
 import { editorReady } from "./editor.js";
 
 window.addEventListener("DOMContentLoaded", () => {

@@ -1,4 +1,4 @@
-import cf from "https://esm.sh/campfire.js@4.0.0-rc17";
+import cf from "https://esm.sh/jsr/@campfire/core@4";
 import { FrameTemplate } from "./FrameTemplate.js";
 import * as CodeCake from "https://unpkg.com/codecake@0.5.0/codecake.js";
 import { highlight } from "https://esm.sh/jsr/@xyzshantaram/macrolight@1.7.0";
