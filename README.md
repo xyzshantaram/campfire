@@ -92,17 +92,17 @@ name.update("you");
 
 ## API at a Glance
 
-| Function          | Purpose                                    |
-| ----------------- | ------------------------------------------ |
-| `nu()`            | Create elements with chainable builder API |
-| `store()`         | Create reactive values, arrays, or maps    |
-| `select()`        | Select DOM elements (array or single)      |
-| `insert()`        | Insert element(s) anywhere in the DOM      |
-| `html``           | Safe HTML templating (escaped by default)  |
-| `mustache()`      | Render Mustache-style string templates     |
-| `extend()`, `x()` | Modify or enhance any DOM element          |
-| `empty()`, `rm()` | Empty or remove elements                   |
-| `seq()`, `ids()`  | Utilities for number ranges and unique IDs |
+| Function                             | Purpose                                    |
+| ------------------------------------ | ------------------------------------------ |
+| `nu()`                               | Create elements with chainable builder API |
+| `store()`                            | Create reactive values, arrays, or maps    |
+| `select()`                           | Select DOM elements (array or single)      |
+| `insert()`                           | Insert element(s) anywhere in the DOM      |
+| <code>html&#96;&#96;</code>/`html()` | Safe HTML templating (escaped by default)  |
+| `mustache()`                         | Render Mustache-style string templates     |
+| `extend()`, `x()`                    | Modify or enhance any DOM element          |
+| `empty()`, `rm()`                    | Empty or remove elements                   |
+| `seq()`, `ids()`                     | Utilities for number ranges and unique IDs |
 
 For **full, annotated examples and advanced usage**, see the
 [docs](https://xyzshantaram.github.io/campfire/?tab=docs).
