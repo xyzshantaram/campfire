@@ -191,6 +191,9 @@ export const extend = <
         });
 
         if (typeof result === "undefined") {
+            if (typeof contents === "string") {
+                setHtml(contents);
+            }
             elt.setAttribute("data-cf-fg-updates", "true");
         } else {
             elt.removeAttribute("data-cf-fg-updates");
