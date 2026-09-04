@@ -9,6 +9,12 @@ A cozy web framework for modern JavaScript.
 Campfire helps you build maintainable, reactive web UI without a build step, without piles of
 dependencies, and without magic.
 
+## See it
+
+The documentation site and its playground are both built with Campfire.
+
+![The Campfire documentation site](res/shot-site.png)
+
 ---
 
 ## Features
