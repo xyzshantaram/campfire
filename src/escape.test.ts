@@ -18,7 +18,9 @@ Deno.test("escape() xss protection", async (t) => {
 
     await t.step("escapes inline event handlers", () => {
         expect(escape("onerror=alert(1)")).to.include("onerror=alert(1)");
-        expect(escape("<img src=x onerror=alert(1)>")).to.include("&lt;img src=x onerror=alert(1)&gt;");
+        expect(escape("<img src=x onerror=alert(1)>")).to.include(
+            "&lt;img src=x onerror=alert(1)&gt;",
+        );
     });
 
     await t.step("escapes html comment tags and keeps normal chars", () => {
@@ -37,7 +39,8 @@ Deno.test("escape() xss protection", async (t) => {
     });
 
     await t.step("escapes everything in a giant attack string", () => {
-        const input = `<svg><script>alert("XSS")</script><img src=x onerror=alert('xss')><!-- -->&</svg>`;
+        const input =
+            `<svg><script>alert("XSS")</script><img src=x onerror=alert('xss')><!-- -->&</svg>`;
         const out = escape(input);
         expect(out).to.equal(
             `&lt;svg&gt;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;&lt;img src=x onerror=alert(&#39;xss&#39;)&gt;&lt;!-- --&gt;&amp;&lt;/svg&gt;`,

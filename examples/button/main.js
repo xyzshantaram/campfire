@@ -2,7 +2,9 @@ const count = cf.store({ value: 0 });
 
 const btn = cf.nu("button#id.some-class.other-class")
     .deps({ count })
-    .render(({ count }) => count === 0 ? "I have not been clicked." : `I have been clicked ${count} times.`)
+    .render(({ count }) =>
+        count === 0 ? "I have not been clicked." : `I have been clicked ${count} times.`
+    )
     .attr("data-some-attribute", 42)
     .on("click", () => count.update(count.value + 1))
     .styles({

@@ -12,38 +12,40 @@ export const highlightStyles = {
     punctuation: "color: #7f7f7f;",
     string: "color: #3cb371;",
     comment: "color: #7f7f7f; font-style: italic;",
-}
+};
 
 const keywords = {
-    js, css, html
-}
+    js,
+    css,
+    html,
+};
 
 const highlighter = (text, lang) => {
     return highlight(text, {
         keywords: keywords[lang],
-        styles: highlightStyles
-    })
-}
+        styles: highlightStyles,
+    });
+};
 
 const ccConfig = (language) => ({
     language,
     className: "codecake-dark",
-    highlight: highlighter
-})
+    highlight: highlighter,
+});
 
 const setupEditor = ({ elt, mode }) => {
-    console.log(elt, mode)
+    console.log(elt, mode);
     const editor = CodeCake.create(elt, ccConfig(mode));
     return editor;
 };
 
-const EDITABLE = ['html', 'css', 'js'];
+const EDITABLE = ["html", "css", "js"];
 const VISIBLE = [...EDITABLE, "output"];
 
 const createEditorConfig = (overlay) => {
     return Object.fromEntries(
         [...EDITABLE, "output", "loading"].map((itm) => {
-            let elt = itm === 'loading' ? overlay : null;
+            let elt = itm === "loading" ? overlay : null;
             let mode = null;
 
             if (VISIBLE.includes(itm)) {
@@ -67,20 +69,20 @@ const EditorButton = (key, currentEditor) =>
 
 const EditorSwitcher = (configs, state) => {
     const slots = VISIBLE
-        .map(item => cf.html`<cf-slot name=${item}></cf-slot>`)
-        .join('');
+        .map((item) => cf.html`<cf-slot name=${item}></cf-slot>`)
+        .join("");
 
     const buttons = {
-        ...Object.fromEntries(EDITABLE.map(key => {
+        ...Object.fromEntries(EDITABLE.map((key) => {
             configs[key].editor = setupEditor(configs[key]);
             return [key, EditorButton(key, state)];
         })),
-        output: EditorButton('output', state)
+        output: EditorButton("output", state),
     };
 
-    const switcher = cf.nu('div.switcher').html(slots).children(buttons).ref();
+    const switcher = cf.nu("div.switcher").html(slots).children(buttons).ref();
     return [switcher, buttons];
-}
+};
 
 const OutputFrame = (contents) =>
     cf.nu("iframe.cf-editor-output-iframe")
@@ -92,19 +94,22 @@ const OutputFrame = (contents) =>
 const DemoListItem = ({ example, setDemo, cache, current }) => {
     const file = (name) => `examples/${example.path}/${name}`;
 
-    const getFiles = async () => Object.fromEntries(await Promise.all(
-        ["index.html", "style.css", "main.js"].map(async (name) => {
-            const res = await fetch(file(name));
-            const text = res.ok ? await res.text() : "";
-            return [name.split(".").at(-1), text];
-        }),
-    ));
+    const getFiles = async () =>
+        Object.fromEntries(
+            await Promise.all(
+                ["index.html", "style.css", "main.js"].map(async (name) => {
+                    const res = await fetch(file(name));
+                    const text = res.ok ? await res.text() : "";
+                    return [name.split(".").at(-1), text];
+                }),
+            ),
+        );
 
     return cf.nu("li")
         .on("click", async () => {
             let files = cache.get(example.path);
             if (files) return setDemo(files);
-            current.update('loading');
+            current.update("loading");
             files = await getFiles();
             cache.set(example.path, files);
             setDemo(files);
@@ -113,22 +118,23 @@ const DemoListItem = ({ example, setDemo, cache, current }) => {
         .ref();
 };
 
-const Overlay = () => cf.nu("div.cf-editor-loading-overlay")
-    .styles({
-        display: "none",
-        zIndex: "1000",
-        inset: "0",
-        background: "inherit",
-        fontFamily: "inherit",
-        color: "#fff",
-        fontSize: "2rem",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        pointerEvents: "all"
-    })
-    .content("Loading…")
-    .ref();
+const Overlay = () =>
+    cf.nu("div.cf-editor-loading-overlay")
+        .styles({
+            display: "none",
+            zIndex: "1000",
+            inset: "0",
+            background: "inherit",
+            fontFamily: "inherit",
+            color: "#fff",
+            fontSize: "2rem",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            pointerEvents: "all",
+        })
+        .content("Loading…")
+        .ref();
 
 export const editorReady = () => {
     const [examples] = cf.select({
@@ -140,7 +146,7 @@ export const editorReady = () => {
     const configs = createEditorConfig(overlay);
     const wrapper = cf.select({ s: ".editor-wrapper", single: true });
     wrapper.style.position = "relative";
-    cf.insert(overlay, { into: wrapper, at: 'start' });
+    cf.insert(overlay, { into: wrapper, at: "start" });
     const current = cf.store({ value: "html" });
     const cache = new Map();
 
@@ -176,12 +182,13 @@ export const editorReady = () => {
         const val = event.value;
 
         Object.entries(configs).forEach(([key, config]) =>
-            config.elt.style.display = key === val ? 'block' : 'none');
+            config.elt.style.display = key === val ? "block" : "none"
+        );
 
-        if (val === 'loading') return;
+        if (val === "loading") return;
         if (val === "output") generateOutput();
-        Object.values(buttons).forEach(button => button.classList.remove('active'));
-        cf.tracked(`editor-btn-${val}`).classList.add('active');
+        Object.values(buttons).forEach((button) => button.classList.remove("active"));
+        cf.tracked(`editor-btn-${val}`).classList.add("active");
     }, true);
 
     const [list] = cf.select({ s: "#playground-demo-list" });
@@ -194,7 +201,7 @@ export const editorReady = () => {
             .attr(
                 "href",
                 "data:text/html;charset=utf-8," +
-                encodeURIComponent(FrameTemplate(getContent())),
+                    encodeURIComponent(FrameTemplate(getContent())),
             )
             .ref();
         link.click();
@@ -212,8 +219,7 @@ export const editorReady = () => {
         .then((res) => res.json())
         .then((parsed) =>
             parsed.examples.forEach((example) => {
-                cf.insert(DemoListItem({ example, setDemo, cache, current }),
-                    { into: list });
+                cf.insert(DemoListItem({ example, setDemo, cache, current }), { into: list });
             })
         );
 };
