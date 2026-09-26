@@ -1,103 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>campfire: a cozy web framework</title>
+        <link rel="stylesheet" href="site/style.css">
+        <link rel="shortcut icon" type="image/jpg" href="campfire.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://unpkg.com/codecake/codecake.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap"
+            rel="stylesheet">
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>campfire: a cozy web framework</title>
-    <link rel="stylesheet" href="site/style.css">
-    <link rel="shortcut icon" type="image/jpg" href="campfire.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://unpkg.com/codecake/codecake.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
-</head>
-
-<body>
-    <div id='app'>
-        <h1>campfire</h1>
-        <noscript>
+    <body>
+        <div id='app'>
+            <h1>campfire</h1>
+            <noscript>
             I'd love to make this site work without JS enabled, but seeing as how this is meant to be a demonstration
             for a JS framework... you'll have to turn on scripts. Sorry for the inconvenience.
         </noscript>
 
-        <div class="cf-site-div" data-heading="home"><h3>campfire: a cozy web framework</h3>
-<p><strong>Campfire</strong> helps you write crisp, reactive UI with vanilla JS/TS—no build step, no boilerplate, no
-magic.</p>
-<h4>Why Campfire?</h4>
-<ul>
-<li><strong>Tiny (5KB!) footprint</strong> you can read and fit in your head.</li>
-<li><strong>Fluent builder API</strong> Create and configure DOM elements with a chainable syntax:
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
-</span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>[</span><span class='macrolight-unformatted'>button</span><span class='macrolight-punctuation'>]</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;button#go&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;Open!&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>on</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;click&quot;</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>open</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;https://campfire.js.org&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>done</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</li>
-<li><strong>Reactive state</strong> that connects to the DOM in just one line:
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
-</span><span class='macrolight-punctuation'>
-</span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>value</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;Sandy&quot;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
-</span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>[</span><span class='macrolight-unformatted'>greeting</span><span class='macrolight-punctuation'>]</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;div&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>deps</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-comment'>// render is called every time one of the deps changes</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>render</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>html</span><span class='macrolight-punctuation'>`</span><span class='macrolight-unformatted'>Hello</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>&lt;</span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-unformatted'>$</span><span class='macrolight-punctuation'>{</span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>&lt;</span><span class='macrolight-punctuation'>/</span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'>!</span><span class='macrolight-punctuation'>`</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>done</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</li>
-<li><strong>Just functions for components:</strong>
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
-</span><span class='macrolight-punctuation'>
-</span><span class='macrolight-comment'>// A name badge component</span><span class='macrolight-punctuation'>
-</span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>NameBadge</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>value</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;&quot;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
-    </span><span class='macrolight-keyword'>return</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;div.badge&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
-        </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>deps</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
-        </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>render</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>`</span><span class='macrolight-unformatted'>Hi</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>$</span><span class='macrolight-punctuation'>{</span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>`</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
-</span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>;</span></code></pre>
-</li>
-</ul>
-<h4>FAQ</h4>
-<ul>
-<li><p><strong>Is this a framework?</strong> Nope—just tools that make vanilla JS delightful.</p>
-</li>
-<li><p><strong>How do I make components?</strong> Return an element (or a function that returns one). That&#39;s it.</p>
-</li>
-<li><p><strong>Why are escape/unescape so simple?</strong> They’re for basic safety; bring your own sanitizer for
-anything fancy.</p>
-</li>
-</ul>
-<p><a href="/?tab=get">Get campfire today!</a></p>
-</div>
-<div class="cf-site-div" data-heading="get"><h3>turn your dumpster fire into a campfire today!</h3>
-<p>You can include campfire into your site with just an import statement, either from a location where you are hosting it,
-or from esm.sh / unkpg.</p>
+            <div class="cf-site-div" data-heading="get">
+                <h3>turn your dumpster fire into a campfire today!</h3>
+                <p>You can include campfire into your site with just an import statement, either from a location where
+you are hosting it, or from esm.sh.</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;https://esm.sh/campfire.js@4&quot;</span><span class='macrolight-punctuation'>;</span></code></pre>
-<p>or</p>
+                <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;https://esm.sh/jsr/@campfire/core@4&quot;</span><span class='macrolight-punctuation'>;</span></code></pre>
+                <p>or</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>ListStore</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;https://esm.sh/campfire.js@4&quot;</span><span class='macrolight-punctuation'>;</span></code></pre>
-<p>If you use a bundler or want to write in TypeScript, you can install Campfire from npm. This gives you full TypeScript
-support as well as TSDoc comments.</p>
-<p>To install:</p>
+                <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>ListStore</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;https://esm.sh/jsr/@campfire/core@4&quot;</span><span class='macrolight-punctuation'>;</span></code></pre>
+                <p>If you use a bundler or want to write in TypeScript, you can install Campfire from npm. This gives
+you full TypeScript support as well as TSDoc comments.</p>
+                <p>To install:</p>
 
-<pre><code><span class='macrolight-unformatted'>npm</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>install</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>-</span><span class='macrolight-punctuation'>-</span><span class='macrolight-unformatted'>save</span><span class='macrolight-punctuation'>-</span><span class='macrolight-unformatted'>dev</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>campfire</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>js</span></code></pre>
-<p>Then in your code:</p>
+                <pre><code><span class='macrolight-unformatted'>pnpm</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>i</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>jsr</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'>@</span><span class='macrolight-unformatted'>campfire</span><span class='macrolight-punctuation'>/</span><span class='macrolight-unformatted'>core</span></code></pre>
+                <p>Then in your code:</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;campfire.js&quot;</span><span class='macrolight-punctuation'>;</span></code></pre>
-<p>Good luck, and thank you for choosing Campfire!</p>
-</div>
-<div class="cf-site-div" data-heading="docs"><h3>using campfire 4.0.0</h3>
-<p>View the <a href="/site/docs/modules/campfire.html">full API reference</a> for detailed descriptions of the
+                <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span></code></pre>
+                <p>Good luck, and thank you for choosing Campfire!</p>
+            </div>
+            <div class="cf-site-div" data-heading="docs">
+                <h3>using campfire 4.0.0</h3>
+                <p>View the <a href="https://jsr.io/@campfire/core/doc">full API reference</a> for detailed descriptions of the
 methods and classes provided by Campfire.</p>
-<h4>quick reference</h4>
-<p>Campfire provides the following methods and classes:</p>
-<details>
-<summary><code>nu()</code> - element creation helper</summary>
+                <h4>quick reference</h4>
+                <p>Campfire provides the following methods and classes:</p>
+                <details>
+                    <summary><code>nu()</code> - element creation helper</summary>
 
-<p>Create DOM elements with a readable, chainable builder pattern.</p>
+                    <p>Create DOM elements with a readable, chainable builder pattern.</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>[</span><span class='macrolight-unformatted'>greeting</span><span class='macrolight-punctuation'>]</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;h1&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
     </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;Hello, world!&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
@@ -109,14 +64,14 @@ methods and classes provided by Campfire.</p>
     </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>deps</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
     </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>render</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>html</span><span class='macrolight-punctuation'>`</span><span class='macrolight-unformatted'>Logged</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>in</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>as</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>&lt;</span><span class='macrolight-unformatted'>strong</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-unformatted'>$</span><span class='macrolight-punctuation'>{</span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>&lt;</span><span class='macrolight-punctuation'>/</span><span class='macrolight-unformatted'>strong</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'>`</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
     </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>done</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</details>
+                </details>
 
-<details>
-<summary><code>store()</code> - reactive data stores</summary>
+                <details>
+                    <summary><code>store()</code> - reactive data stores</summary>
 
-<p>Store state in a reactive scalar, array, or map.</p>
+                    <p>Store state in a reactive scalar, array, or map.</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>counter</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>value</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>0</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>counter</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>update</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>(</span><span class='macrolight-unformatted'>n</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>n</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>+</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>1</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
@@ -127,25 +82,25 @@ methods and classes provided by Campfire.</p>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>users</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>type</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;map&quot;</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>value</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>sid</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-keyword'>true</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>users</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>set</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;alex&quot;</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-keyword'>false</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</details>
+                </details>
 
-<details>
-<summary><code>select()</code> - element selection</summary>
+                <details>
+                    <summary><code>select()</code> - element selection</summary>
 
-<p>Select DOM elements with a unified API.</p>
+                    <p>Select DOM elements with a unified API.</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>[</span><span class='macrolight-unformatted'>header</span><span class='macrolight-punctuation'>]</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>select</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>s</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;header&quot;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>buttons</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>select</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>s</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;button&quot;</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>all</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-keyword'>true</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</details>
+                </details>
 
-<details>
-<summary><code>insert()</code> - element insertion</summary>
+                <details>
+                    <summary><code>insert()</code> - element insertion</summary>
 
-<p>Insert elements anywhere in the DOM.</p>
+                    <p>Insert elements anywhere in the DOM.</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>[</span><span class='macrolight-unformatted'>greeting</span><span class='macrolight-punctuation'>]</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;h1&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
     </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;Hello, world!&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
@@ -159,24 +114,23 @@ methods and classes provided by Campfire.</p>
 </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>insert</span><span class='macrolight-punctuation'>(</span><span class='macrolight-unformatted'>greeting</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>into</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>document</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>body</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-comment'>// or insert the result of nu() directly</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>insert</span><span class='macrolight-punctuation'>(</span><span class='macrolight-unformatted'>info</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>after</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>greeting</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</details>
+                </details>
 
-<details>
-<summary><code>html()</code> - HTML templating</summary>
+                <details>
+                    <summary><code>html()</code> - HTML templating</summary>
 
-<p>Escape content for the DOM and compose structured HTML.</p>
+                    <p>Escape content for the DOM and compose structured HTML.</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>user</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>text</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>html</span><span class='macrolight-punctuation'>`</span><span class='macrolight-unformatted'>A</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>message</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>for</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>&lt;</span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-unformatted'>$</span><span class='macrolight-punctuation'>{</span><span class='macrolight-unformatted'>user</span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>&lt;</span><span class='macrolight-punctuation'>/</span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'>`</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'> </span><span class='macrolight-comment'>// user is escaped safely</span></code></pre>
-</details>
+                </details>
 
-<details>
-<summary><code>mustache()</code> & <code>template()</code> - string templates</summary>
+                <details>
+                    <summary><code>mustache()</code> & <code>template()</code> - string templates</summary>
 
-
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-comment'>// Basic interpolation (auto-escaped)</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>mustache</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;Hello, {{name}}!&quot;</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;&lt;b&gt;Alex&lt;/b&gt;&quot;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'> </span><span class='macrolight-comment'>// &quot;Hello, &amp;lt;b&amp;gt;Alex&amp;lt;/b&amp;gt;!&quot;</span><span class='macrolight-punctuation'>
@@ -194,14 +148,14 @@ methods and classes provided by Campfire.</p>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>hello</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>template</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;Hello, {{who}}!&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>hello</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>who</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;World&quot;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'> </span><span class='macrolight-comment'>// &quot;Hello, World!&quot;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>hello</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>who</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;&lt;x&gt;&quot;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'> </span><span class='macrolight-comment'>// &quot;Hello, &amp;lt;x&amp;gt;!&quot;</span></code></pre>
-</details>
+                </details>
 
-<details>
-<summary><code>extend()</code> & <code>x()</code> - element modification</summary>
+                <details>
+                    <summary><code>extend()</code> & <code>x()</code> - element modification</summary>
 
-<p>Modify or enhance any DOM element with props, reactivity, and more. Use the builder for clarity.</p>
+                    <p>Modify or enhance any DOM element with props, reactivity, and more. Use the builder for clarity.</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>header</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>document</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>createElement</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;header&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
@@ -209,65 +163,115 @@ methods and classes provided by Campfire.</p>
     </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;Page Header&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
     </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>style</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;fontWeight&quot;</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;bold&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
     </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>done</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</details>
+                </details>
 
-<details>
-<summary><code>empty()</code> and <code>rm()</code> - element cleanup</summary>
+                <details>
+                    <summary><code>empty()</code> and <code>rm()</code> - element cleanup</summary>
 
-<p>Clear an element or remove it from the DOM.</p>
+                    <p>Clear an element or remove it from the DOM.</p>
 
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>header</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;header&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;foo&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>ref</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>empty</span><span class='macrolight-punctuation'>(</span><span class='macrolight-unformatted'>header</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>rm</span><span class='macrolight-punctuation'>(</span><span class='macrolight-unformatted'>header</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</details>
+                </details>
 
-<details>
-<summary><code>seq()</code> & <code>ids()</code> - ranges and unique ids</summary>
+                <details>
+                    <summary><code>seq()</code> & <code>ids()</code> - ranges and unique ids</summary>
 
-
-<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+                    <pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>
 </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>seq</span><span class='macrolight-punctuation'>(</span><span class='macrolight-unformatted'>3</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>forEach</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>(</span><span class='macrolight-unformatted'>i</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'>
     </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>id</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>ids</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;item&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
     </span><span class='macrolight-unformatted'>cf</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;div.item&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>attr</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;id&quot;</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>id</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>`</span><span class='macrolight-unformatted'>Item</span><span class='macrolight-punctuation'> </span><span class='macrolight-comment'>#${i + 1}`).done();</span><span class='macrolight-punctuation'>
 </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
-</details>
-</div>
-<div class="cf-site-div" data-heading="playground"><h3>try before you buy</h3>
-<p>Try one of these demos, or do your own thing!</p>
-<ul id='playground-demo-list'>
-</ul>
+                </details>
+            </div>
+            <div class="cf-site-div" data-heading="home">
+                <h3>campfire: a cozy web framework</h3>
+                <p><strong>Campfire</strong> helps you write crisp, reactive UI with vanilla JS/TS—no build step, no boilerplate, no
+magic.</p>
+                <h4>Why Campfire?</h4>
+                <ul>
+                    <li><strong>Tiny (5KB!) footprint</strong> you can read and fit in your head.</li>
+                    <li><strong>Fluent builder API</strong> Create and configure DOM elements with a chainable syntax:
+<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+</span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>[</span><span class='macrolight-unformatted'>button</span><span class='macrolight-punctuation'>]</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;button#go&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;Open!&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>on</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;click&quot;</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>open</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;https://campfire.js.org&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>done</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
+                    </li>
+                    <li><strong>Reactive state</strong> that connects to the DOM in just one line:
+<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+</span><span class='macrolight-punctuation'>
+</span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>value</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;Sandy&quot;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+</span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>[</span><span class='macrolight-unformatted'>greeting</span><span class='macrolight-punctuation'>]</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;div&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>deps</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-comment'>// render is called every time one of the deps changes</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>render</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>html</span><span class='macrolight-punctuation'>`</span><span class='macrolight-unformatted'>Hello</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>&lt;</span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-unformatted'>$</span><span class='macrolight-punctuation'>{</span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>&lt;</span><span class='macrolight-punctuation'>/</span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'>!</span><span class='macrolight-punctuation'>`</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>done</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span></code></pre>
+                    </li>
+                    <li><strong>Just functions for components:</strong>
+<pre><code><span class='macrolight-keyword'>import</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>from</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;@campfire/core&quot;</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+</span><span class='macrolight-punctuation'>
+</span><span class='macrolight-comment'>// A name badge component</span><span class='macrolight-punctuation'>
+</span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>NameBadge</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-keyword'>const</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>store</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>value</span><span class='macrolight-punctuation'>:</span><span class='macrolight-punctuation'> </span><span class='macrolight-string'>&quot;&quot;</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+    </span><span class='macrolight-keyword'>return</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>nu</span><span class='macrolight-punctuation'>(</span><span class='macrolight-string'>&quot;div.badge&quot;</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
+        </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>deps</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>
+        </span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>render</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>{</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'> </span><span class='macrolight-punctuation'>=</span><span class='macrolight-punctuation'>&gt;</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>b</span><span class='macrolight-punctuation'>.</span><span class='macrolight-unformatted'>content</span><span class='macrolight-punctuation'>(</span><span class='macrolight-punctuation'>`</span><span class='macrolight-unformatted'>Hi</span><span class='macrolight-punctuation'>,</span><span class='macrolight-punctuation'> </span><span class='macrolight-unformatted'>$</span><span class='macrolight-punctuation'>{</span><span class='macrolight-unformatted'>name</span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>`</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>)</span><span class='macrolight-punctuation'>;</span><span class='macrolight-punctuation'>
+</span><span class='macrolight-punctuation'>}</span><span class='macrolight-punctuation'>;</span></code></pre>
+                    </li>
+                </ul>
+                <h4>FAQ</h4>
+                <ul>
+                    <li>
+                        <p><strong>Is this a framework?</strong> Nope—just tools that make vanilla JS delightful.</p>
+                    </li>
+                    <li>
+                        <p><strong>How do I make components?</strong> Return an element (or a function that returns one). That&#39;s it.</p>
+                    </li>
+                    <li>
+                        <p><strong>Why are escape/unescape so simple?</strong> They’re for basic safety; bring your own sanitizer for
+anything fancy.</p>
+                    </li>
+                </ul>
+                <p><a href="/?tab=get">Get campfire today!</a></p>
+            </div>
+            <div class="cf-site-div" data-heading="playground">
+                <h3>try before you buy</h3>
+                <p>Try one of these demos, or do your own thing!</p>
+                <ul id='playground-demo-list'></ul>
 
-<div id='cf-editor-controls'>
-  <a href='javascript:void(0)' id='cf-editor-clear'>Clear All</a>
-  <a href='javascript:void(0)' id='cf-editor-dl'>Download</a>
-</div>
+                <div id='cf-editor-controls'>
+                    <a href='javascript:void(0)' id='cf-editor-clear'>Clear All</a>
+                    <a href='javascript:void(0)' id='cf-editor-dl'>Download</a>
+                </div>
 
-<div class='editor-wrapper'>
-  <div class='cf-editor-html'></div>
-  <div class='cf-editor-css'></div>
-  <div class='cf-editor-js'></div>
-  <div class='cf-editor-output'></div>
-</div>
-</div>
+                <div class='editor-wrapper'>
+                    <div class='cf-editor-html'></div>
+                    <div class='cf-editor-css'></div>
+                    <div class='cf-editor-js'></div>
+                    <div class='cf-editor-output'></div>
+                </div>
+            </div>
 
-        <div class='footer'>
-            <a href='https://github.com/xyzshantaram/campfire'>Campfire on GitHub</a>
-            <a href='https://github.com/xyzshantaram/campfire/blob/main/index.html'>This site on GitHub</a>
-            <p>
+            <div class='footer'>
+                <a href='https://github.com/xyzshantaram/campfire'>Campfire on GitHub</a>
+                <a
+                    href='https://github.com/xyzshantaram/campfire/blob/main/index.html'>This site on GitHub</a>
+                <p>
                 Campfire is free, open-source software available under <a
                     href='https://github.com/xyzshantaram/campfire/blob/main/LICENSE'>the MIT License</a>.
             </p>
+            </div>
         </div>
-    </div>
 
-    <div id='mask'>
-        <span>loading...</span>
-    </div>
+        <div id='mask'>
+            <span>loading...</span>
+        </div>
 
-    <script defer type='module' src='site/main.js'></script>
-</body>
-
+        <script defer type='module' src='site/main.js'></script>
+    </body>
 </html>

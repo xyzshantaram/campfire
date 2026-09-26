@@ -1,6 +1,6 @@
 ### using campfire 4.0.0
 
-View the [full API reference](/site/docs/modules/campfire.html) for detailed descriptions of the
+View the [full API reference](https://jsr.io/@campfire/core/doc) for detailed descriptions of the
 methods and classes provided by Campfire.
 
 #### quick reference
