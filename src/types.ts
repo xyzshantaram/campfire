@@ -73,7 +73,15 @@ export type RenderBuilder<Elem extends HTMLElement, Deps> = Omit<
         Elem,
         Deps extends Record<string, Store<any>> ? Deps : never
     >,
-    "children" | "done" | "ref" | "on" | "gimme" | "deps" | "render"
+    | "children"
+    | "done"
+    | "ref"
+    | "on"
+    | "gimme"
+    | "gimmeAll"
+    | "insert"
+    | "deps"
+    | "render"
 >;
 
 /**
@@ -92,9 +100,13 @@ export type RenderBuilder<Elem extends HTMLElement, Deps> = Omit<
  * @returns A string, builder instance, or void
  *
  * @example
- * ```js
+ * ```ts
+ * import { nu, store } from "@campfire/core";
+ *
+ * const counterStore = store({ value: 0 });
+ *
  * // Using the first parameter to conditionally render initial state
- * const [element] = cf.nu("div")
+ * const [element] = nu("div")
  *   .deps({ count: counterStore })
  *   .render(({ count }, { b, first }) => {
  *     // Do one-time setup on first render
@@ -131,6 +143,19 @@ export type StringStyleProps = keyof {
 export type DOMEventHandlers = {
     [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void;
 };
+
+/**
+ * A single selector request recorded by `gimme()` or `gimmeAll()`, preserving
+ * the order in which the two were called.
+ *
+ * @internal
+ */
+export interface GimmeSpec {
+    /** The selector to query for. */
+    selector: string;
+    /** When true, retrieve every match rather than just the first. */
+    all?: boolean;
+}
 
 /**
  * Properties for the HTML element to be created.
@@ -193,6 +218,34 @@ export interface ElementProperties<
      * elements.
      */
     gimme?: string[];
+
+    /**
+     * Like `gimme`, but queries every matching element for each selector. Each
+     * selector contributes one slot containing an array of its matches, in
+     * document order. An empty array is returned when a selector matches
+     * nothing.
+     *
+     * When both `gimme` and `gimmeAll` are supplied in the same args object,
+     * all `gimme` slots precede all `gimmeAll` slots. Use the builder methods to
+     * interleave the two.
+     */
+    gimmeAll?: string[];
+
+    /**
+     * Ordered selector requests recorded by the `gimme()`/`gimmeAll()` builder
+     * methods. When present, this takes precedence over `gimme` and `gimmeAll`,
+     * which remain for object-literal callers.
+     *
+     * @internal
+     */
+    gimmeSpecs?: GimmeSpec[];
+
+    /**
+     * Elements to append to the created element as children. Unlike `children`,
+     * these are not keyed or preserved across re-renders that replace the
+     * element's innerHTML.
+     */
+    insert?: CfHTMLElementInterface[];
 
     /**
      * A Record<string, Store> of the element's dependencies. The element's

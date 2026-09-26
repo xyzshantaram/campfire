@@ -1,6 +1,7 @@
 import type { Store } from "../stores/mod.ts";
 import type {
     ElementProperties,
+    GimmeSpec,
     InferElementType,
     RenderBuilder,
     RenderFunction,
@@ -160,7 +161,7 @@ export const extend = <
 >(
     elt: T,
     args: ElementProperties<T, D> = {},
-): [T, ...HTMLElement[]] => {
+): [T, ...(HTMLElement | null | HTMLElement[])[]] => {
     const {
         contents,
         render,
@@ -171,11 +172,22 @@ export const extend = <
         raw: r,
         classes = {},
         gimme = [],
+        gimmeAll = [],
+        gimmeSpecs,
+        insert: toInsert = [],
         deps = ({} as D),
         children = {},
         track,
     } = args;
     let raw = !!r;
+
+    // `gimmeSpecs` (populated by the builder) preserves the interleaved call
+    // order of gimme()/gimmeAll(). Fall back to the object-literal arrays,
+    // where all `gimme` slots precede all `gimmeAll` slots.
+    const gimmeRequests: GimmeSpec[] = gimmeSpecs ?? [
+        ...gimme.map<GimmeSpec>((selector) => ({ selector })),
+        ...gimmeAll.map<GimmeSpec>((selector) => ({ selector, all: true })),
+    ];
 
     if (track) tracking.track(track, elt);
     reconcileClasses(elt, classes);
@@ -212,6 +224,8 @@ export const extend = <
 
     setupReactiveChildren(elt, children);
 
+    toInsert.forEach((itm) => elt.appendChild(itm));
+
     if (misc) Object.assign(elt, misc);
     if (style) Object.assign(elt.style, style);
 
@@ -222,13 +236,16 @@ export const extend = <
 
     reconcileAttrs(elt, attrs);
 
-    const extras: HTMLElement[] = [];
-    for (const selector of gimme) {
-        const found = elt.querySelector(selector);
-        // This is on purpose.
-        // The user will expect the items to be at the same indices
-        // as the selectors they supplied.
-        extras.push(found as HTMLElement);
+    const extras: (HTMLElement | null | HTMLElement[])[] = [];
+    for (const { selector, all } of gimmeRequests) {
+        // Each request contributes exactly one slot, in call order, so the
+        // user can match slots to the selectors they supplied. `gimme` yields
+        // the first match (or null); `gimmeAll` yields every match (or []).
+        if (all) {
+            extras.push(Array.from(elt.querySelectorAll(selector)) as HTMLElement[]);
+        } else {
+            extras.push(elt.querySelector(selector) as HTMLElement);
+        }
     }
 
     return [elt, ...extras];
@@ -268,6 +285,24 @@ export const extend = <
  *  .html`<span class='foo'>hi!</span>`
  *  .done();
  * // Now 'child' is the inner .foo element.
+ * ```
+ * @example
+ * ```ts
+ * import { nu } from "@campfire/core";
+ * // gimmeAll returns an array of every match; insert appends elements:
+ * const [page, columns] = nu("div.page")
+ *  .html('<div class="column"></div><div class="column"></div>')
+ *  .gimmeAll('div.column')
+ *  .done();
+ * // Now 'columns' is an array of both .column elements.
+ *
+ * const [list] = nu("ul")
+ *  .insert(
+ *      nu("li").content("one").ref(),
+ *      nu("li").content("two").ref(),
+ *  )
+ *  .done();
+ * // The <li> elements are appended to the list, in order.
  * ```
  *
  * @param info String describing the element. Format: `tag#id.class1.class2` or variant.

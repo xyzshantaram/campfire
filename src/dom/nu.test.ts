@@ -21,15 +21,54 @@ Deno.test("nu function coverage", async (t) => {
             .render((_, { b }) => b.html`<cf-slot name='x'></cf-slot>`)
             .done();
         expect(parent.querySelector("span")).to.equal(span);
-        const [noSlot] = nu("div", { children: {}, render: () => `<cf-slot name='y'></cf-slot>`, raw: true }).done();
+        const [noSlot] = nu("div", {
+            children: {},
+            render: () => `<cf-slot name='y'></cf-slot>`,
+            raw: true,
+        }).done();
         expect(noSlot.innerHTML).to.match(/cf-slot/);
     });
 
     await t.step("handles gimme single/multiple/missing selectors", () => {
         const html = `<span class='a'>1</span><span id='b'>2</span><span class='c'></span>`;
-        const [, one, two, miss] = nu("div").raw(true).content(html).gimme(".a", "#b", "#no", "#c").done();
+        const [, one, two, miss] = nu("div").raw(true).content(html).gimme(".a", "#b", "#no", "#c")
+            .done();
         expect(one?.classList.contains("a")).to.be.true;
         expect(two?.id).to.equal("b");
         expect(miss === null).to.be.true;
+    });
+
+    await t.step("gimmeAll returns one array of matches per selector", () => {
+        const html = `<div class='column'></div><div class='column'></div>` +
+            `<span class='footer'>f</span>`;
+        const [page, columns, footers, missing] = nu("div")
+            .raw(true)
+            .content(html)
+            .gimmeAll(".column", ".footer", ".nope")
+            .done();
+
+        const cols: HTMLElement[] = columns;
+        expect(page.tagName).to.equal("DIV");
+        expect(cols.length).to.equal(2);
+        expect(cols.every((c) => c.classList.contains("column"))).to.be.true;
+        expect(footers.length).to.equal(1);
+        expect(missing).to.deep.equal([]);
+    });
+
+    await t.step("gimme and gimmeAll slots follow call order", () => {
+        const html = `<span class='a'>1</span><span class='b'>2</span>` +
+            `<span class='b'>3</span><span class='c'>4</span>`;
+        const [elt, first, allB, last] = nu("div")
+            .raw(true)
+            .content(html)
+            .gimme(".a")
+            .gimmeAll(".b")
+            .gimme(".c")
+            .done();
+
+        expect(elt.tagName).to.equal("DIV");
+        expect(first?.textContent).to.equal("1");
+        expect(allB.map((b) => b.textContent)).to.deep.equal(["2", "3"]);
+        expect(last?.textContent).to.equal("4");
     });
 });

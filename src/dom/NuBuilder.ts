@@ -2,14 +2,23 @@ import type { Store } from "../stores/mod.ts";
 import type {
     DOMEventHandlers,
     ElementProperties,
+    GimmeSpec,
     RenderFunction,
     StringStyleProps,
     TagStringParseResult,
 } from "../types.ts";
 import { extend } from "./nu.ts";
 import { CfDom } from "./config.ts";
+import type { CfHTMLElementInterface } from "./config.ts";
 import { html } from "../templating/html.ts";
 import type { RawHtml } from "../templating/html.ts";
+
+/**
+ * Maps a tuple of selector strings to a tuple with one slot per selector,
+ * each slot typed as `Slot`.
+ * @internal
+ */
+type SelectorSlots<S extends string[], Slot> = { [K in keyof S]: Slot };
 
 /**
  * Creates a typed HTML element based on the tag name.
@@ -92,12 +101,19 @@ export class NuBuilder<
     Elem extends HTMLElement,
     Deps extends Record<string, Store<any>>,
     Info = string,
+    Extras extends unknown[] = [],
 > {
     /** Element properties configuration object */
     props: ElementProperties<Elem, Deps> = {};
 
     /** Element info string (tag, id, classes) */
     private elem: Elem;
+
+    /**
+     * Interleaved `gimme()`/`gimmeAll()` requests, in call order. Lazily seeded
+     * from any `gimme`/`gimmeAll` passed via the args object.
+     */
+    private gimmeSpecs: GimmeSpec[] | null = null;
 
     /**
      * Creates a new NuBuilder instance.
@@ -129,11 +145,12 @@ export class NuBuilder<
     /**
      * Finalizes the builder and creates the actual DOM element with all configured properties.
      *
-     * @returns A tuple containing the created element as the first item, followed by any child elements
+     * @returns A tuple containing the created element as the first item, followed by
+     * one slot per `gimme()`/`gimmeAll()` selector, in the order they were requested.
      * @throws Error if a class name contains a '#' character
      */
-    done(): [Elem, ...HTMLElement[]] {
-        return extend(this.elem as any as Elem, this.props);
+    done(): [Elem, ...Extras] {
+        return extend(this.elem as any as Elem, this.props) as [Elem, ...Extras];
     }
 
     ref(): Elem {
@@ -259,22 +276,93 @@ export class NuBuilder<
     }
 
     /**
+     * Returns the `gimme`/`gimmeAll` requests in call order, seeding from any
+     * supplied via the args object on first use.
+     */
+    private specsInCallOrder(): GimmeSpec[] {
+        if (!this.gimmeSpecs) {
+            this.gimmeSpecs = this.props.gimmeSpecs ? [...this.props.gimmeSpecs] : [
+                ...(this.props.gimme ?? []).map<GimmeSpec>((selector) => ({ selector })),
+                ...(this.props.gimmeAll ?? []).map<GimmeSpec>((selector) => ({
+                    selector,
+                    all: true,
+                })),
+            ];
+        }
+        return this.gimmeSpecs;
+    }
+
+    /**
      * Specifies selectors for elements that should be retrieved after building the element.
      *
-     * @param selectors - A single selector string or an array of selector strings
-     * @returns The builder instance for chaining
+     * Each selector contributes exactly one slot to the tuple returned by `done()`,
+     * holding the first match or `null` when nothing matched. Slots appear in the
+     * order the selectors were requested, interleaved with `gimmeAll()` calls.
+     *
+     * @param selectors - The selectors to query for.
+     * @returns The builder instance for chaining, with one extra slot per selector.
      */
-    gimme(...selectors: string[]): typeof this {
-        this.props.gimme ||= [];
-        this.props.gimme = selectors;
+    gimme<S extends string[]>(
+        ...selectors: S
+    ): NuBuilder<Elem, Deps, Info, [...Extras, ...SelectorSlots<S, HTMLElement | null>]> {
+        const specs = this.specsInCallOrder();
+        selectors.forEach((selector) => specs.push({ selector }));
+        this.props.gimmeSpecs = specs;
+        return this as unknown as NuBuilder<
+            Elem,
+            Deps,
+            Info,
+            [...Extras, ...SelectorSlots<S, HTMLElement | null>]
+        >;
+    }
+
+    /**
+     * Like `gimme()`, but retrieves every element matching each selector.
+     *
+     * Each selector contributes exactly one slot to the tuple returned by `done()`,
+     * holding an array of all matches in document order (empty when nothing matched).
+     * Slots appear in the order the selectors were requested, interleaved with
+     * `gimme()` calls.
+     *
+     * @param selectors - The selectors to query for.
+     * @returns The builder instance for chaining, with one extra slot per selector.
+     */
+    gimmeAll<S extends string[]>(
+        ...selectors: S
+    ): NuBuilder<Elem, Deps, Info, [...Extras, ...SelectorSlots<S, HTMLElement[]>]> {
+        const specs = this.specsInCallOrder();
+        selectors.forEach((selector) => specs.push({ selector, all: true }));
+        this.props.gimmeSpecs = specs;
+        return this as unknown as NuBuilder<
+            Elem,
+            Deps,
+            Info,
+            [...Extras, ...SelectorSlots<S, HTMLElement[]>]
+        >;
+    }
+
+    /**
+     * Appends one or more elements as children of the element being built.
+     *
+     * This is applied when `done()` (or `ref()`) is called, after content and
+     * slot children are mounted, so appended elements are visible to
+     * `gimme()`/`gimmeAll()`. Unlike `children()`, appended elements are plain
+     * children and are not preserved across re-renders that replace the
+     * element's innerHTML.
+     *
+     * @param els - The element(s) to append, in order.
+     * @returns The builder instance for chaining.
+     */
+    insert(...els: CfHTMLElementInterface[]): typeof this {
+        this.props.insert = [...(this.props.insert ?? []), ...els];
         return this;
     }
 
     deps<ND extends Record<string, Store<any>>>(
         obj: ND,
-    ): NuBuilder<Elem, Deps & ND, Info> {
+    ): NuBuilder<Elem, Deps & ND, Info, Extras> {
         this.props.deps = { ...(this.props.deps as Deps), ...obj };
-        return this as unknown as NuBuilder<Elem, Deps & ND, Info>;
+        return this as unknown as NuBuilder<Elem, Deps & ND, Info, Extras>;
     }
 
     /**

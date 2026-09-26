@@ -60,6 +60,38 @@ Deno.test("classes logic", async (t) => {
     });
 });
 
+Deno.test("insert() builder method", async (t) => {
+    await t.step("appends elements in order", () => {
+        const a = nu("span").content("a").ref();
+        const b = nu("span").content("b").ref();
+        const [div] = nu("div").insert(a, b).done();
+        expect(Array.from(div.children)).to.deep.equal([a, b]);
+    });
+
+    await t.step("accumulates across calls and mixes with content", () => {
+        const a = nu("span").content("a").ref();
+        const b = nu("span").content("b").ref();
+        const [div] = nu("div").html("<em>hi</em>").insert(a).insert(b).done();
+        expect(div.querySelector("em")).to.not.be.null;
+        expect(Array.from(div.children).slice(-2)).to.deep.equal([a, b]);
+    });
+
+    await t.step("appended elements are queryable via gimme", () => {
+        const col = nu("div.column").ref();
+        const [page, found] = nu("div.page").insert(col).gimme(".column").done();
+        expect(found).to.equal(col);
+    });
+});
+
+Deno.test("ref() is unaffected by gimme slots", async (t) => {
+    await t.step("returns the element, not a gimme slot", () => {
+        const html = `<span class='a'></span><span class='a'></span>`;
+        const el = nu("div").raw(true).content(html).gimmeAll(".a").gimme(".a").ref();
+        expect(el.tagName).to.equal("DIV");
+        expect(el.children.length).to.equal(2);
+    });
+});
+
 Deno.test("NuBuilder method coverage", async (t) => {
     await t.step("covers every builder chainable method", () => {
         const el = CfDom.document!.createElement("div");
@@ -77,6 +109,8 @@ Deno.test("NuBuilder method coverage", async (t) => {
             .cls("foo", true)
             .track("test-id")
             .gimme(".foo", "#id")
+            .gimmeAll(".foo")
+            .insert()
             .deps({})
             .html("<span>B</span>");
 
